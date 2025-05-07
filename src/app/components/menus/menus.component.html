@@ -1,0 +1,23 @@
+<h1>Menu</h1>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Tên menu</th>
+                <th>Link</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @for (item of menus; track item.ID) {
+                <tr>
+                    <td>{{ item.ID }}</td>
+                    <td>{{ item.MenuName }}</td>
+                    <td>{{ item.Link }}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
