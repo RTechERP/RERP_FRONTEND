@@ -1,0 +1,126 @@
+
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+}
+
+.toolbar {
+  background-color: #e6e6e6;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.toolbar .btn {
+  margin-right: 5px;
+}
+
+.form-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.grid-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.table th,
+.table td {
+  vertical-align: middle;
+}
+
+.file-upload-section {
+  margin-top: 20px;
+}
+
+/* Modal specific styles */
+.modal-fullscreen {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  margin: 0;
+}
+
+.modal-fullscreen .modal-content {
+  height: auto;
+  height: 100%;
+  border-radius: 0;
+  border: none;
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+::ng-deep ng-select {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+::ng-deep ng-select .ng-select-container {
+  height: 42px;
+  align-items: center;
+  font-size: 14px;
+  padding: 0 10px;
+  background-color: #fff;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s ease;
+}
+
+::ng-deep ng-select.ng-select-focused .ng-select-container {
+  border-color: #66afe9;
+  box-shadow: 0 0 0 3px rgba(102, 175, 233, 0.2);
+}
+
+/* Dropdown panel */
+::ng-deep ng-select .ng-dropdown-panel {
+  background-color: #ffffff;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  z-index: 1050;
+}
+
+/* Dropdown items */
+::ng-deep ng-select .ng-dropdown-panel .ng-option {
+  padding: 10px 14px;
+  min-height: 42px;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover */
+::ng-deep ng-select .ng-dropdown-panel .ng-option:hover {
+  background-color: #f0f4f8;
+  cursor: pointer;
+}
+
+/* Selected item */
+::ng-deep ng-select .ng-dropdown-panel .ng-option-selected {
+  font-weight: 600;
+  background-color: #e6f3ff;
+}
+
+/* Disabled item */
+::ng-deep ng-select .ng-dropdown-panel .ng-option-disabled {
+  color: #aaa;
+  background-color: #f9f9f9;
+}

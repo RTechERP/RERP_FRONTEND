@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-
+import { Component,  OnInit } from '@angular/core';
+import { PokhServiceService } from './pokh-service/pokh.service';
 @Component({
   selector: 'app-pokh',
   imports: [],
