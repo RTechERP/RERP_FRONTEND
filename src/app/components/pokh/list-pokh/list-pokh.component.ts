@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, viewChild } from '@angular/core';
 import { PokhServiceService } from '../pokh-service/pokh.service';
 import { CommonModule } from '@angular/common';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
@@ -6,8 +6,6 @@ import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { event } from 'jquery';
-
-
 
 @Component({
   selector: 'app-list-pokh',
@@ -20,12 +18,16 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   @ViewChild('productTable', { static: false }) productTableElement!: ElementRef;
   @ViewChild('fileTable', { static: false }) fileTableElement!: ElementRef;
   @ViewChild('ProductDetailTreeList', { static: false }) ProductDetailTreeListElement!: ElementRef;
+  @ViewChild('DetailUser', { static: false }) DetailUserElement!: ElementRef;
+
   private table!: Tabulator;
   private productTable!: Tabulator;
   private fileTable!: Tabulator;
   private ProductDetailTreeList!: Tabulator;
+  private DetailUser!: Tabulator;
   pokhs: any[] = [];
   selectedProduct: any = null;
+  detailUser: any[] = [];
   selectedRow: any = null;
   nextRowId: number = 1;
   selectedId: number = 0;
@@ -68,6 +70,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       if (this.table) {
         this.table.setData(this.pokhs);
       }
+      this.loadFormData();
     });
   }
 
@@ -80,10 +83,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.table = new Tabulator(this.tableElement.nativeElement, {
       data: this.pokhs,
       layout: 'fitDataFill',
+      height: '50vh',
       pagination: true,
-      paginationSize: 10,
+      paginationSize: 20,
       movableColumns: true,
       resizableRows: true,
+      reactiveData: true,
       columns: [
         { title: 'Hành động', field: 'actions', formatter: this.actionFormatter, width: 120 },
         { title: 'Duyệt', field: 'IsApproved', sorter: 'boolean', width: 80, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
@@ -126,15 +131,17 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     this.productTable = new Tabulator(this.productTableElement.nativeElement, {
       data: this.POKHProduct,
-      dataTree: true,
       layout: 'fitDataFill',
       pagination: true,
-      paginationSize: 5,
+      paginationSize: 3,
+      height: '18vh',
       movableColumns: true,
       resizableRows: true,
       columns: [
         { title: 'STT', field: 'STT', sorter: 'number', width: 70 },
-        { title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120 },
+        {
+          title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120
+        },
         { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 120 },
         { title: 'Tên sản phẩm', field: 'ProductName', sorter: 'string', width: 250 },
         { title: 'Mã theo khách', field: 'GuestCode', sorter: 'string', width: 250 },
@@ -173,7 +180,8 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       data: this.POKHFiles,
       layout: 'fitDataFill',
       pagination: true,
-      paginationSize: 5,
+      paginationSize: 3,
+      height: '18vh',
       movableColumns: true,
       resizableRows: true,
       columns: [
@@ -207,14 +215,16 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.loadTypePO();
     this.loadCurrency();
     this.loadProducts();
-    console.log(this.Products);
+    this.loadDetailUser();
+  
   }
 
   isModalOpen: boolean = false;
   openModal() {
     this.isModalOpen = true;
-    this.loadFormData();
-    this.initProductDetailTreeList();
+    setTimeout(() => {
+      this.initProductDetailTreeList();
+    }, 300);
   }
   closeModal() {
     this.isModalOpen = false;
@@ -241,7 +251,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       response => {
         if (response.status === 1) {
           // this.users = response.data[0] || [];
-          this.users = response.data || [];
+          this.users = response.data[2] || [];
         } else {
           console.error('Lỗi khi tải nhân viên quản lý:', response.message);
         }
@@ -401,16 +411,28 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       this.ProductDetailTreeList.destroy();
     }
     this.ProductDetailTreeList = new Tabulator(this.ProductDetailTreeListElement.nativeElement, {
-      data: this.POKHProduct,
       dataTree: true,
+      dataTreeStartExpanded: false,
+      dataTreeChildField: "_children",
+      dataTreeChildIndent: 15,
+      dataTreeElementColumn: "STT",
       layout: 'fitDataFill',
       pagination: true,
-      paginationSize: 5,
+      paginationSize: 10,
       movableColumns: true,
       resizableRows: true,
       columns: [
         { title: 'STT', field: 'STT', sorter: 'number', width: 70 },
-        { title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120, editor: "input" },
+        {
+          title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120, editor: "list", editorParams: {
+            values: this.Products.map(product => ({
+              label: `${product.ProductNewCode}  - ${product.ProductCode} - ${product.ProductName} - ${product.Unit} - ${product.ProductGroupName}`,
+              value: product.ProductNewCode
+            })),
+            listOnEmpty: true,
+            autocomplete: true
+          },
+        },
         { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 120, editor: "input" },
         { title: 'Tên sản phẩm', field: 'ProductName', sorter: 'string', width: 250, editor: "input" },
         { title: 'Mã theo khách', field: 'GuestCode', sorter: 'string', width: 250, editor: "input" },
@@ -429,20 +451,85 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Số hóa đơn', field: 'BillNumber', sorter: 'string', width: 250, editor: "input" },
         { title: 'Công nợ', field: 'Debt', sorter: 'number', width: 250, editor: "number" },
         { title: 'Ngày yêu cầu thanh toán', field: 'PayDate', sorter: 'string', width: 250, formatter: this.dateFormatter, editor: "date" },
-        { title: 'Nhóm', field: 'GroupPO', sorter: 'string', width: 250, editor: "input" },
-        { title: 'Ngày giao hàng thực tế', field: 'ActualDeliveryDate', sorter: 'string', width: 250, formatter: this.dateFormatter, editor: "date" },
-        { title: 'Ngày tiền về', field: 'RecivedMoneyDate', sorter: 'string', width: 250, formatter: this.dateFormatter, editor: "date" },
-        { title: 'SL đã về', field: 'QuantityReturn', sorter: 'number', width: 250, editor: "number" },
-        { title: 'SL đã xuất', field: 'QuantityExport', sorter: 'number', width: 250, editor: "number" },
-        { title: 'SL còn lại', field: 'QuantityRemain', sorter: 'number', width: 250, editor: "number" },
+        { title: 'Nhóm', field: 'ProductGroupName', sorter: 'string', width: 250, editor: "input" },
+        { title: 'Ghi chú', field: 'Note', sorter: 'string', width: 250, editor: "input" }
       ]
+    });
+
+    this.ProductDetailTreeList.on("cellEdited", (cell) => {
+      if (cell.getColumn().getField() === "ProductNewCode") {
+        const selectedProduct = this.Products.find(p => p.ProductNewCode === cell.getValue());
+        console.log("Dữ liệu của sản phẩm đã nhận: ", selectedProduct)
+        if (selectedProduct) {
+          const row = cell.getRow();
+          row.update({
+            ProductCode: selectedProduct.ProductCode,
+            ProductName: selectedProduct.ProductName,
+            Unit: selectedProduct.Unit,
+            ProductGroupName: selectedProduct.ProductGroupName
+          });
+        }
+      }
     });
 
     this.ProductDetailTreeList.on("rowClick", (e, row) => {
       this.selectedRow = row;
+      console.log("selectedRow", this.selectedRow);
+      console.log("_children: ", this.selectedRow.getData()['_children']);
+
     });
   }
+  createAutoCompleteEditor(options: string[]) {
+    return (
+      cell: any,
+      onRendered: Function,
+      success: Function,
+      cancel: Function
+    ) => {
+      const cellValue = cell.getValue();
+      const input = document.createElement('input');
+      const datalistId = 'datalist-' + Math.random().toString(36).substr(2, 9);
 
+      input.setAttribute('list', datalistId);
+      input.setAttribute('type', 'text');
+      input.style.width = '100%';
+      input.value = cellValue;
+
+      const dataList = document.createElement('datalist');
+      dataList.id = datalistId;
+
+      options.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        dataList.appendChild(option);
+      });
+
+      document.body.appendChild(dataList);
+
+      input.addEventListener('blur', () => {
+        success(input.value);
+        dataList.remove();
+      });
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          success(input.value);
+          dataList.remove();
+        }
+        if (e.key === 'Escape') {
+          cancel();
+          dataList.remove();
+        }
+      });
+
+      onRendered(() => {
+        input.focus();
+        input.select();
+      });
+
+      return input;
+    };
+  }
   addNewRow(): void {
     const newRow = {
       id: "new_" + this.nextRowId++,
@@ -483,14 +570,15 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     }
   }
   addChildRow(): void {
+    console.log("abc", this.selectedRow);
+
     if (!this.selectedRow) {
       alert("Vui lòng chọn một sản phẩm trước khi thêm sản phẩm con!");
       return;
     }
-
     const childRow = {
       id: "child_" + this.nextRowId++,
-      STT: this.selectedRow.getData()._children ? this.selectedRow.getData()._children.length + 1 : 1,
+      STT: this.selectedRow.getData()['_children'] ? this.selectedRow.getData()['_children'].length + 1 : 1,
       ProductNewCode: "",
       ProductCode: "",
       ProductName: "",
@@ -515,13 +603,86 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       RecivedMoneyDate: null,
       QuantityReturn: 0,
       QuantityExport: 0,
-      QuantityRemain: 0
+      QuantityRemain: 0,
+      _children: []
     };
-
-    this.ProductDetailTreeList.addRow(childRow, false, this.selectedRow);
+    this.selectedRow.addTreeChild(childRow);
+    // this.selectedRow.getData()['_children'].push(childRow);
+    // console.log("zxc",this.selectedRow.getData()['_children']);
+    // this.ProductDetailTreeList.addRow(childRow, false, this.selectedRow);
 
     this.selectedRow.treeExpand();
 
-    this.ProductDetailTreeList.scrollToRow(childRow.id, "bottom", true);
+    // this.ProductDetailTreeList.scrollToRow(childRow.id, "bottom", true);
+  }
+  loadDetailUser(id: number = 0, idDetail: number = 0): void {
+    this.pokhService.loadUserDetail(id, idDetail).subscribe(
+      response => {
+        if (response.status === 1) {
+          this.detailUser = response.data;
+        }
+        else {
+          console.error('Lỗi khi tải chi tiết người dùng:', response.message);
+        }
+      },
+      error => {
+        console.error('Lỗi kết nối khi tải chi tiết người dùng:', error);
+      }
+    );
+  }
+  initDetailTable(): void {
+    if (!this.DetailUserElement || !this.DetailUserElement.nativeElement) return;
+    if (this.DetailUser) {
+      this.DetailUser.destroy();
+    }
+    this.DetailUser = new Tabulator(this.DetailUserElement.nativeElement, {
+      data: [],
+      layout: "fitDataFill",
+      pagination: true,
+      paginationSize: 5,
+      movableColumns: true,
+      resizableRows: true,
+      columns: [
+        {
+          title: '', field: 'actions', formatter: (cell, formatterParams) => {
+            return `<i class="bi bi-trash3 text-danger" style="font-size:15px" onclick="deleteRow(${cell.getRow().getIndex()})"></i>`;
+          },
+          width: '5%'
+        },
+        {
+          title: 'Người phụ trách', field: 'ResponsibleUser', sorter: 'string', width: '35%', editor: "list", editorParams: {
+            values: this.users.map(user => ({
+              label: `${user.FullName}`,
+              value: user.FullName
+            })),
+            listOnEmpty: true,
+            autocomplete: true
+          },
+        },
+        { title: 'Phần trăm', field: 'PercentUser', sorter: 'number', editor: "input", width: '30%' },
+        { title: 'Tiền theo phần trăm', field: 'MoneyUser', sorter: 'number', editor: "input", width: '30%' },
+      ]
+    });
+  }
+  addRowDetailUser(): void {
+    const newRow = {
+      id: "new_" + this.nextRowId++,
+      ResponsibleUser: "",
+      PercentUser: 0,
+      MoneyUser: 0,
+    };
+    this.detailUser.push(newRow);
+    if (this.DetailUser) {
+      this.DetailUser.addRow(newRow);
+      this.DetailUser.scrollToRow(newRow.id, "bottom", true);
+    }
+  }
+  toggleResponsibleUsers() {
+    this.isResponsibleUsersEnabled = !this.isResponsibleUsersEnabled;
+    if (this.isResponsibleUsersEnabled) {
+      this.initDetailTable();
+    } else {
+      this.DetailUser.destroy();
+    }
   }
 }

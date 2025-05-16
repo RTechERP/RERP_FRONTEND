@@ -5,7 +5,7 @@
 
 <!-- Khi chọn một POKH cụ thể -->
 <div *ngIf="selectedId > 0" class="mt-4">
-    <h4>Sản phẩm của POKH #{{selectedId}}</h4>
+    <h5>Sản phẩm của POKH #{{selectedId}}</h5>
     <div class="row">
         <!-- Bảng sản phẩm bên trái -->
         <div class="col-md-9">
@@ -217,34 +217,21 @@
                                 </div>
                             </div>
                             <div class="grid-section">
-                                <h4>Người phụ trách cho sản phẩm đã chọn</h4>
-                                <div class="table-responsive" *ngIf="selectedProduct">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Xóa</th>
-                                                <th>#</th>
-                                                <th>Người dùng</th>
-                                                <th>Phần trăm</th>
-                                                <th>Số tiền</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr *ngFor="let user of selectedProduct.responsibleUsers; let i = index">
-                                                <td><button class="btn btn-danger btn-sm">Xóa</button></td>
-                                                <td>{{i + 1}}</td>
-                                                <!-- <td>
-                                        <select class="form-select" [(ngModel)]="user.userId" (ngModelChange)="updateUser(user)">
-                                            <option *ngFor="let u of availableUsers" [value]="u.id">{{u.fullName}}</option>
-                                        </select>
-                                    </td>
-                                    <td><input type="number" class="form-control" [(ngModel)]="user.percentage" (ngModelChange)="calculateAmount(user)" min="0" max="100"></td>
-                                    <td>{{user.amount | number}}</td> -->
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <button class="btn btn-primary" *ngIf="selectedProduct">Thêm người dùng</button>
+                                <h5>Người phụ trách cho sản phẩm đã chọn</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <button class="btn btn-primary"
+                                        [ngStyle]="{ 'background-color': isResponsibleUsersEnabled ? 'red' : 'green' }"
+                                        (click)="toggleResponsibleUsers()">
+                                        {{ isResponsibleUsersEnabled ? 'Disable' : 'Enable' }}
+                                    </button>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <button class="btn btn-primary" (click)="addRowDetailUser()">
+                                            Thêm người phụ trách
+                                        </button>
+                                    </div>
+
                                 </div>
+                                <div #DetailUser [style.display]="isResponsibleUsersEnabled ? 'block' : 'none'"></div>
                             </div>
                         </div>
 
