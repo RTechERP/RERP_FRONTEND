@@ -1,1 +1,523 @@
-<p>project-form works!</p>
+<div class="modal-header bg-primary align-items-center ps-2">
+  <h6 class="text-light text-uppercase m-0">Thông tin chi tiết dự án</h6>
+</div>
+
+<div class="modal-body pt-0 pb-0">
+  <div class="row">
+    <div class="col-12 col-lg-6">
+      <div class="row">
+        <div class="form-group m-0 p-1 col-sm-12">
+          <label for="">Khách hàng <span style="color: red">(*)</span></label>
+          <div class="d-flex justify-content-center align-items-center">
+            <ng-select
+              [items]="customers"
+              bindValue="ID"
+              bindLabel="CustomerName"
+              [(ngModel)]="selectedCustomer"
+              [searchable]="true"
+              placeholder="Chọn khách hàng..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              (change)="getProjectCode()"
+              class="form-control form-control-sm p-0 border border-0 me-1"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.CustomerCode }} - {{ item.CustomerName }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item">
+                <div
+                  class="d-inline-block text-truncate"
+                  style="
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  "
+                >
+                  {{ item.CustomerCode }}
+                </div>
+              </ng-template>
+            </ng-select>
+            <button
+              type="button"
+              class="btn btn-outline-info btn-sm"
+              title="Thêm khách hàng"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-info ms-1 btn-sm"
+              title="Sửa khách hàng"
+            >
+              <i class="fas fa-pen"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row align-items-center d-flex">
+        <div class="form-group col-sm-6 p-1">
+          <label for="">Mã dự án <span style="color: red">(*)</span></label>
+          <input
+            [(ngModel)]="projectCode"
+            class="form-control form-control-sm"
+            type="text"
+            disabled=""
+          />
+        </div>
+        <div class="form-group col-sm-6 p-1">
+          <label for="">Ngày tạo</label>
+          <input
+            type="date"
+            name="date_start"
+            [(ngModel)]="createDate"
+            class="form-control form-control-sm"
+            required=""
+          />
+        </div>
+        <div class="form-group col-sm-12 p-1">
+          <label for="">Tên dự án <span style="color: red">(*)</span></label>
+          <input
+            type="text"
+            name="date_start"
+            [(ngModel)]="projectName"
+            class="form-control form-control-sm"
+            required=""
+            placeholder="Nhập tên dự án..."
+          />
+        </div>
+      </div>
+      <div class="row align-items-center d-flex">
+        <div class="form-group col-sm-6 p-1">
+          <label for=""
+            >Người phụ trách (Sale) <span style="color: red">(*)</span></label
+          >
+          <ng-select
+            [items]="users"
+            bindValue="ID"
+            bindLabel="FullName"
+            [(ngModel)]="selectedUserSale"
+            [searchable]="true"
+            placeholder="Chọn người phụ trách Sale..."
+            [clearable]="true"
+            [virtualScroll]="true"
+            class="form-control form-control-sm p-0 border border-0 me-1"
+          >
+            <!-- Template hiển thị các lựa chọn trong dropdown -->
+            <ng-template ng-option-tmp let-item="item">
+              <div class="row text-dark w-100">
+                <div class="col-3 ms-1">
+                  {{ item.Code }} - {{ item.FullName }}
+                </div>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+        <div class="form-group col-sm-6 p-1">
+          <label for=""
+            >Người phụ trách (Technical)
+            <span style="color: red">(*)</span></label
+          >
+          <ng-select
+            [items]="users"
+            bindValue="ID"
+            bindLabel="FullName"
+            [(ngModel)]="selectedUserTech"
+            [searchable]="true"
+            placeholder="Chọn người phụ trách kỹ thuật..."
+            [clearable]="true"
+            [virtualScroll]="true"
+            class="form-control form-control-sm p-0 border border-0 me-1"
+          >
+            <!-- Template hiển thị các lựa chọn trong dropdown -->
+            <ng-template ng-option-tmp let-item="item">
+              <div class="row text-dark w-100">
+                <div class="col-3 ms-1">
+                  {{ item.Code }} - {{ item.FullName }}
+                </div>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+      </div>
+      <div class="row align-items-center d-flex">
+        <div class="form-group col-sm-6 p-1">
+          <label for="">Trạng thái</label>
+          <div class="d-flex justify-content-center align-items-center">
+            <ng-select
+              [items]="statuses"
+              bindValue="ID"
+              bindLabel="StatusName"
+              [(ngModel)]="selectedStatus"
+              [searchable]="true"
+              placeholder="Chọn trạng thái dự án.."
+              [clearable]="true"
+              [virtualScroll]="true"
+              (change)="getDayChange()"
+              class="form-control form-control-sm p-0 border border-0 me-1"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.StatusName }}
+                  </div>
+                </div>
+              </ng-template>
+            </ng-select>
+            <button
+              type="button"
+              class="btn btn-outline-info btn-sm"
+              title="Thêm trạng thái"
+              (click)="openAddProjectStatusModal()"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group col-sm-6 p-1">
+          <label for="">Pm <span style="color: red">(*)</span></label>
+          <ng-select
+            [items]="pms"
+            bindValue="EmployeeID"
+            bindLabel="FullName"
+            [(ngModel)]="selectedPm"
+            [searchable]="true"
+            placeholder="Chọn pm..."
+            [clearable]="true"
+            [virtualScroll]="true"
+            class="form-control form-control-sm p-0 border border-0 me-1"
+          >
+            <!-- Template hiển thị các lựa chọn trong dropdown -->
+            <ng-template ng-option-tmp let-item="item">
+              <div class="row text-dark w-100">
+                <div class="col-3 ms-1">
+                  {{ item.Code }} - {{ item.FullName }}
+                </div>
+              </div>
+            </ng-template>
+          </ng-select>
+        </div>
+        <div class="form-group m-0 p-1 pe-0 col-sm-12">
+          <label for="">End User <span style="color: red">(*)</span></label>
+          <div class="d-flex justify-content-center align-items-center">
+            <ng-select
+              [items]="customers"
+              bindValue="ID"
+              bindLabel="CustomerName"
+              [(ngModel)]="selectedEndUser"
+              [searchable]="true"
+              placeholder="Chọn người dùng cuối..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              (change)="getProjectCode()"
+              class="form-control form-control-sm p-0 border border-0 me-1"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.CustomerCode }} - {{ item.CustomerName }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item">
+                <div
+                  class="d-inline-block text-truncate"
+                  style="
+                    max-width: 100%;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  "
+                >
+                  {{ item.CustomerCode }}
+                </div>
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+      <div class="row align-items-center d-flex">
+        <div class="form-group p-1 col-sm-6">
+          <label for="">Hãng </label>
+          <div class="d-flex justify-content-center align-items-center">
+            <ng-select
+              [items]="firmBases"
+              bindValue="ID"
+              bindLabel="FirmName"
+              [(ngModel)]="selectedFirmBase"
+              [searchable]="true"
+              placeholder="Chọn hãng..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0 me-1"
+            >
+            </ng-select>
+            <button
+              type="button"
+              class="btn btn-outline-info btn-sm"
+              title="Thêm hãng"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group p-1 col-sm-6">
+          <label for="">Loại </label>
+          <div class="d-flex justify-content-center align-items-center">
+            <ng-select
+              [items]="projectTypeBases"
+              bindValue="ID"
+              bindLabel="ProjectTypeName"
+              [(ngModel)]="selectedPrjTypeBase"
+              [searchable]="true"
+              placeholder="Chọn loại..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0 me-1"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.ProjectTypeName }}
+                  </div>
+                </div>
+              </ng-template>
+            </ng-select>
+            <button
+              type="button"
+              class="btn btn-outline-info btn-sm"
+              title="Thêm loại"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-6 p-1">
+      <fieldset class="reset">
+        <legend class="reset">Dự kiến</legend>
+        <div class="row align-items-center d-flex">
+          <div class="form-group col-sm-6 p-1">
+            <label for=""
+              >Ngày gửi phương án <span style="color: red">(*)</span></label
+            >
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="expectedPlanDate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+          <div class="form-group col-sm-6 p-1">
+            <label for=""
+              >Ngày gửi báo giá <span style="color: red">(*)</span></label
+            >
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="expectedQuotationDate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+          <div class="form-group col-sm-6 p-1">
+            <label for="">Ngày PO</label>
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="expectedPODate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+          <div class="form-group col-sm-6 p-1">
+            <label for="">Ngày kết thúc</label>
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="expectedProjectEndDate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+        </div>
+      </fieldset>
+      <fieldset class="reset">
+        <legend class="reset">Thực tế</legend>
+        <div class="row align-items-center d-flex">
+          <div class="form-group col-sm-6 p-1">
+            <label for="">Ngày gửi phương án</label>
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="realityPlanDate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+          <div class="form-group col-sm-6 p-1">
+            <label for="">Ngày gửi báo giá</label>
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="realityQuotationDate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+          <div class="form-group col-sm-6 p-1">
+            <label for="">Ngày PO</label>
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="realityPODate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+          <div class="form-group col-sm-6 p-1">
+            <label for="">Ngày kết thúc</label>
+            <input
+              type="date"
+              name="date_start"
+              [(ngModel)]="realityProjectEndDate"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+        </div>
+      </fieldset>
+      <div class="form-group col-sm-12 p-1">
+        <label for="">Người phụ trách PIC</label>
+        <input
+          type="text"
+          [(ngModel)]="projectContactName"
+          class="form-control"
+          required=""
+        />
+      </div>
+      <div class="align-items-center d-flex">
+        <div class="form-group p-1 col-sm-6">
+          <label for="">Mức ưu tiên <span style="color: red">(*)</span></label>
+          <div class="d-flex justify-content-center align-items-center">
+            <input
+              type="text"
+              [(ngModel)]="selectedPrio"
+              class="form-control"
+              required=""
+              disabled
+            />
+            <button
+              type="button"
+              class="btn btn-outline-info ms-1 btn-sm"
+              title="Thêm mức độ ưu tiên"
+            >
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group p-1 col-sm-6">
+          <label for="">Kiểu</label>
+          <div class="d-flex justify-content-center align-items-center">
+            <ng-select
+              [items]="projectTypes"
+              bindLabel="TypeName"
+              bindValue="ID"
+              [(ngModel)]="selectedProjectType"
+              [clearable]="false"
+              placeholder="Chọn kiểu..."
+              (change)="getProjectCode()"
+              class="form-control form-control-sm p-0 border border-0"
+            >
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.TypeName }}
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.TypeName }}
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row p-0">
+    <!-- Bảng 1 -->
+    <div class="col-12 col-lg-2 p-1">
+      <div class="border border-primary">
+        <div id="tb_ProjectUser"></div>
+      </div>
+    </div>
+
+    <!-- Bảng 2 -->
+    <div class="col-12 col-lg-4 p-1">
+      <div class="border border-primary">
+        <div id="tb_projectTypeLinksModal"></div>
+      </div>
+    </div>
+
+    <!-- Textarea mô tả và hiện trạng -->
+    <div class="col-12 col-lg-6 p-2">
+      <div class="form-group mb-2">
+        <label for="description">Mô tả dự án</label>
+        <textarea
+          id="description"
+          class="form-control form-control-sm"
+          rows="5"
+          placeholder="Nhập mô tả..."
+          [(ngModel)]="note"
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="status">Hiện trạng</label>
+        <textarea
+          id="status"
+          class="form-control form-control-sm"
+          rows="5"
+          placeholder="Nhập hiện trạng..."
+          [(ngModel)]="currentState"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer bg-whitesmoke br p-1">
+  <button
+    type="button"
+    style="background-color: darkblue"
+    class="btn btn-sm text-light"
+  >
+    Cập nhật Leader
+  </button>
+  <button
+    type="button"
+    style="background-color: limegreen"
+    class="btn btn-sm text-light"
+    (click)="saveDataProject()"
+  >
+    Lưu
+  </button>
+  <button
+    type="button"
+    class="btn btn-sm text-light btn-close-modal"
+    style="background-color: red"
+    (click)="activeModal.dismiss()"
+  >
+    Đóng
+  </button>
+</div>
