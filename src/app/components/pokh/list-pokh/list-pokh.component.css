@@ -123,11 +123,3 @@ body {
   background-color: #f9f9f9;
 }
 
-.tabulator-edit-list {
-  right: 0 !important;
-  left: auto !important;
-}
-
-.tabulator-edit-list .tabulator-edit-list-item {
-  text-align: left;
-}

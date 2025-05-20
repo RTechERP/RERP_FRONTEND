@@ -32,10 +32,7 @@
                 <div class="container-fluid">
                     <!-- Toolbar -->
                     <div class="toolbar">
-                        <button class="btn btn-primary" onclick="alert('Save and Close')"><i class="bi bi-save"></i> Cất
-                            & Đóng</button>
-                        <button class="btn btn-primary" onclick="alert('Save and New')"><i class="bi bi-save"></i> Cất &
-                            thêm mới</button>
+                        <button class="btn btn-primary" (click)="savePOKH()"><i class="bi bi-save"></i> Thêm mới</button>
                         <button class="btn btn-secondary" onclick="alert('Add Customer')"><i
                                 class="bi bi-person-plus"></i> Thêm khách hàng</button>
                         <button class="btn btn-secondary" onclick="alert('Add New Product')"><i class="bi bi-box"></i>
@@ -61,11 +58,6 @@
                             <button class="nav-link" id="product-details-tab" data-bs-toggle="tab"
                                 data-bs-target="#product-details" type="button" role="tab"
                                 aria-controls="product-details" aria-selected="false">Chi tiết sản phẩm</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="attached-files-tab" data-bs-toggle="tab"
-                                data-bs-target="#attached-files" type="button" role="tab" aria-controls="attached-files"
-                                aria-selected="false">Tệp đính kèm</button>
                         </li>
                     </ul>
 
@@ -95,7 +87,7 @@
                                             <input type="text" class="form-control" id="txtPOCode"
                                                 [(ngModel)]="poFormData.poCode">
                                             <button class="btn btn-outline-secondary" type="button"
-                                                onclick="alert('New PO Code')">
+                                                (click)="openModalPOCode()">
                                                 <i class="bi bi-plus"></i>
                                             </button>
                                         </div>
@@ -136,7 +128,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label for="txtTotalPO" class="form-label">Tổng tiền PO</label>
-                                        <input type="number" class="form-control" id="txtTotalPO"
+                                        <input type="" class="form-control" id="txtTotalPO"
                                             [(ngModel)]="poFormData.totalPO">
                                     </div>
                                     <div class="col-md-3">
@@ -198,6 +190,19 @@
                                             <label class="form-check-label" for="ckbBigAccount">New Account</label>
                                         </div>
                                     </div>
+                                    <!-- Attached Files Tab -->
+                                    <div class="grid-section file-upload-section">
+                                        <h5>File đính kèm</h5>
+                                        <div class="mb-3 d-flex align-items-center">
+                                            <input type="file"  class="form-control w-auto me-2" #fileInput 
+                                                style="max-width: 300px;">
+                                            <button class="btn btn-primary" (click)="onUploadClick()">
+                                                <i class="bi bi-upload"></i> Upload
+                                            </button>
+                                        </div>
+
+                                        <div #fileUploaded></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -207,15 +212,17 @@
                             aria-labelledby="product-details-tab">
                             <div class="grid-section">
                                 <div class="mb-3">
-                                    <button class="btn btn-success" (click)="addNewRow()"><i
+                                    <button class="btn btn-primary" (click)="addNewRow()"><i
                                             class="bi bi-plus"></i>Thêm</button>
-                                    <button class="btn btn-success" (click)="addChildRow()"><i
+                                    <button class="btn btn-outline-secondary ms-3" (click)="addChildRow()"><i
                                             class="bi bi-plus-circle"></i> Thêm Con</button>
                                 </div>
                                 <div class="table-responsive">
                                     <div #ProductDetailTreeList></div>
                                 </div>
                             </div>
+
+
                             <div class="grid-section">
                                 <h5>Người phụ trách cho sản phẩm đã chọn</h5>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -224,46 +231,15 @@
                                         (click)="toggleResponsibleUsers()">
                                         {{ isResponsibleUsersEnabled ? 'Disable' : 'Enable' }}
                                     </button>
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <button class="btn btn-primary" (click)="addRowDetailUser()">
-                                            Thêm người phụ trách
-                                        </button>
-                                    </div>
-
+                                    <button class="btn btn-primary" (click)="addRowDetailUser()">
+                                        Thêm người phụ trách
+                                    </button>
                                 </div>
                                 <div #DetailUser [style.display]="isResponsibleUsersEnabled ? 'block' : 'none'"></div>
                             </div>
                         </div>
 
-                        <!-- Attached Files Tab -->
-                        <div class="tab-pane fade" id="attached-files" role="tabpanel"
-                            aria-labelledby="attached-files-tab">
-                            <div class="grid-section file-upload-section">
-                                <div class="mb-3">
-                                    <input type="file" class="form-control" id="fileInput" multiple>
-                                    <button class="btn btn-primary mt-2" onclick="alert('Upload Files')"><i
-                                            class="bi bi-upload"></i> Upload</button>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-striped">
-                                        <thead>
-                                            <tr>
-                                                <th>Delete</th>
-                                                <th>File Name</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td><button class="btn btn-danger btn-sm"
-                                                        onclick="alert('Delete File')"><i
-                                                            class="bi bi-trash"></i></button></td>
-                                                <td>document.pdf</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>

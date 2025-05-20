@@ -56,7 +56,7 @@ export class PokhServiceService {
   }
 
   getPart(id: number): Observable<any> {
-    return this.http.get<any>(this._url + 'GetPart',{
+    return this.http.get<any>(this._url + 'GetPart', {
       params: {
         id: id.toString()
       }
@@ -78,8 +78,7 @@ export class PokhServiceService {
       }
     });
   }
-  getPOKHFile(id: number = 0): Observable<any> 
-  {
+  getPOKHFile(id: number = 0): Observable<any> {
     return this.http.get<any>(this._url + 'LoadPOKHFiles', {
       params: {
         id: id.toString()
@@ -101,14 +100,24 @@ export class PokhServiceService {
   loadProducts(): Observable<any> {
     return this.http.get<any>(this._url + 'LoadProduct');
   }
-  loadUserDetail(id: number, idDetail : number): Observable<any>{
+  loadUserDetail(id: number, idDetail: number): Observable<any> {
     return this.http.get<any>(this._url + 'LoadDetailUser',
       {
         params: {
           id: id,
-          idDetail : idDetail
+          idDetail: idDetail
         }
       }
     )
   }
+  uploadFiles(files: File[], id: number): Observable<any> {
+    const formData = new FormData();
+    files.forEach(file => {
+      formData.append('files', file);
+    });
+    formData.append('poKHID', id.toString());
+
+    return this.http.post<any>(this._url + 'Upload', formData);
+  }
+  
 }

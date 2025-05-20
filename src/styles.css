@@ -1,0 +1,86 @@
+.tabulator-edit-list {
+    right: 0 !important;
+    left: auto !important;
+  }
+  
+  .tabulator-edit-list .tabulator-edit-list-item {
+    text-align: left;
+  }
+  /* Tabulator dropdown list styles */
+.tabulator-edit-list {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 4px 0;
+  }
+  
+  .tabulator-edit-list .tabulator-edit-list-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .tabulator-edit-list .tabulator-edit-list-item:last-child {
+    border-bottom: none;
+  }
+  
+  .tabulator-edit-list .tabulator-edit-list-item:hover {
+    background-color: #f5f9ff;
+    color: #0066cc;
+  }
+  
+  .tabulator-edit-list .tabulator-edit-list-item.tabulator-edit-list-item-active {
+    background-color: #e6f3ff;
+    color: #0066cc;
+    font-weight: 500;
+  }
+  
+  /* Custom scrollbar for the dropdown */
+  .tabulator-edit-list::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .tabulator-edit-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+  
+  .tabulator-edit-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+  
+  .tabulator-edit-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+  
+  /* Search input in dropdown */
+  .tabulator-edit-list .tabulator-edit-list-search {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 4px;
+  }
+  
+  .tabulator-edit-list .tabulator-edit-list-search input {
+    width: 100%;
+    padding: 6px 12px;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .tabulator-edit-list .tabulator-edit-list-search input:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+  }
+  
+  
+  

@@ -5,11 +5,13 @@ import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { event } from 'jquery';
+import { error, event } from 'jquery';
+import { CustomerPartComponent } from '../../vision-base/customer-part/customer-part.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-list-pokh',
-  imports: [CommonModule, FormsModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, CustomerPartComponent],
   templateUrl: './list-pokh.component.html',
   styleUrls: ['./list-pokh.component.css']
 })
@@ -19,12 +21,17 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   @ViewChild('fileTable', { static: false }) fileTableElement!: ElementRef;
   @ViewChild('ProductDetailTreeList', { static: false }) ProductDetailTreeListElement!: ElementRef;
   @ViewChild('DetailUser', { static: false }) DetailUserElement!: ElementRef;
+  @ViewChild('fileUploaded', { static: false }) fileUploadedElement!: ElementRef;
+  @ViewChild('fileInput') fileInput!: ElementRef;
 
   private table!: Tabulator;
   private productTable!: Tabulator;
   private fileTable!: Tabulator;
+  private fileUploadedTable!: Tabulator;
   private ProductDetailTreeList!: Tabulator;
   private DetailUser!: Tabulator;
+
+  lockEvents: boolean = false;
   pokhs: any[] = [];
   selectedProduct: any = null;
   detailUser: any[] = [];
@@ -32,6 +39,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   nextRowId: number = 1;
   selectedId: number = 0;
   Products: any[] = [];
+  uploadedFiles: any[] = [];
   selectedCustomer: any = null;
   selectedCustomerId: number = 0;
   isResponsibleUsersEnabled = false;
@@ -60,11 +68,11 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     currencyId: 0,
     isBigAccount: false
   };
-  constructor(private pokhService: PokhServiceService) { }
+  constructor(private pokhService: PokhServiceService, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     const startDate = new Date('2025-02-10T12:00:00');
-    this.pokhService.getPOKH('', 1, 50, 0, 0, 0, 0, 0, startDate, new Date(), 1, 0).subscribe((response) => {
+    this.pokhService.getPOKH('', 1, 50, 0, 0, 0, 0, 0, startDate, new Date(), 1, 0).subscribe((response) => { //warehouse = 1
       this.pokhs = response.data;
       console.log(this.pokhs);
       if (this.table) {
@@ -77,7 +85,172 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.initTable();
   }
+  openModalPOCode() { 
+     const modalRef = this.modalService.open(CustomerPartComponent, {
+      centered: true,
+      size: 'xl',
+      backdrop: 'static',
+      
+    });
+  }
+  //SAVE
+  savePOKH() {
+    const pokhData = this.getPOKHData();
+    const details = this.getPOKHDetails();
 
+    console.log('POKH Data:', pokhData);
+    console.log('Details:', details);
+    if (!details || details.length === 0) {
+      alert('Vui lòng thêm chi tiết sản phẩm');
+      return;
+    }
+    const requestBody = {
+      POKH: pokhData,
+      pOKHDetails: details
+    };
+    console.log('Request Body:', requestBody);
+    //api call
+    this.pokhService.handlePOKH(requestBody).subscribe({
+      next: (response) => {
+        if (response.status === 1) {
+          this.handleSuccess(response)
+        }
+      },
+      error: (error) => {
+        this.handleError(error);
+      }
+    })
+  }
+  getPOKHData() {
+    const poDate = new Date(this.poFormData.poDate || new Date());
+    return {
+      status: this.poFormData.status || 0,
+      userId: this.poFormData.userId || 0,
+      poCode: this.poFormData.poCode || '',
+      receivedDatePO: poDate,
+      totalMoneyPO: this.poFormData.totalPO || 0,
+      totalMoneyKoVAT: this.calculateTotalMoneyKoVAT(),
+      note: this.poFormData.note || '',
+      customerId: this.poFormData.customerId || 0,
+      partId: this.poFormData.partId || 0,
+      projectId: this.poFormData.projectId || 0,
+      poType: this.poFormData.poType || 0,
+      newAccount: this.poFormData.isBigAccount || false,
+      endUser: this.poFormData.endUser || '',
+      isBill: this.poFormData.isBill || false,
+      userType: this.poFormData.userType || 0,
+      quotationId: this.poFormData.quotationId || 0,
+      poNumber: this.poFormData.poNumber || '',
+      warehouseId: this.poFormData.warehouseId || 0,
+      currencyId: this.poFormData.currencyId || 0,
+      year: poDate.getFullYear(),
+      month: poDate.getMonth() + 1
+    };
+  }
+
+  getPOKHDetails() {
+    if (!this.ProductDetailTreeList) {
+      console.error('ProductDetailTreeList chưa được khởi tạo');
+      return [];
+    }
+
+    const treeData = this.ProductDetailTreeList.getData();
+    console.log('Raw Tree Data:', treeData);
+
+    if (!treeData || treeData.length === 0) {
+      console.warn('Không có dữ liệu chi tiết sản phẩm');
+      return [];
+    }
+
+    const processRows = (rows: any[], parentId: number | null = null, level: number = 0): any[] => {
+      if (!rows || !Array.isArray(rows)) return [];
+
+      let result: any[] = [];
+
+      rows.forEach((row, index) => {
+        if (!row) return;
+
+        console.log(`Processing row level ${level}, index ${index}:`, row);
+
+        const rowData = {
+          ProductId: row.productId || (row.id ? Number(row.id) : null),
+          Qty: row.Qty ? Number(row.Qty) : 0,
+          UnitPrice: row.UnitPrice ? Number(row.UnitPrice) : 0,
+          IntoMoney: (row.Qty ? Number(row.Qty) : 0) * (row.UnitPrice ? Number(row.UnitPrice) : 0),
+          FilmSize: row.FilmSize || null,
+          Vat: row.VAT ? Number(row.VAT) : 0,
+          BillNumber: row.BillNumber || null,
+          BillDate: row.BillDate ? new Date(row.BillDate) : null,
+          TotalPriceIncludeVAT: row.TotalPriceIncludeVAT ? Number(row.TotalPriceIncludeVAT) : 0,
+          DeliveryRequestedDate: row.DeliveryRequestedDate ? new Date(row.DeliveryRequestedDate) : null,
+          PayDate: row.PayDate ? new Date(row.PayDate) : null,
+          EstimatedPay: row.EstimatedPay ? Number(row.EstimatedPay) : 0,
+          QuotationDetailId: row.quotationDetailId ? Number(row.quotationDetailId) : null,
+          GuestCode: row.GuestCode || null,
+          Debt: row.Debt ? Number(row.Debt) : 0,
+          UserReceiver: row.UserReceiver || null,
+          Note: row.Note || null,
+          NetUnitPrice: row.netUnitPrice ? Number(row.netUnitPrice) : 0,
+          ProjectPartListId: row.projectPartListId ? Number(row.projectPartListId) : null,
+          Spec: row.Spec || null,
+          ParentId: parentId,
+          Stt: index + 1
+        };
+
+        result.push(rowData);
+
+        // Xử lý các sản phẩm con nếu có
+        if (row._children && Array.isArray(row._children) && row._children.length > 0) {
+          const childRows = processRows(row._children, rowData.ProductId, level + 1);
+          result = result.concat(childRows);
+        }
+      });
+
+      return result;
+    };
+
+    return processRows(treeData);
+  }
+
+  calculateTotalMoneyKoVAT() {
+    return this.ProductDetailTreeList.getData()
+      .reduce((total, row) => total + (row.qty * row.unitPrice), 0);
+  }
+  handleSuccess(response: any) {
+    const pokhId = response.data.id;
+    if (this.uploadedFiles.length > 0) {
+      this.uploadFiles(pokhId);
+    }
+    alert('Lưu thành công');
+    this.loadData();
+    this.closeModal();
+  }
+  uploadFiles(pokhId: number) {
+    this.pokhService.uploadFiles(this.uploadedFiles, pokhId)
+      .subscribe({
+        next: (response) => {
+          console.log('Upload files thành công');
+        },
+        error: (error) => {
+          console.error('Lỗi upload files:', error);
+        }
+      });
+  }
+  handleError(error: any) {
+    alert('Có lỗi xảy ra: ' + error.message);
+  }
+
+  loadData() {
+    const startDate = new Date('2025-02-10T12:00:00');
+    this.pokhService.getPOKH('', 1, 50, 0, 0, 0, 0, 0, startDate, new Date(), 1, 0)
+      .subscribe((response) => {
+        this.pokhs = response.data;
+        if (this.table) {
+          this.table.setData(this.pokhs);
+        }
+      });
+  }
+  //END SAVE
   initTable(): void {
     if (!this.tableElement) return;
     this.table = new Tabulator(this.tableElement.nativeElement, {
@@ -100,7 +273,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Khách hàng', field: 'CustomerName', sorter: 'string', width: 200 },
         { title: 'Người phụ trách', field: 'FullName', sorter: 'string', width: 150 },
         { title: 'Dự án', field: 'ProjectName', sorter: 'string', width: 200 },
-        { title: 'Ngày nhận PO', field: 'ReceivedDatePO', sorter: 'date', width: 150, formatter: 'datetime' },
+        { title: 'Ngày nhận PO', field: 'ReceivedDatePO', sorter: 'date', width: 150, },
         { title: 'Loại tiền', field: 'CurrencyCode', sorter: 'string', width: 100 },
         { title: 'Tổng tiền Xuất VAT', field: 'TotalMoneyKoVAT', sorter: 'number', width: 150, formatter: 'money' },
         { title: 'Tổng tiền nhận PO', field: 'TotalMoneyPO', sorter: 'number', width: 150, formatter: 'money' },
@@ -216,7 +389,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.loadCurrency();
     this.loadProducts();
     this.loadDetailUser();
-  
   }
 
   isModalOpen: boolean = false;
@@ -224,6 +396,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.isModalOpen = true;
     setTimeout(() => {
       this.initProductDetailTreeList();
+      this.initFileUploadedTable();
     }, 300);
   }
   closeModal() {
@@ -340,6 +513,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       response => {
         if (response.status === 1) {
           this.POKHFiles = response.data;
+          console.log("Files:", this.POKHFiles)
           setTimeout(() => {
             this.initFileTable();
           }, 0);
@@ -427,10 +601,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120, editor: "list", editorParams: {
             values: this.Products.map(product => ({
               label: `${product.ProductNewCode}  - ${product.ProductCode} - ${product.ProductName} - ${product.Unit} - ${product.ProductGroupName}`,
-              value: product.ProductNewCode
+              value: product.ProductNewCode,
+              id: product.ID
             })),
             listOnEmpty: true,
-            autocomplete: true
+            autocomplete: true,
+            freetext: true,
           },
         },
         { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 120, editor: "input" },
@@ -451,7 +627,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Số hóa đơn', field: 'BillNumber', sorter: 'string', width: 250, editor: "input" },
         { title: 'Công nợ', field: 'Debt', sorter: 'number', width: 250, editor: "number" },
         { title: 'Ngày yêu cầu thanh toán', field: 'PayDate', sorter: 'string', width: 250, formatter: this.dateFormatter, editor: "date" },
-        { title: 'Nhóm', field: 'ProductGroupName', sorter: 'string', width: 250, editor: "input" },
+        { title: 'Nhóm', field: 'ProductPO', sorter: 'string', width: 250, editor: "input" },
         { title: 'Ghi chú', field: 'Note', sorter: 'string', width: 250, editor: "input" }
       ]
     });
@@ -470,6 +646,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           });
         }
       }
+      this.handleCellValueChange(cell);
     });
 
     this.ProductDetailTreeList.on("rowClick", (e, row) => {
@@ -479,57 +656,78 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     });
   }
-  createAutoCompleteEditor(options: string[]) {
-    return (
-      cell: any,
-      onRendered: Function,
-      success: Function,
-      cancel: Function
-    ) => {
-      const cellValue = cell.getValue();
-      const input = document.createElement('input');
-      const datalistId = 'datalist-' + Math.random().toString(36).substr(2, 9);
+  handleCellValueChange(cell: any): void {
+    if (this.lockEvents) return;
 
-      input.setAttribute('list', datalistId);
-      input.setAttribute('type', 'text');
-      input.style.width = '100%';
-      input.value = cellValue;
+    const row = cell.getRow();
+    const columnField = cell.getColumn().getField();
+    const rowData = row.getData();
 
-      const dataList = document.createElement('datalist');
-      dataList.id = datalistId;
+    const quantity = row.getData().Qty || 0;
+    const unitPrice = row.getData().UnitPrice || 0;
+    const vat = row.getData().VAT || 0;
+    const billDate = row.getData().BillDate;
+    const debt = row.getData().Debt || 0;
 
-      options.forEach((value) => {
-        const option = document.createElement('option');
-        option.value = value;
-        dataList.appendChild(option);
-      });
-
-      document.body.appendChild(dataList);
-
-      input.addEventListener('blur', () => {
-        success(input.value);
-        dataList.remove();
-      });
-
-      input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          success(input.value);
-          dataList.remove();
+    try {
+      // Tính thành tiền
+      if (unitPrice >= 0 && quantity > 0) {
+        if (columnField === 'Qty' || columnField === 'UnitPrice' || columnField === 'VAT') {
+          const intoMoney = quantity * unitPrice;
+          row.update({
+            IntoMoney: intoMoney,
+            TotalPriceIncludeVAT: intoMoney + (intoMoney * (vat / 100))
+          });
+          this.calculateTotal();
         }
-        if (e.key === 'Escape') {
-          cancel();
-          dataList.remove();
+      }
+
+      // Xử lý VAT
+      if (columnField === 'VAT') {
+        this.ProductDetailTreeList.getRows().forEach(item => {
+          const itemData = item.getData();
+          const vatOld = itemData["VAT"] || 0;
+          const vatOldText = String(itemData["VAT"]);
+
+          if (vatOld === 0 && vat !== 0 && vatOldText === '') {
+            item.update({ VAT: vat });
+          }
+        });
+      }
+
+      // Tính ngày thanh toán
+      if (columnField === 'BillDate' || columnField === 'Debt') {
+        if (billDate) {
+          const payDate = new Date(billDate);
+          payDate.setDate(payDate.getDate() + debt);
+          row.update({ PayDate: payDate });
         }
-      });
+      }
 
-      onRendered(() => {
-        input.focus();
-        input.select();
-      });
-
-      return input;
-    };
+      // Tính lại thành tiền khi thay đổi số lượng hoặc đơn giá
+      if (columnField === 'Qty' || columnField === 'UnitPrice') {
+        row.update({ IntoMoney: quantity * unitPrice });
+        this.calculateTotal();
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
+
+  calculateTotal(): void {
+    let totalSum = 0;
+    const allRows = this.ProductDetailTreeList.getRows();
+    allRows.forEach(row => {
+      const rowData = row.getData();
+      // Kiểm tra nếu giá trị không phải là undefined và là số
+      if (rowData["TotalPriceIncludeVAT"] !== undefined && !isNaN(rowData["TotalPriceIncludeVAT"])) {
+        totalSum += Number(rowData["TotalPriceIncludeVAT"]);
+      }
+    });
+    this.poFormData.totalPO = totalSum;
+    console.log("Tổng giá trị sau VAT:", this.poFormData.totalPO);
+  };
+
   addNewRow(): void {
     const newRow = {
       id: "new_" + this.nextRowId++,
@@ -607,13 +805,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       _children: []
     };
     this.selectedRow.addTreeChild(childRow);
-    // this.selectedRow.getData()['_children'].push(childRow);
-    // console.log("zxc",this.selectedRow.getData()['_children']);
-    // this.ProductDetailTreeList.addRow(childRow, false, this.selectedRow);
 
     this.selectedRow.treeExpand();
 
-    // this.ProductDetailTreeList.scrollToRow(childRow.id, "bottom", true);
   }
   loadDetailUser(id: number = 0, idDetail: number = 0): void {
     this.pokhService.loadUserDetail(id, idDetail).subscribe(
@@ -636,7 +830,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       this.DetailUser.destroy();
     }
     this.DetailUser = new Tabulator(this.DetailUserElement.nativeElement, {
-      data: [],
       layout: "fitDataFill",
       pagination: true,
       paginationSize: 5,
@@ -653,17 +846,31 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           title: 'Người phụ trách', field: 'ResponsibleUser', sorter: 'string', width: '35%', editor: "list", editorParams: {
             values: this.users.map(user => ({
               label: `${user.FullName}`,
-              value: user.FullName
+              value: user.FullName,
+              id: user.ID
             })),
             listOnEmpty: true,
             autocomplete: true
           },
         },
-        { title: 'Phần trăm', field: 'PercentUser', sorter: 'number', editor: "input", width: '30%' },
+        { title: 'Phần trăm', field: 'PercentUser', sorter: 'number', editor: "input", width: '30%',
+          cellEdited: (cell) => {
+            const totalPO = this.getTotalPOValue();
+            const percentValue = parseFloat(cell.getValue()) || 0;
+            const moneyValue = totalPO * (percentValue / 100);
+            cell.getRow().update({MoneyUser: moneyValue});
+          }
+        },
         { title: 'Tiền theo phần trăm', field: 'MoneyUser', sorter: 'number', editor: "input", width: '30%' },
       ]
     });
   }
+  
+  getTotalPOValue(): number {
+    this.calculateTotal();
+    return this.poFormData.totalPO;
+  }
+
   addRowDetailUser(): void {
     const newRow = {
       id: "new_" + this.nextRowId++,
@@ -685,4 +892,78 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       this.DetailUser.destroy();
     }
   }
+  initFileUploadedTable(): void {
+    if (!this.fileUploadedElement || !this.fileUploadedElement.nativeElement) return;
+
+    if (this.fileUploadedTable) {
+      this.fileUploadedTable.destroy();
+    }
+
+    this.fileUploadedTable = new Tabulator(this.fileUploadedElement.nativeElement, {
+      data: this.uploadedFiles,
+      layout: 'fitDataFill',
+      pagination: true,
+      paginationSize: 5,
+      height: '30vh',
+      movableColumns: true,
+      resizableRows: true,
+      columns: [
+        {
+          title: 'Hành động',
+          field: 'actions',
+          formatter: (cell) => {
+            return `<button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>`;
+          },
+          width: "10%",
+          hozAlign: "center",
+        },
+        { title: 'Tên file', field: 'fileName', sorter: 'string', width: "60%" },
+        { title: 'Kích thước', field: 'fileSize', sorter: 'string', width: "10%" },
+        { title: 'Loại file', field: 'fileType', sorter: 'string', width: "10%" },
+        { title: 'Ngày tải lên', field: 'uploadDate', sorter: 'date', width: "10%" }
+      ]
+    });
+  }
+  onUploadClick() {
+    if (!this.fileInput || !this.fileInput.nativeElement) {
+      console.error('File input element not found');
+      return;
+    }
+
+    const files = this.fileInput.nativeElement.files;
+    if (files && files.length > 0) {
+      Array.from(files).forEach(file => {
+        this.addFileToTable(file as File);
+        console.log(this.uploadedFiles);
+      });
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  addFileToTable(file: File): void {
+    const newFile = {
+      fileName: file.name,
+      fileSize: this.formatFileSize(file.size),
+      fileType: this.getFileType(file.name),
+      uploadDate: new Date().toLocaleDateString('vi-VN')
+    };
+    this.uploadedFiles.push(newFile);
+    if (this.fileUploadedTable) {
+      this.fileUploadedTable.addRow(newFile);
+    }
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  getFileType(fileName: string): string {
+    return fileName.split('.').pop()?.toUpperCase() || '';
+  }
+
+
 }
