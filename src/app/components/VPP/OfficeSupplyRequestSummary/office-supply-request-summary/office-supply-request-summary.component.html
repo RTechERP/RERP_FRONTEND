@@ -1,0 +1,54 @@
+<div class="button-section">
+    <!-- Action buttons group -->
+    <div class="button-group">
+        <label for="txtYear">Năm</label>
+        <input type="number" id="txtYear" min="2024" max="9999" class="form-control form-control-sm"
+             [(ngModel)]="searchParams.year">
+
+        <label for="txtMonth">Tháng</label>
+        <input type="number" id="txtMonth" min="1" max="12" class="form-control form-control-sm"
+             [(ngModel)]="searchParams.month">
+    </div>
+    <div class="button-group">
+        <label for="cboDepartment">Phòng ban</label>
+            <ng-select id="cboDepartment" class="department-select" [items]="dataDeparment" bindLabel="Name"
+                [bindValue]="'ID'" [(ngModel)]="searchParams.departmentId" 
+                placeholder="Chọn phòng ban">
+                <ng-template ng-header-tmp>       
+                    <div class="row font-weight-bold text-center">
+                        <div class="col-4" style="font-weight: bold;">Mã phòng ban</div>
+                        <div class="col-4" style="font-weight: bold;">Tên phòng ban</div>
+                    </div>
+                </ng-template>
+                <ng-template ng-option-tmp let-item="item">
+                    <div class="row text-center">
+                        <div class="col-4">{{ item.Code}}</div>
+                        <div class="col-4">{{ item.Name }}</div>
+                    </div>
+                </ng-template>
+            </ng-select>
+        
+            <div class="button-group">
+                   <div class="button-group">
+                <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" 
+                  data-bs-target="#searchOffcanvas" (click)="search()">
+                  <i class="fas fa-search"></i>
+                </button>
+              </div>
+              </div>
+    </div>
+
+    <div class="vr"></div>
+
+    <!-- Excel import/export group -->
+    <div class="button-group">
+        <button class="btn btn-outline-success">
+            <i class="fa-solid fa-file-excel"></i> Xuất Excel
+        </button>
+    </div>
+</div>
+<!-- Table section -->
+<div class="table-container mt-3">
+    <div id="office-supply-request-summary-table"></div>
+</div>
+

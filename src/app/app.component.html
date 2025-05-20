@@ -13,10 +13,36 @@
                 </a>
             </div>
             <!-- App brand ends -->
-
+            
             <!-- Sidebar menu starts -->
+             
+         
             <div class="sidebarMenuScroll">
+                
                 <ul class="sidebar-menu">
+                    <ul class="sidebar-menu">
+                        Quản lý Văn phòng phẩm
+                        <li>
+                            <a class="btn bt    n-success" [routerLink]="['/listVPP']">Danh sách Văn phòng phẩm</a>
+                        </li>
+                        <li>
+                            <a class="btn bt    n-success" [routerLink]="['/OUS']">Đơn vị tính</a>
+                        </li>
+                        <li>
+                            <a class="btn bt    n-success" [routerLink]="['/dkVPP']">Đăng ký Văn phòng phẩm</a>
+                        </li>
+                        <li>
+                            <a class="btn bt    n-success" [routerLink]="['/officeSupplyRequestSummary']">Tổng hợp VPP</a>
+                        </li>
+                    </ul>
+                    <ul class="sidebar-menu">
+                        Quản lý báo cáo
+                        <li>
+                            <a class="btn bt    n-success" [routerLink]="['/dailyreport']">Báo cáo hàng ngày</a>
+                        </li>
+                    </ul>
+                   
+                    
                     @for (item of menus; track item.ID) {
                     <li>
                         <a href="#" (click)="addComponent('a')">
@@ -152,6 +178,9 @@
 
                 <!-- Container starts -->
                 <div class="container-fluid">
+                   
+                    <div id="example-table"></div>
+                    <router-outlet />
                     <ng-template #viewcomponent></ng-template>
                     
 
@@ -174,4 +203,17 @@
     <!-- Main container end -->
 
 </div>
-<router-outlet />
+<script>
+    var table = new Tabulator("#example-table", {
+    height:"311px",
+    columns:[
+    {title:"Name", field:"name"},
+    {title:"Progress", field:"progress", hozAlign:"right", sorter:"number"},
+    {title:"Gender", field:"gender"},
+    {title:"Rating", field:"rating", hozAlign:"center"},
+    {title:"Favourite Color", field:"col"},
+    {title:"Date Of Birth", field:"dob", hozAlign:"center", sorter:"date"},
+    {title:"Driver", field:"car", hozAlign:"center"},
+    ],
+});
+  </script>

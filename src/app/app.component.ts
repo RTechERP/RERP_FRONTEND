@@ -1,17 +1,26 @@
 import { Component, ComponentFactoryResolver, OnInit, ViewChild, ViewContainerRef, Type } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { NgModule } from '@angular/core';
+import { RouterOutlet, RouterModule } from '@angular/router';
 import { EmployeesComponent } from './components/employees/employees.component';
 import { MenusComponent } from './components/menus/menus.component';
 import { MenuService } from './components/menus/menu-service/menu.service';
 import { DymanicComponentComponent } from './dymanic-component/dymanic-component.component';
+import { ListVPPComponent } from "./components/VPP/list-vpp/list-vpp.component";
+import{OfficeSupplyComponentComponent} from"./components/OfficeSupply/office-supply-component/office-supply-component.component";
+import { OfficeSupplyRequestSummaryComponent } from './components/VPP/OfficeSupplyRequestSummary/office-supply-request-summary/office-supply-request-summary.component';
+import { DangkyVppComponent } from './components/VPP/DangkyVPP/dangky-vpp/dangky-vpp.component';    
+import { DailyreportComponent } from './components/dailyreport/dailyreport.component';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet],
+    standalone:true,
+    imports: [RouterOutlet, RouterOutlet, ListVPPComponent,RouterModule, OfficeSupplyComponentComponent, OfficeSupplyRequestSummaryComponent, DangkyVppComponent, DailyreportComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })
+
+
+
+
 export class AppComponent implements OnInit {
     title = 'R_ERP';
 

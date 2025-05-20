@@ -1,0 +1,159 @@
+<div class="layout-wrapper">
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-left custom-offcanvas" tabindex="-1" id="searchOffcanvas" data-bs-backdrop="false">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Tìm kiếm</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <!-- Date range -->
+      <div class="form-group">
+        <label for="dateStart">Từ ngày</label>
+        <input type="date" id="dateStart" 
+          [(ngModel)]="searchParams.dateStart"
+          class="form-control form-control-sm">
+      </div>
+
+      <div class="form-group">
+        <label for="dateEnd">Đến ngày</label>
+        <input type="date" id="dateEnd" 
+          [(ngModel)]="searchParams.dateEnd"
+          class="form-control form-control-sm">
+      </div>
+
+      <!-- Employee -->
+      <div class="form-group">
+        <label for="cboEmployee">Nhân viên</label>
+        <ng-select id="cboEmployee" 
+          class="department-select" 
+          [items]="dataEmployees"
+          bindLabel="FullName" 
+          [bindValue]="'UserID'"
+          [(ngModel)]="searchParams.userID"
+          placeholder="Chọn nhân viên">
+          <ng-template ng-header-tmp>
+            <div class="row font-weight-bold text-center">
+              <div class="col-4" style="font-weight: bold;">Mã nhân viên</div>
+              <div class="col-4" style="font-weight: bold;">Tên nhân viên</div>
+            </div>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <div class="row text-center">
+              <div class="col-4">{{ item.Code}}</div>
+              <div class="col-4">{{ item.FullName }}</div>
+            </div>
+          </ng-template>
+        </ng-select>
+      </div>
+
+      <!-- Keyword -->
+      <div class="form-group">
+        <label for="txtKeyword">Từ khóa</label>
+        <input type="text" id="txtKeyword" 
+          [(ngModel)]="searchParams.keyword"
+          class="form-control form-control-sm" 
+          placeholder="Từ khóa">
+      </div>
+
+      <!-- Buttons -->
+      <div class="form-group mt-3">
+        <button class="btn btn-outline-primary btn-outline-sm me-2" 
+          data-bs-dismiss="offcanvas" (click)="search()"
+          >
+          <i class="fas fa-search"></i> Tìm kiếm
+        </button>
+        <button class="btn btn-outline-secondary btn-outline-sm"
+          >
+          <i class="fas fa-undo"></i> Đặt lại
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="project-container">
+    <!-- Button toolbar -->
+    <div class="button-section">
+      <!-- Search group -->
+      <div class="button-group">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" 
+          data-bs-target="#searchOffcanvas">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+
+      <div class="vr"></div>
+
+      <!-- Excel import/export group -->
+      <div class="button-group">
+        <button class="btn btn-outline-success"
+          >
+          <i class="fa-solid fa-file-excel"></i> Xuất Excel
+        </button>
+      </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="card-body">
+        <div class="custom-tabs-container">
+            <ul class="nav nav-tabs" id="customTab3" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="tab-oneAA" data-bs-toggle="tab"
+                        href="#oneAA" role="tab" aria-controls="oneAA"
+                        aria-selected="true">Hành chính nhân sự IT</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="tab-twoAA" data-bs-toggle="tab"
+                        href="#twoAA" role="tab" aria-controls="twoAA"
+                        aria-selected="false">Cắt phim</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="tab-threeAA" data-bs-toggle="tab"
+                        href="#threeAA" role="tab" aria-controls="threeAA"
+                        aria-selected="false">Lái xe</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="customTabContent3">
+                <div class="tab-pane fade show active" id="oneAA" role="tabpanel">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                              <div class="tables-wrapper">
+                                <div class="table-container mb-3">
+                                  <div id="table_dailyreportHCNSIT" class="custom-tabulator"></div>
+                                </div>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="twoAA" role="tabpanel">
+                      <!-- Card start -->
+                      <div class="card mb-3">
+                        <div class="card-body">
+                          <div class="tables-wrapper">
+                            <div class="table-container mb-3">
+                              <div id="table_dailyreportCP" class="custom-tabulator"></div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <!-- Card end -->
+                </div>
+                <div class="tab-pane fade" id="threeAA" role="tabpanel">
+                      <!-- Card start -->
+                      <div class="card mb-3">
+                        <div class="card-body">
+                          <div class="tables-wrapper">
+                            <div class="table-container mb-3">
+                              <div id="table_dailyreportLX" class="custom-tabulator"></div>
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <!-- Card end -->
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- thêm -->
+  </div>
+</div>

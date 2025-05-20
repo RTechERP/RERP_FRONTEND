@@ -1,0 +1,143 @@
+<div class="layout-wrapper">
+  <!-- Offcanvas -->
+  <div class="offcanvas offcanvas-left custom-offcanvas" tabindex="-1" id="searchOffcanvas" data-bs-backdrop="false">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Tìm kiếm</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <!-- Năm -->
+      <div class="form-group">
+        <label for="txtYear">Năm</label>
+        <input type="number" id="txtYear" 
+          min="2024" max="9999" 
+          [(ngModel)]="searchParams.year"
+          (change)="onYearChange($event)" 
+          class="form-control form-control-sm">
+      </div>
+
+      <!-- Tháng -->
+      <div class="form-group">
+        <label for="txtMonth">Tháng</label>
+        <input type="number" id="txtMonth" 
+          min="1" max="12" 
+          [(ngModel)]="searchParams.month"
+          (change)="onMonthChange($event)" 
+          class="form-control form-control-sm">
+      </div>
+
+      <!-- Phòng ban -->
+      <div class="form-group">
+        <label for="cboDepartment">Phòng ban</label>
+        <ng-select id="cboDepartment"
+          class="department-select" 
+          [items]="dataDeparment" 
+          bindLabel="Name" 
+          [bindValue]="'ID'"
+          [(ngModel)]="searchParams.departmentId" 
+          (change)="onDepartmentChange($event)" 
+          placeholder="Chọn phòng ban">
+          <ng-template ng-header-tmp>
+            <div class="row font-weight-bold text-center">
+              <div class="col-4" style="font-weight: bold;">Mã phòng ban</div>
+              <div class="col-4" style="font-weight: bold;">Tên phòng ban</div>
+            </div>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <div class="row text-center">
+              <div class="col-4">{{ item.Code}}</div>
+              <div class="col-4">{{ item.Name }}</div>
+            </div>
+          </ng-template>
+        </ng-select>
+      </div>
+
+      <!-- Từ khóa -->
+      <div class="form-group">
+        <label for="txtSearch">Từ khóa</label>
+        <input type="text" id="txtSearch" 
+          class="form-control form-control-sm"
+          [(ngModel)]="searchParams.keyword" 
+          (input)="onKeywordChange($event)"
+          placeholder="Nhập từ khóa...">
+      </div>
+
+      <!-- Buttons -->
+      <div class="form-group mt-3">
+        <button class="btn btn-outline-primary btn-outline-sm me-2" data-bs-dismiss="offcanvas">
+          <i class="fas fa-search"></i> Tìm kiếm
+        </button>
+        <button class="btn btn-outline-secondary btn-outline-sm">
+          <i class="fas fa-undo"></i> Đặt lại
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="project-container">
+    <!-- Button toolbar -->
+    <div class="button-section">
+      <!-- Search group -->
+      <div class="button-group">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" 
+          data-bs-target="#searchOffcanvas">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+
+      <!-- Action buttons group -->
+      <div class="button-group">
+        <button class="btn btn-outline-info" id="btnNew">
+          <i class="fa-solid fa-plus"></i> Thêm
+        </button>
+        <button class="btn btn-outline-warning" id="btnEdit">
+          <i class="fa-solid fa-pen-to-square"></i> Sửa
+        </button>
+        <button class="btn btn-outline-danger" id="btnDelete">
+          <i class="fa-solid fa-trash"></i> Xóa
+        </button>
+        <button class="btn btn-outline-secondary" id="btnCopy">
+          <i class="fa-solid fa-copy"></i> Copy
+        </button>
+      </div>
+
+      <div class="vr"></div>
+
+      <!-- Admin approval group -->
+      <div class="button-group">
+        <button class="btn btn-outline-success" id="btnAdminApproved" (click)="IsAdminApproved()">
+          <i class="fa-solid fa-check"></i> Admin duyệt
+        </button>
+        <button class="btn btn-outline-danger" id="btnUnAdminApproved" (click)="UnAdminApproved()">
+          <i class="fa-solid fa-xmark"></i> Admin hủy
+        </button>
+      </div>
+
+      <div class="vr"></div>
+
+      <!-- TBP approval group -->
+      <div class="button-group">
+        <button class="btn btn-outline-success" id="btnApprove" (click)="IsApproved()">
+          <i class="fa-solid fa-check"></i> TBP duyệt
+        </button>
+        <button class="btn btn-outline-danger" id="btnDisapprove" (click)="UnIsApproved()">
+          <i class="fa-solid fa-xmark"></i> TBP hủy
+        </button>
+      </div>
+    </div>
+
+    <!-- Tables -->
+    <div class="tables-wrapper">
+      <div class="table-container mb-3">
+        <h5  class="table-title">Danh sách đăng ký văn phòng phẩm</h5>
+        <div id="datatable1" class="custom-tabulator"></div>
+      </div>
+
+      <div class="table-container">
+        <h5 class="table-title" >Chi tiết đăng ký</h5>
+        <div id="datatable2" class="custom-tabulator"></div>
+      </div>
+    </div>
+  </div>
+</div>
