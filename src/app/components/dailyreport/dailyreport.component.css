@@ -109,8 +109,7 @@ th {
   border-radius: 4px;
   padding: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  margin-top: 0;
+ 
 }
 
 .table-title {
@@ -121,15 +120,8 @@ th {
 }
 
 /* Tabulator customization */
-::ng-deep .tabulator {
-  border: none !important;
-  background-color: #fff;
-}
 
-::ng-deep .tabulator-header {
-  background-color: #f8f9fa !important;
-  border-bottom: 2px solid #dee2e6 !important;
-}
+
 
 ::ng-deep .tabulator-header .tabulator-col {
   background-color: #f8f9fa !important;
