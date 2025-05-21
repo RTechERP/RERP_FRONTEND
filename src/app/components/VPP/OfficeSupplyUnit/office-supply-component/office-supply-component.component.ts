@@ -6,6 +6,8 @@ import 'tabulator-tables/dist/css/tabulator.min.css';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { RowComponent } from 'tabulator-tables';
 import { OfficeSupplyUnitServiceService } from '../OSU-service/office-supply-unit-service.service'
+import Swal from 'sweetalert2';
+import * as bootstrap from 'bootstrap';
 @Component({ 
   selector: 'app-office-supply-component',
   standalone: true,
@@ -19,6 +21,8 @@ export class OfficeSupplyComponentComponent implements OnInit {
   dataTable: any[] = [];
   searchText: string = '';
   selectedItem: any = {};
+  isCheckmode: boolean = false;
+  selectedList: any[] = [];
   constructor(private OSU: OfficeSupplyUnitServiceService) { }
   ngOnInit(): void {
     this.drawTable();
@@ -30,19 +34,26 @@ export class OfficeSupplyComponentComponent implements OnInit {
       this.table.replaceData(this.dataTable);
     } else {
       this.table = new Tabulator('#datatable', {
-        height: "70vh",
+        layout: 'fitDataFill',
+        height: '70vh',
         pagination: true,
-        paginationSize: 20,
-        selectableRange: true,
-        selectableRangeColumns: true,
-        selectableRangeRows: true,
-        columnDefaults: {
-          headerSort: false,
-          resizable: "header"
-
-        },
-
+        paginationSize: 50,
+        movableColumns: true,
+        resizableRows: true,
+        reactiveData: true,
+      
         columns: [
+          { 
+            title: "",
+            formatter: "rowSelection", 
+            titleFormatter: "rowSelection",
+            hozAlign: "center",
+            headerHozAlign: "center",
+            headerSort: false,
+            width: 40,
+            frozen: true,
+            
+          },
           {
             title: 'Mã đơn vị',
             field: 'ID',
@@ -79,11 +90,17 @@ export class OfficeSupplyComponentComponent implements OnInit {
         }
 
         if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-          this.selectedItem = { ...data };
+          this.selectedItem = {
+            ID: data.ID || '',
+            Name: data.Name || '',
+           };
         } else {
           console.warn('Không có dữ liệu để fill');
           console.log('Giá trị data:', data);
         }
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy dữ liệu:', err);
       }
     });
   }
@@ -96,14 +113,23 @@ export class OfficeSupplyComponentComponent implements OnInit {
   }
   saveSelectedItem() {
     if (!this.selectedItem?.Name) {
-      alert("Tên đơn vị không được để trống");
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Tên đơn vị không được để trống!',
+      })
       return;
     }
     this.OSU.updatedata(this.selectedItem).subscribe({
       next: (response) => {
-        alert('Lưu thành công');
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công',
+          text: 'Lưu thành công!',
+        })
         this.selectedItem = {}; // responseet form
         this.get(); // Tải lại bảng
+        this.closeUnitModal();
       },
       error: (err) => {
         console.error('Lỗi khi lưu dữ liệu:', err);
@@ -111,7 +137,59 @@ export class OfficeSupplyComponentComponent implements OnInit {
       }
     });
   }
-
+  openUnitModal() {
+    const modalEl = document.getElementById('addUnitModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.show();
+    }
+  }
+  openUnitModalForNewUnit() {
+    this.isCheckmode = false;
+    this.openUnitModal();
+  }
+  openUnitModalForUpdateUnit() {
+    this.isCheckmode = true;
+    var dataSelect = this.table.getSelectedData();
+    dataSelect.forEach((row: any) => {
+      if (!this.selectedList.some(item => item.ID === row.ID)) {
+        this.selectedList.push(row);
+      }
+    });
+    const ids= this.selectedList.map(item => item.ID);
+    
+    if (this.selectedList.length == 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Thông báo',
+        text: 'Vui lòng chọn 1 đơn vị để sửa!',
+        showConfirmButton: true,
+        timer: 1500
+      });
+      this.selectedList=[];
+      return;
+    } else if (this.selectedList.length > 1) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Thông báo',
+        text: 'Vui lòng chỉ chọn 1 đơn vị để sửa!',
+        showConfirmButton: true,
+        timer: 1500
+      });
+      this.selectedList=[];
+      return;
+    } else {
+      this.getdatabyid(this.selectedList[0].ID);
+      this.openUnitModal();
+    }
+  }
+  closeUnitModal() {
+    const modalEl = document.getElementById('addUnitModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.hide();
+    }
+  }
   get(): void {
     this.OSU.getdata().subscribe({
       next: (response) => {

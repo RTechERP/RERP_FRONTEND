@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { OfficeSupplyUnitServiceService } from '../../OfficeSupply/OSU-service/office-supply-unit-service.service';
+import { OfficeSupplyUnitServiceService } from '../../OfficeSupplyUnit/OSU-service/office-supply-unit-service.service';
 
 describe('OfficeSupplyUnitServiceService', () => {
   let service: OfficeSupplyUnitServiceService;

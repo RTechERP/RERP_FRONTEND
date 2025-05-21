@@ -5,15 +5,23 @@ import { MenusComponent } from './components/menus/menus.component';
 import { MenuService } from './components/menus/menu-service/menu.service';
 import { DymanicComponentComponent } from './dymanic-component/dymanic-component.component';
 import { ListVPPComponent } from "./components/VPP/list-vpp/list-vpp.component";
-import{OfficeSupplyComponentComponent} from"./components/OfficeSupply/office-supply-component/office-supply-component.component";
+import{OfficeSupplyComponentComponent} from"./components/VPP/OfficeSupplyUnit/office-supply-component/office-supply-component.component";
 import { OfficeSupplyRequestSummaryComponent } from './components/VPP/OfficeSupplyRequestSummary/office-supply-request-summary/office-supply-request-summary.component';
 import { DangkyVppComponent } from './components/VPP/DangkyVPP/dangky-vpp/dangky-vpp.component';    
 import { DailyreportComponent } from './components/dailyreport/dailyreport.component';
 
 @Component({
     selector: 'app-root',
-    standalone:true,
-    imports: [RouterOutlet, RouterOutlet, ListVPPComponent,RouterModule, OfficeSupplyComponentComponent, OfficeSupplyRequestSummaryComponent, DangkyVppComponent, DailyreportComponent],
+    standalone: true,
+    imports: [
+        RouterOutlet,
+        ListVPPComponent,
+        RouterModule,
+        OfficeSupplyComponentComponent,
+        OfficeSupplyRequestSummaryComponent,
+        DangkyVppComponent,
+        DailyreportComponent
+    ],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })
