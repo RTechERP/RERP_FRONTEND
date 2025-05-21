@@ -3,6 +3,7 @@ import { OfficeSupplyRequestSummaryServiceService } from '../OfficeSupplyRequest
 import { Tabulator } from 'tabulator-tables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-office-supply-request-summary',
@@ -71,6 +72,20 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
         console.error('Lỗi khi lấy đơn vị tính:', err);
       }
     });
+  }
+  exportToExcel() {
+    const now = new Date();
+    const dateStr = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+    
+    if (this.table) {
+      this.table.download('xlsx', `TongHopVPP_T${this.searchParams.month}/${this.searchParams.year}_${dateStr}.xlsx`, { sheetName: 'Báo cáo VPP' });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Bảng chưa được khởi tạo!',
+      });
+    }
   }
 
   private drawTable(): void {
