@@ -85,9 +85,7 @@ export class ListVPPComponent implements OnInit {
     this.lstVPP.getUnit().subscribe({
       next: (res) => {
         console.log('Danh sách đơn vị tính:', res);
-        this.listUnit = Array.isArray(res?.Items)
-          ? res.Items
-          : [];
+        this.listUnit = Array.isArray(res?.data) ? res.data : [];
       },
       error: (err) => {
         console.error('Lỗi khi lấy đơn vị tính:', err);

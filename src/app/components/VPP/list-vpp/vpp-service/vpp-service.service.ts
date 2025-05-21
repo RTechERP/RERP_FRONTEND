@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ListVPPService {
-  private baseUrl = 'https://localhost:44365/api/OfficeSupplies';
+  private baseUrl = 'https://localhost:7187/api/OfficeSupplies';
 
   constructor(private httpclient: HttpClient) { }
 
@@ -15,11 +15,11 @@ export class ListVPPService {
   }
 
   getUnit(): Observable<any> {
-    return this.httpclient.get<any>(`${this.baseUrl}/GetOfficeSupplyUnit`);
+    return this.httpclient.get<any>(`https://localhost:7187/api/OfficeSupplies/GetOfficeSupplyUnit`);
   }
 
   addUnit(data: any): Observable<any> {
-    return this.httpclient.post<any>('https://localhost:44365/api/OfficeSupplies/savedatas',data);
+    return this.httpclient.post<any>('https://localhost:7187/api/OfficeSupplies/savedatas',data);
   }
 
   getdatafill(id: number): Observable<any> {
