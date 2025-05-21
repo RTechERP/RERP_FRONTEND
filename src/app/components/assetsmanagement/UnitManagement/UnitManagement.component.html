@@ -1,0 +1,43 @@
+<!-- UnitManagement.component.html -->
+
+<div class="d-flex align-items-center mb-3">
+  <button class="btn btn-success me-2" (click)="openUnitModal('add')">
+    Thêm đơn vị tính
+  </button>
+  <button class="btn btn-warning" (click)="onEditClick()">
+    Sửa đơn vị tính
+  </button>
+</div>
+
+<div id="datatableunit"></div>
+
+<!-- Modal chung Add/Edit -->
+<div class="modal fade" id="unitModal" tabindex="-1"
+     aria-labelledby="unitModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="unitModalLabel">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="newUnitName"
+          [placeholder]="action === 'add' ? 'Tên đơn vị mới' : 'Tên đơn vị sửa'"
+        />
+      </div>
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">Hủy</button>
+        <button type="button"
+                class="btn btn-primary"
+                (click)="saveUnit()">
+          {{ action === 'add' ? 'Thêm' : 'Lưu' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
+      "types": ["jquery"],
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -24,4 +25,6 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   }
+  
 }
+
