@@ -1,19 +1,19 @@
 
-<nav class="navbar navbar-light bg-light">
-  <div class="d-flex align-items-center gap-2 mb-2">
+<div class="button-section">
+  <div class="button-group">
     <button style="font-size: 13px;" class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse"
-      data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample"
-      (click)="saveSelectedItem()">
-      <i class="fa-solid" [ngClass]="selectedItem?.ID > 0 ? 'fa-pen' : 'fa-plus'"></i>
-      {{ selectedItem?.ID > 0 ? 'Cập nhật' : 'Thêm mới' }}
+    data-bs-target="#collapseWidthExample" aria-expanded="false" aria-controls="collapseWidthExample"
+    (click)="saveSelectedItem()">
+    <i class="fa-solid" [ngClass]="selectedItem?.ID > 0 ? 'fa-pen' : 'fa-plus'"></i>
     </button>
-    <div>
+    <div class="input-group">
       <input style="font-size: 13px;" id="collapseWidthExample" class="form-control me-3 "
         [(ngModel)]="selectedItem.Name" name="searchText" type="search" placeholder="Tên đơn vị" aria-label="Search"
         (keyup.enter)="get()" (ngModelChange)="onNameChange($event)">
     </div>
-    <!-- h -->
   </div>
-</nav>
-<div id="datatable"></div>
+</div>
+<div class="table-container mt-3">
+  <div id="datatable"></div>
+</div>
 

@@ -6,12 +6,12 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class DangkyvppServiceService {
-  private baseUrl = 'https://localhost:44365';
+  private baseUrl = 'https://localhost:44365/api/OfficeSupplyRequests';
 
   constructor(private httpclient: HttpClient) { }
 
   getdataDepartment(): Observable<any> {
-    return this.httpclient.get<any>(`${this.baseUrl}/getdata`);
+    return this.httpclient.get<any>(`${this.baseUrl}/getdataDepartment`);
   }
 
   spGetOfficeSupplyRequestsDetail(id: number): Observable<any>{

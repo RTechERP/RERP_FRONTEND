@@ -1,0 +1,366 @@
+
+/* Styles for ng-select dropdown arrow */
+::ng-deep .ng-select .ng-select-container::after {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #666;
+    margin-right: 5px;
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  
+  ::ng-deep .ng-select .ng-arrow-wrapper {
+    display: none;
+  }
+  
+  ::ng-deep .ng-select.ng-select-opened .ng-select-container::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+  
+  /* Fix clear button positioning */
+  ::ng-deep .ng-select .ng-clear-wrapper {
+    right: 20px !important;
+  }
+  
+  /* Adjust padding for the value container to prevent text overlap */
+  ::ng-deep .ng-select .ng-value-container {
+    padding-right: 35px !important;
+  }
+  
+  /* Adjust ng-select height and width to match other inputs */
+  ::ng-deep .ng-select .ng-select-container {
+    min-height: 35px !important;
+    height: 35px !important;
+  }
+  
+  ::ng-deep .ng-select.ng-select-single .ng-select-container {
+    height: 35px !important;
+    min-height: 35px !important;
+  }
+  
+  /* Make modal ng-select match input width */
+  .modal-body ::ng-deep .ng-select {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+  
+  /* Preserve the wider ng-select for other cases */
+  ::ng-deep .ng-select:not(.modal-body .ng-select) {
+    min-width: 200px;
+  }
+  
+  /* Ensure form groups in modal have consistent spacing */
+  .modal-body .mb-3 {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Make all form controls in modal have consistent width */
+  .modal-body .form-control,
+  .modal-body .ng-select {
+    width: 100% !important;
+  }
+  
+  /* Ensure proper alignment in row groups */
+  .modal-body .row > [class*="col"] {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-body .row > [class*="col"] > * {
+    flex: 1;
+  }
+  
+  /* Adjust button size */
+  .btn-outline-primary {
+    font-size: 12px;
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: white;
+  }
+  
+  /* Global styles */
+  .btn {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      height: 31px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      margin-right: 0.5rem;
+  }
+  
+  .btn i {
+    font-size: 14px;
+  }
+  
+  /* Action buttons container */
+  .d-flex.flex-wrap.gap-2 {
+    gap: 0.5rem !important;
+  }
+  
+  /* Form controls */
+  .form-control-sm {
+    height: 31px;
+    padding: 0.25rem 0.5rem;
+    font-size: 13px;
+  }
+  
+  /* ng-select customization */
+  ::ng-deep .ng-select .ng-select-container {
+    min-height: 35px !important;
+    height: 35px !important;
+  }
+  
+  ::ng-deep .ng-select.ng-select-single .ng-select-container {
+    height: 35px !important;
+  }
+  
+  /* Modal button styles */
+  .btn.btn-outline-primary.d-flex {
+    width: 31px !important;
+    height: 31px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 767.98px) {
+    .d-flex.flex-wrap.gap-2 {
+      justify-content: flex-start;
+    }
+  
+    .form-control-sm {
+      width: 100%;
+    }
+  }
+  
+  /* Fix alignment issues with validation messages */
+  .modal-body .row .col {
+    position: relative;
+    min-height: 85px; /* Đủ không gian cho input và thông báo lỗi */
+  }
+  
+  .modal-body .form-control,
+  .modal-body .ng-select {
+    margin-bottom: 0;
+  }
+  
+  .modal-body .invalid-feedback {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    margin-top: 0;
+  }
+  
+  /* Ensure consistent spacing between rows */
+  .modal-body .row.mb-3 {
+    margin-bottom: 1rem !important;
+    position: relative;
+  }
+  
+  /* Adjust input groups to maintain alignment */
+  .modal-body .form-label {
+    margin-bottom: 0.5rem;
+  }
+  
+  .modal-body .input-group {
+    margin-bottom: 0;
+  }
+  
+  /* Ensure form groups have consistent height */
+  .modal-body .form-group {
+    min-height: 85px;
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  
+  /* Căn chỉnh vị trí text trong ng-select */
+  ::ng-deep .ng-select .ng-select-container .ng-value-container {
+    padding-top: 0 !important;
+    padding-left: 10px !important;
+    align-items: center !important;
+  }
+  
+  /* Căn chỉnh placeholder */
+  ::ng-deep .ng-select .ng-select-container .ng-placeholder {
+    line-height: 35px !important;
+  }
+  
+  /* Đảm bảo input và ng-select có cùng font-size */
+  .form-control,
+  ::ng-deep .ng-select .ng-select-container {
+    font-size: 13px !important;
+  }
+  
+  /* Đảm bảo chiều cao đồng nhất cho tất cả form controls */
+  .form-control,
+  ::ng-deep .ng-select,
+  ::ng-deep .ng-select .ng-select-container,
+  .btn {
+    height: 35px !important;
+    min-height: 35px !important;
+    line-height: normal !important;
+  }
+  
+  /* Căn chỉnh nội dung bên trong ng-select */
+  ::ng-deep .ng-select .ng-value {
+    line-height: 35px !important;
+  }
+  
+  /* Đảm bảo dropdown arrow đúng vị trí */
+  ::ng-deep .ng-select .ng-select-container::after {
+    top: 50% !important;
+  }
+  .d-flex.gap-2.align-items-center{
+    height: 50px !important;
+  }
+  
+  /* Button section styles */
+  .button-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    padding: 10px;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  
+  .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .vr {
+    height: 20px;
+    margin: 0 8px;
+    display: none;
+  }
+  
+  /* Button styles */
+  .btn {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    height: 31px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    margin-right: 0.5rem;
+  }
+  
+  .btn:last-child {
+    margin-right: 0;
+  }
+  
+  .btn i {
+    margin-right: 5px;
+  }
+  
+  /* Search input styles */
+  .input-group {
+    width: 250px;
+  }
+  
+  /* Table container styles */
+  .table-container {
+    background: #fff;
+    border-radius: 4px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Responsive styles */
+  @media (min-width: 768px) {
+    .vr {
+      display: block;
+    }
+    
+    .button-group {
+      flex-wrap: nowrap;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .button-section {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .button-group {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  
+    .btn {
+      flex: 1;
+      min-width: auto;
+    }
+  
+    .input-group {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .btn {
+      padding: 0.4rem 0.8rem;
+      font-size: 12px;
+    }
+  
+    .button-group {
+      gap: 4px;
+    }
+  }
+  
+  /* Button hover effects */
+  .btn-outline-primary:hover,
+  .btn-outline-secondary:hover,
+  .btn-outline-success:hover,
+  .btn-outline-danger:hover,
+  .btn-outline-warning:hover,
+  .btn-outline-info:hover {
+    color: white;
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: #0d6efd;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #6c757d;
+  }
+  
+  .btn-outline-success:hover {
+    background-color: #198754;
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: #dc3545;
+  }
+  
+  .btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: #000;
+  }
+  
+  .btn-outline-info:hover {
+    background-color: #0dcaf0;
+  }
+  

@@ -86,8 +86,7 @@
 
       <!-- Excel import/export group -->
       <div class="button-group">
-        <button class="btn btn-outline-success"
-          >
+        <button class="btn btn-outline-success" (click)="exportToExcel()">
           <i class="fa-solid fa-file-excel"></i> Xuất Excel
         </button>
       </div>
@@ -100,17 +99,17 @@
                 <li class="nav-item" role="presentation">
                     <a class="nav-link active" id="tab-oneAA" data-bs-toggle="tab"
                         href="#oneAA" role="tab" aria-controls="oneAA"
-                        aria-selected="true">Hành chính nhân sự IT</a>
+                        aria-selected="true" (click)="setCheckModeExcel(0)">Hành chính nhân sự IT</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" id="tab-twoAA" data-bs-toggle="tab"
                         href="#twoAA" role="tab" aria-controls="twoAA"
-                        aria-selected="false">Cắt phim</a>
+                        aria-selected="false" (click)="setCheckModeExcel(1)">Cắt phim</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" id="tab-threeAA" data-bs-toggle="tab"
                         href="#threeAA" role="tab" aria-controls="threeAA"
-                        aria-selected="false">Lái xe</a>
+                        aria-selected="false" (click)="setCheckModeExcel(2)">Lái xe</a>
                 </li>
             </ul>
             <div class="tab-content" id="customTabContent3">

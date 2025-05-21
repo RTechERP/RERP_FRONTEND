@@ -4,7 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DailyreportService } from './dailyreport-service/dailyreport.service';
+import * as XLSX from 'xlsx';
+(window as any).XLSX = XLSX;
 import { Tabulator } from 'tabulator-tables';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-dailyreport',
@@ -31,6 +34,7 @@ export class DailyreportComponent implements OnInit {
   dataTable1: any[] = [];
   dataTable2: any[] = [];
   dataTable3: any[] = [];
+  ischeckmodeExcel: number = 0;
 
   dataEmployees: any[] = [];
 
@@ -163,7 +167,7 @@ export class DailyreportComponent implements OnInit {
       this.table2 = new Tabulator("#table_dailyreportCP", {
         data: this.dataTable2,
         layout: "fitDataFill",
-        height: '50vh',
+        height: '70vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,
@@ -203,7 +207,29 @@ export class DailyreportComponent implements OnInit {
       });
     }
   }
+  setCheckModeExcel(mode: number): void{
+    this.ischeckmodeExcel = mode;
+  }
 
+  exportToExcel() {
+    const now = new Date();
+    const dateStr = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+    
+    if(this.ischeckmodeExcel == 0 && this.table1){
+      this.table1.download('xlsx', `BaoCaoHCNSIT_${dateStr}.xlsx`, { sheetName: 'Báo cáo HCNS-IT' });
+    } else if (this.ischeckmodeExcel == 1 && this.table2) {
+      this.table2.download('xlsx', `BaoCaoCP_${dateStr}.xlsx`, { sheetName: 'Báo cáo cắt phim' });
+    } else if (this.ischeckmodeExcel == 2 && this.table3) {
+      this.table3.download('xlsx', `BaoCaoLX_${dateStr}.xlsx`, { sheetName: 'Báo cáo lái xe' });
+    } else {
+      console.warn('Bảng chưa được khởi tạo');
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Bảng chưa được khởi tạo!',
+      });
+    }
+  }
   search(): void {
     this.ngOnInit();
   }
@@ -216,7 +242,7 @@ export class DailyreportComponent implements OnInit {
       this.table3 = new Tabulator("#table_dailyreportLX", {
         data: this.dataTable3,
         layout: "fitDataFill",
-        height: '50vh',
+        height: '70vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,
