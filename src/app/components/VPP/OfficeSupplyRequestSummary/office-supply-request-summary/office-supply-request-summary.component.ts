@@ -131,7 +131,6 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
                   width: 150,
                   resizable: true,
                   variableHeight: true,
-                  headerFilter:"input"
                 },
               ]
             },
@@ -140,7 +139,7 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
               columns: [
                 { title: "Ban giám đốc", field: "GD", hozAlign: "right", width: 65, resizable: true, sorter:"number",headerFilterParams:{"tristate":true},
                   bottomCalc:"sum", bottomCalcFormatter: quantityFormatter, formatter: quantityFormatter },
-                { title: "HCNS", field: "HR", hozAlign: "right", width: 60, resizable: true,
+                { title: "HCNS", field: "HR", hozAlign: "right", width: 60, resizable: true, 
                   bottomCalc:"sum", bottomCalcFormatter: quantityFormatter, formatter: quantityFormatter },
                 { title: "Kế toán", field: "KT", hozAlign: "right", width: 60, resizable: true,
                   bottomCalc:"sum", bottomCalcFormatter: quantityFormatter, formatter: quantityFormatter },

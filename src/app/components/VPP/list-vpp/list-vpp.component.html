@@ -109,7 +109,7 @@
               </div>
               <div class="col md-6">
                 <label for="Price" class="form-label">Giá sản phẩm<sup style="color: red;">(*)</sup></label>
-                <input style="text-align: right;" type="number" min="1" class="form-control" [(ngModel)]="newProduct.Price"
+                <input style="text-align: right;" type="number" min="1000" class="form-control" [(ngModel)]="newProduct.Price"
                   placeholder="Nhập giá" name="Price" required>
                 <div class="invalid-feedback">
                   Vui lòng nhập giá sản phẩm!
@@ -119,7 +119,7 @@
             <div class="row mb-3">
               <div class="col md-6">
                 <label for="RequestLimit" class="form-label">Định mức</label>
-                <input type="number" style="text-align: right;" class="form-control"
+                <input type="number" style="text-align: right;" class="form-control" min="1"
                   [(ngModel)]="newProduct.RequestLimit" placeholder="" name="RequestLimit" required>
               </div>
               <div class="col md-6">

@@ -98,6 +98,7 @@ export class ListVPPComponent implements OnInit {
         data: this.dataTable,
         layout: 'fitDataFill',
         height: '70vh',
+        selectableRows: 10,
         pagination: true,
         paginationSize: 50,
         movableColumns: true,
@@ -169,7 +170,7 @@ export class ListVPPComponent implements OnInit {
   }
 
   add(): void {
-    if (!this.newProduct.CodeNCC || !this.newProduct.NameNCC || !this.newProduct.Price || !this.newProduct.RequestLimit || !this.newProduct.SupplyUnitID) {
+    if (!this.newProduct.CodeNCC || !this.newProduct.NameNCC || !this.newProduct.Price || !this.newProduct.SupplyUnitID) {
           Swal.fire({
             icon: 'error',
             title: 'Thông báo',
@@ -264,7 +265,7 @@ export class ListVPPComponent implements OnInit {
 
   //cập nhật
   update(): void {
-    if (!this.newProduct.CodeNCC || !this.newProduct.NameNCC || !this.newProduct.Price || !this.newProduct.RequestLimit || !this.newProduct.SupplyUnitID) {
+    if (!this.newProduct.CodeNCC || !this.newProduct.NameNCC || !this.newProduct.Price || !this.newProduct.SupplyUnitID) {
       Swal.fire({
         icon: 'error',
         title: 'Thông báo',
