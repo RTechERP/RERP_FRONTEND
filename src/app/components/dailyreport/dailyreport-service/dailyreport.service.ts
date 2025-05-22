@@ -28,7 +28,7 @@ export class DailyreportService {
   }
 
   getDailyReportFilmAndDriver(dateStart: Date, dateEnd: Date, keyword: string, employeeId: number): Observable<any> {
-    return this.http.get(`https://localhost:44365/api/DailyReport/GetdataFilmAndDriver`,{
+    return this.http.get(`https://localhost:7187/api/DailyReport/GetdataFilmAndDriver`,{
       params: {
         dateStart: dateStart.toISOString(),
         dateEnd: dateEnd.toISOString(),

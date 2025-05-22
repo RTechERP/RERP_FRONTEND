@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class OfficeSupplyRequestSummaryServiceService {
 
-  private baseUrl = 'https://localhost:44365/api/OfficeSupplyRequestSummary';
+  private baseUrl = 'https://localhost:7187/api/OfficeSupplyRequestSummary';
 
   constructor(private httpclient: HttpClient) { }
 
