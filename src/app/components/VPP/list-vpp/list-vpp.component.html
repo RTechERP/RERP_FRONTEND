@@ -93,9 +93,9 @@
             <div class="row mb-3">
               <div class="col md-6">
                 <label for="SupplyUnitID" class="form-label">Đơn vị tính <sup style="color: red;">(*)</sup></label>
-                <div class="d-flex gap-2 align-items-center" style="height: 40x;">
+                <div class="d-flex gap-2 align-items-center">
                   <ng-select [items]="listUnit" bindLabel="Name" bindValue="ID" [(ngModel)]="newProduct.SupplyUnitID"
-                    name="SupplyUnitID" placeholder="Chọn đơn vị" class="flex-grow-1" required>
+                    name="SupplyUnitID" placeholder="Chọn đơn vị" class="flex-grow-1" required >
                   </ng-select>
                   <button type="button" class="btn btn-outline-primary d-flex align-items-center justify-content-center"
                     style="width: 31px; height: 31px; padding: 0;" data-bs-toggle="modal"

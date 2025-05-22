@@ -63,27 +63,46 @@ export class DailyreportComponent implements OnInit {
   }
 
   //Bao cao HCNS-IT
-  getDailyReportHCNSIT(): void{
-    const dateStart = new Date(this.searchParams.dateStart);
-    const dateEnd = new Date(this.searchParams.dateEnd);
- 
-    this.dailyreportService.getDailyReportHCNSIT(this.departmentId, dateStart, dateEnd, this.searchParams.userID, this.searchParams.keyword).subscribe({
-      next: (res) => {
-        console.log('Báo cáo HCNS-IT:', res);
-        if(res?.data){
-          this.dataTable1 = Array.isArray(res.data) ? res.data : [res.data];
-          this.drawTable1();
-        }else{
+  getDailyReportHCNSIT(): void {
+    try {
+      const dateStart = this.searchParams.dateStart ? new Date(this.searchParams.dateStart) : new Date();
+      const dateEnd = this.searchParams.dateEnd ? new Date(this.searchParams.dateEnd) : new Date();
+      const departmentId = this.departmentId || 0;
+      const userId = this.searchParams.userID || 0;
+      const keyword = this.searchParams.keyword || '';
+
+      this.dailyreportService.getDailyReportHCNSIT(departmentId, dateStart, dateEnd, userId, keyword).subscribe({
+        next: (res) => {
+          console.log('Báo cáo HCNS-IT:', res);
+          if(res?.data){
+            this.dataTable1 = Array.isArray(res.data) ? res.data : [res.data];
+            this.drawTable1();
+          }else{
+            this.dataTable1 = [];
+            this.drawTable1();
+          }
+        },
+        error: (err) => {
+          console.error('Lỗi khi lấy báo cáo HCNS-IT:', err);
           this.dataTable1 = [];
           this.drawTable1();
+          Swal.fire({
+            icon: 'error',
+            title: 'Lỗi',
+            text: 'Không thể lấy dữ liệu báo cáo. Vui lòng thử lại sau.'
+          });
         }
-      },
-      error: (err) => {
-        console.error('Lỗi khi lấy báo cáo HCNS-IT:', err);
-        this.dataTable1 = [];
-        this.drawTable1();
-      }
-    });
+      });
+    } catch (error) {
+      console.error('Lỗi khi xử lý dữ liệu:', error);
+      this.dataTable1 = [];
+      this.drawTable1();
+      Swal.fire({
+        icon: 'error',
+        title: 'Lỗi',
+        text: 'Có lỗi xảy ra khi xử lý dữ liệu. Vui lòng thử lại sau.'
+      });
+    }
   }
 
   private drawTable1(): void{
@@ -185,14 +204,14 @@ export class DailyreportComponent implements OnInit {
             const year = date.getFullYear();
             return `${day}-${month}-${year}`;
           }},
-          {title: "Đầu mục", field: "FilmName",hozAlign: "center"},
-          {title: "Nọi dung công việc", field: "WorkContent",hozAlign: "left"},
-          {title: "ĐVT", field: "UnitName",hozAlign: "left"},
-          {title: "Năng suất trung bình(phút/đơn vị sản phẩm)", field: "PerformanceAVG",hozAlign: "left"},
-          {title: "Kế quả thực hiện", field: "Quantity",hozAlign: "left"},
-          {title: "Thời gian thực hiện (Phút)", field: "TimeActual",hozAlign: "left"},
-          {title: "Năng suất thực tế (Phút/đơn vị sản phẩm)", field: "PerformanceActual",hozAlign: "left"},
-          {title: "Năng suất trung bình/ Năng suất thực tế", field: "Percentage",hozAlign: "left"},         
+          {title: "Đầu mục", field: "FilmName",hozAlign: "left"},
+          {title: "Nội dung công việc", field: "WorkContent",hozAlign: "right"},
+          {title: "ĐVT", field: "UnitName",hozAlign: "right"},
+          {title: "Năng suất trung bình(phút/đơn vị sản phẩm)", field: "PerformanceAVG",hozAlign: "right"},
+          {title: "Kế quả thực hiện", field: "Quantity",hozAlign: "right"},
+          {title: "Thời gian thực hiện (Phút)", field: "TimeActual",hozAlign: "right"},
+          {title: "Năng suất thực tế (Phút/đơn vị sản phẩm)", field: "PerformanceActual",hozAlign: "right"},
+          {title: "Năng suất trung bình/ Năng suất thực tế", field: "Percentage",hozAlign: "right"},         
           {title: "Ngày tạo", field: "CreatedDate",hozAlign: "center", 
             formatter: (cell) => {
             const value = cell.getValue();

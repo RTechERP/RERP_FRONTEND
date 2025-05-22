@@ -16,15 +16,15 @@ export class DailyreportService {
     return this.http.get(`${this.apiUrl}/dailyreport/GetdataEmployee?departmentId=${departmentId}&projectId=${projectId}`);
   }
   getDailyReportHCNSIT(departmentId: number, dateStart: Date, dateEnd: Date, userId: number, keyword: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/dailyreport/GetDailyReportTechnical`,{
-      params: {
-        departmentId: departmentId.toString(),
-        dateStart: dateStart.toISOString(),
-        dateEnd: dateEnd.toISOString(),
-        userId: userId.toString(),    
-        keyword: keyword.trim()
-      }
-    });
+    const params: any = {
+      departmentId: departmentId?.toString() || '0',
+      dateStart: dateStart?.toISOString() || new Date().toISOString(),
+      dateEnd: dateEnd?.toISOString() || new Date().toISOString(),
+      userId: userId?.toString() || '0',
+      keyword: keyword?.trim() || ''
+    };
+    
+    return this.http.get(`${this.apiUrl}/dailyreport/GetDailyReportTechnical`, { params });
   }
 
   getDailyReportFilmAndDriver(dateStart: Date, dateEnd: Date, keyword: string, employeeId: number): Observable<any> {

@@ -179,6 +179,7 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
                   formatterParams: moneyFormatterParams,
                   bottomCalcFormatterParams: moneyFormatterParams
                 },
+                
                 { 
                   title: "Thành tiền (VND)", 
                   field: "TotalPrice", 
