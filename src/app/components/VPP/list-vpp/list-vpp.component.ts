@@ -70,10 +70,7 @@ export class ListVPPComponent implements OnInit {
 
 
   constructor(private lstVPP: ListVPPService) { }
-  generateCodeRTC(): string {
-    const randomNum = Math.floor(1000 + Math.random() * 9000); // Sinh số ngẫu nhiên từ 1000 đến 9999
-    return 'VPP' + randomNum;
-  }
+
   ngOnInit(): void {
     this.drawTable();
     this.getAll();
@@ -351,17 +348,38 @@ export class ListVPPComponent implements OnInit {
   }
   openModalForNewProduct() {
     this.isCheckmode = false;
-    this.newProduct = {
-      CodeRTC: this.generateCodeRTC(),
-      CodeNCC: '',
-      NameRTC: '',
-      NameNCC: '',
-      Price: 0,
-      SupplyUnitID: 0,
-      RequestLimit: 0,
-      Type: 2,
-    };
-    this.openModal();
+  
+    // Gọi API để lấy mã CodeRTC mới
+    this.lstVPP.nextCodeRTC().subscribe({
+      next: (res) => {
+        console.log('Response từ nextCodeRTC:', res);
+        this.newProduct = {
+          CodeRTC: res,
+          CodeNCC: '',
+          NameRTC: '',
+          NameNCC: '',
+          Price: 0,
+          SupplyUnitID: 0,
+          RequestLimit: 0,
+          Type: 2,
+        };
+        this.openModal();
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy CodeRTC:', err);
+        this.newProduct = {
+          CodeRTC: 'VPP-TAM',
+          CodeNCC: '',
+          NameRTC: '',
+          NameNCC: '',
+          Price: 0,
+          SupplyUnitID: 0,
+          RequestLimit: 0,
+          Type: 2,
+        };
+        this.openModal();
+      }
+    });
   }
   openModalForUpdateProduct() {
     var dataSelect = this.table.getSelectedData();

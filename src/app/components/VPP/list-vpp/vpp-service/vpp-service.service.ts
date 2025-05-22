@@ -41,4 +41,7 @@ export class ListVPPService {
   searchdata(id: number): Observable<any> {
     return this.httpclient.get(`${this.baseUrl}/${id}`);
   }
+  nextCodeRTC(): Observable<any>{
+    return this.httpclient.get<any>(`${this.baseUrl}/next-codeRTC`, { responseType: 'text' as 'json' });
+  }
 }
