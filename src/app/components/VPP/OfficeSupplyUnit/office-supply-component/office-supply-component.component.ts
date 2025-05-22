@@ -8,7 +8,7 @@ import { RowComponent } from 'tabulator-tables';
 import { OfficeSupplyUnitServiceService } from '../OSU-service/office-supply-unit-service.service'
 import Swal from 'sweetalert2';
 import * as bootstrap from 'bootstrap';
-@Component({ 
+@Component({
   selector: 'app-office-supply-component',
   standalone: true,
   imports: [CommonModule, FormsModule, NgSelectModule,],
@@ -41,18 +41,18 @@ export class OfficeSupplyComponentComponent implements OnInit {
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
-      
+
         columns: [
-          { 
+          {
             title: "",
-            formatter: "rowSelection", 
+            formatter: "rowSelection",
             titleFormatter: "rowSelection",
             hozAlign: "center",
             headerHozAlign: "center",
             headerSort: false,
             width: 40,
             frozen: true,
-            
+
           },
           {
             title: 'Mã đơn vị',
@@ -93,7 +93,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
           this.selectedItem = {
             ID: data.ID || '',
             Name: data.Name || '',
-           };
+          };
         } else {
           console.warn('Không có dữ liệu để fill');
           console.log('Giá trị data:', data);
@@ -137,6 +137,61 @@ export class OfficeSupplyComponentComponent implements OnInit {
       }
     });
   }
+  deleteUnit() {
+    var dataSelect = this.table.getSelectedData();
+    dataSelect.forEach((row: any) => {
+      if (!this.selectedList.some(item => item.ID === row.ID)) {
+        this.selectedList.push(row);
+      }
+    });
+    const ids = this.selectedList.map(item => item.ID);
+    if (ids.length == 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        text: 'Vui lòng chọn ít nhất 1 sản phẩm để xóa!',
+        showConfirmButton: true,
+        timer: 1500
+      });
+      return;
+    }
+    else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Thông báo',
+        text: 'Bạn có chắc chắn muốn xóa không?',
+        showConfirmButton: true,
+        showCancelButton: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.OSU.deletedata(ids).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Thông báo',
+                text: 'Đã xóa thành công!',
+                showConfirmButton: true,
+                timer: 1500
+              });
+              this.get();
+              this.selectedList = [];
+            },
+            error: (err: any) => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Thông báo',
+                text: 'Có lỗi xảy ra khi xóa dữ liệu!',
+                showConfirmButton: true,
+                timer: 1500
+              });
+            }
+          });
+        }
+      });
+    }
+  }
+
+
   openUnitModal() {
     const modalEl = document.getElementById('addUnitModal');
     if (modalEl) {
@@ -156,8 +211,8 @@ export class OfficeSupplyComponentComponent implements OnInit {
         this.selectedList.push(row);
       }
     });
-    const ids= this.selectedList.map(item => item.ID);
-    
+    const ids = this.selectedList.map(item => item.ID);
+
     if (this.selectedList.length == 0) {
       Swal.fire({
         icon: 'warning',
@@ -166,7 +221,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
         showConfirmButton: true,
         timer: 1500
       });
-      this.selectedList=[];
+      this.selectedList = [];
       return;
     } else if (this.selectedList.length > 1) {
       Swal.fire({
@@ -176,7 +231,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
         showConfirmButton: true,
         timer: 1500
       });
-      this.selectedList=[];
+      this.selectedList = [];
       return;
     } else {
       this.getdatabyid(this.selectedList[0].ID);
@@ -214,4 +269,5 @@ export class OfficeSupplyComponentComponent implements OnInit {
   }
 
 }
+
 

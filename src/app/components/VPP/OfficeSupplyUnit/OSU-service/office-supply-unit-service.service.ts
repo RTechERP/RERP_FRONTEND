@@ -16,4 +16,7 @@ export class OfficeSupplyUnitServiceService {
    getdatafill(id:number):Observable<any>{
     return this.httpclient.get('https://localhost:7187/api/OfficeSupplies/getbyid?id='+id);
    }
+   deletedata(id:number[]):Observable<any>{
+    return this.httpclient.post('https://localhost:7187/api/OfficeSupplies/deleteOfficeSupplyUnit', id);
+   }
 }
