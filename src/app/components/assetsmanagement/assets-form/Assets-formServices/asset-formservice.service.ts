@@ -13,6 +13,7 @@ export class EmployeeService {
  urlAssetManagement = 'http://localhost:5207/api/Assets/getallassetsmanagement';
  urladdunit = 'http://localhost:5207/api/Unit/savedata';
 urlgetemployeetoadd='http://localhost:5207/api/Employee/get-all-with-details';
+urladdTassetCode='http://localhost:5207/api/Assets/generate-allocation-code-asset';
 urlgetCode='http://localhost:5207/api/Assets/generate-allocation-code';
 urlpostassetallocation='http://localhost:5207/api/Assets/SaveAllocation';
 constructor(private httpclient: HttpClient) { }
@@ -48,5 +49,11 @@ getTSCPCode(allocationDate: string): Observable<string> {
   const params = new HttpParams().set('allocationDate', allocationDate);
   return this.httpclient.get(this.urlgetCode, { params, responseType: 'text' });
 }
-
+getTassetCode(assetdate: string): Observable<string> {
+  const params = new HttpParams().set('assetdate', assetdate);
+  return this.httpclient.get(this.urladdTassetCode, { params, responseType: 'text' });
+}
+updateAssetAllocation(payload: any): Observable<any> {
+    return this.httpclient.post(this.urlpostassetallocation, payload);
+  }
 }

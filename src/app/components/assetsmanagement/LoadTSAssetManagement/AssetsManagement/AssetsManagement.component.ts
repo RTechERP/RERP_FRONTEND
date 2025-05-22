@@ -5,15 +5,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DepartmentServiceService } from '../../../Department/DepartmentService.service';
 import * as XLSX from 'xlsx';
-(window as any).XLSX = XLSX; 
+(window as any).XLSX = XLSX;
 import { NgSelectModule } from '@ng-select/ng-select';
 import { AssetStatusService } from '../../AssetStatus/AssetStatusService/AssetStatus.service';
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
-import 'tabulator-tables/dist/css/tabulator.min.css'; 
+import 'tabulator-tables/dist/css/tabulator.min.css';
 import { Router } from '@angular/router';
 import { AssetModalComponent } from '../../assets-form/assets-form.component';
 import { EmployeeService } from '../../assets-form/Assets-formServices/asset-formservice.service';
 import { data } from 'jquery';
+import Swal from 'sweetalert2';
+import { AssetManagementServiceService } from '../../BorrowAssets/AssetManagementHistory/AssetManagementHistoryService/AssetManagementService.service';
 @Component({
   selector: 'app-assetsmanagement',
   standalone: true,
@@ -93,7 +95,12 @@ export class AssetsManagementComponent implements OnInit {
   handleSave(asset: any) {
     this.assetsService.saveAssets(asset).subscribe({
       next: () => {
-        alert('Lưu thành công!');
+        Swal.fire({
+          title: "Thành công!",
+          text: "Lưu thành công!",
+          icon: "success"
+        });
+
         this.getAll();
       },
       error: err => {
@@ -107,7 +114,12 @@ export class AssetsManagementComponent implements OnInit {
 
     this.assetsService.baoHongTaiSan(baoHongData).subscribe({
       next: () => {
-        alert('Báo hỏng thành công!');
+         Swal.fire({
+          title: "Thành công!",
+          text: "Báo hỏng thành công!",
+          icon: "success"
+        });
+
       },
       error: (err) => {
         console.error(err);
@@ -119,7 +131,12 @@ export class AssetsManagementComponent implements OnInit {
     console.log('Dữ liệu gửi lên API:', baomatdata);
     this.assetsService.baoMatTaiSan(baomatdata).subscribe({
       next: () => {
-        alert('Báo mất thành công')
+           Swal.fire({
+          title: "Thành công!",
+          text: "Báo mất thành công!",
+          icon: "success"
+        });
+
       },
       error: (err) => {
         console.error(err);
@@ -275,6 +292,7 @@ export class AssetsManagementComponent implements OnInit {
 
     }
   }
+    
   private drawEmployeeTable(): void {
     const cols: ColumnDefinition[] = [
       {
@@ -396,30 +414,39 @@ export class AssetsManagementComponent implements OnInit {
     const asset = selectedRows[0].getData();
     this.openModal('edit', asset);
   }
+    getSelectedIds(): number[] {
+  if (this.table) {
+    const selectedRows = this.table.getSelectedData();
+    return selectedRows.map((row: any) => row.ID);
+  }
+  return [];
+}
   onDeleteClick() {
     if (!this.table) {
       alert('Vui lòng tải lại trang!');
       return;
     }
-    const selectedRows = this.table.getSelectedRows();
-    if (selectedRows.length === 0) {
+     const ids = this.getSelectedIds();
+    if (ids.length === 0) {
       alert('Vui lòng chọn ít nhất một hàng để xóa!');
       return;
     }
-    const asset = selectedRows[0].getData();
-    const id = asset['ID'];
-    if (confirm(`Bạn có chắc chắn muốn xóa tài sản có ID = ${id}?`)) {
-      this.assetsService.deleteAsset(id).subscribe({
-        next: () => {
-          alert('Xóa thành công!');
-          this.getAll(); // Reload danh sách
-        },
-        error: err => {
-          console.error('Lỗi khi xóa:', err);
-          alert('Xóa thất bại!');
-        }
-      });
-    }
+ 
+   this.assetsService.DeleteAssetManagement(ids).subscribe({
+    next: res => {
+   Swal.fire({
+  icon: 'success',
+  title: 'Thành công!',
+  text: 'Dữ liệu đã được lưu.',
+  timer: 2000,
+  showConfirmButton: false
+});
+
+      this.getAll(); // Reload lại table
+    },
+    error: err => alert('Lỗi duyệt HR: ' + err.message)
+  });
+    
   }
   clearAllFilters(): void {
     if (this.table) {

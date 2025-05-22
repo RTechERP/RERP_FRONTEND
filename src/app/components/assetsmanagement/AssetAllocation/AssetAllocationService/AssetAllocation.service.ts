@@ -6,7 +6,11 @@ import { Observable } from 'rxjs';
 export class AssetAllocationService {
   private urlMaster = 'http://localhost:5207/api/Assets/getTSAssestAllocation';
   private urlDetail = 'http://localhost:5207/api/Assets/getassetsallocationdetail';
-
+urlHrApprove='http://localhost:5207/api/Assets/HRApproved';
+urlHrCancelApprove='http://localhost:5207/api/Assets/HRCancelApproved ';
+urAccountantApprove='http://localhost:5207/api/Assets/AccountantApproved';
+urlAccountCancelApprove='http://localhost:5207/api/Assets/AccountantCancelApproved';
+urlDeleteAllocation='http://localhost:5207/api/Assets/deleteAssetAllocation';
   constructor(private http: HttpClient) {}
 
   getAssetsManagement(
@@ -33,5 +37,25 @@ export class AssetAllocationService {
   getAssetAllocationDetail(id: number): Observable<any> {
     const url = `${this.urlDetail}?id=${id}`;
     return this.http.get<any>(url);
+  }
+  HrApprove(ids:number[]):Observable<any>
+  {
+    return this.http.post<any>(this.urlHrApprove,ids);
+  }
+   HrCancelApprove(ids:number[]):Observable<any>
+  {
+    return this.http.post<any>(this.urlHrCancelApprove,ids);
+  }
+   AccountantApprove(ids:number[]):Observable<any>
+  {
+    return this.http.post<any>(this.urAccountantApprove,ids);
+  }
+   AccountantCancelApprove(ids:number[]):Observable<any>
+  {
+    return this.http.post<any>(this.urlAccountCancelApprove,ids);
+  }
+  DeleteAllocation(ids:number[]):Observable<any>
+  {
+    return this.http.post<any>(this.urlDeleteAllocation,ids);
   }
 }

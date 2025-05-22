@@ -11,6 +11,8 @@ import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowCompone
 import 'tabulator-tables/dist/css/tabulator.min.css'; //import Tabulator stylesheet 
 import { AssetsManagementService } from '../LoadTSAssetManagement/AssetsManagement/AssetsManagementService.service';
 declare var bootstrap: any;
+import Swal from 'sweetalert2';
+
 
 @Component({
   selector: 'app-asset-modal',
@@ -20,7 +22,9 @@ declare var bootstrap: any;
 })
 export class AssetModalComponent implements AfterViewInit {
   @ViewChild('table', { static: false }) tableRef!: ElementRef;
-
+  isEditMode: boolean = false; // Flag to track edit mode
+  allocationId: number | null = null; // Store ID of allocation being edited
+  @Output() allocationSaved = new EventEmitter<void>();
   @Input() modalTitle = 'Thêm tài sản';
   @Input() selectedAsset: any = {};
   @Output() saveBaoHongEvent = new EventEmitter<any>();
@@ -29,7 +33,9 @@ export class AssetModalComponent implements AfterViewInit {
   @Output() saveAsset = new EventEmitter<any>();
   department: any[] = [];
   allocationDate: string = '';
+   assetdate: string = '';
   generatedCode: string = '';
+  generateTSAssetCode:string='';
   assets: any[] = [];
   typeAssets: any[] = [];
   unit: any[] = [];
@@ -74,8 +80,7 @@ export class AssetModalComponent implements AfterViewInit {
       this.unit = data.data;
     });
     this.employeeService.getEmployeetoadd().subscribe((data: any) => {
-      this.emplylist = data.data;
-      console.log(data);
+      this.emplylist = data.data[0]; // vì data.data là mảng chứa mảng
     });
 
     this.employeeService.getMaxAssetId().subscribe((res: any) => {
@@ -83,7 +88,7 @@ export class AssetModalComponent implements AfterViewInit {
       this.selectedAsset.STT = this.maxAssetId + 1;
     });
     this.employeeService.getEmployee().subscribe((data: any) => {
-
+ 
       this.employee = data.data;
     });
     this.assetsService.getAssets().subscribe((data: any) => {
@@ -96,18 +101,46 @@ export class AssetModalComponent implements AfterViewInit {
       this.department = data.data;
     });
     this.generateCode();
+this.employeeService.getEmployee().subscribe((data: any) => {
+  if (!this.assetdate) {
+    const today = new Date();
+    this.assetdate = today.toISOString().split('T')[0];
   }
-  save() {
+  this.employee = data.data;
+  this.generateTSAssetCodde();
+});
+  }
+save() {
+  // Set the TSAssetCode
+  this.selectedAsset.TSAssetCode = this.generateTSAssetCode;
+
+  // Set the CreatedDate to the current date and time
+  const currentDate = new Date().toISOString(); // e.g., "2025-05-22T03:16:00.000Z"
+  this.selectedAsset.CreatedDate = currentDate;
+  this.selectedAsset.CreatedBy='AdminSW';
+  this.selectedAsset.UpdatedDate=currentDate;
+  this.selectedAsset.UpdatedBy='AdminSW';
+  this.selectedAsset.DepartmentID=0;
+
+  // Fetch the max asset ID and set STT
+  this.employeeService.getMaxAssetId().subscribe((res: any) => {
+    this.maxAssetId = res.data;
+    this.selectedAsset.STT = this.maxAssetId + 1;
+
+    // Log the data for debugging
     console.log('Dữ liệu modal:', this.selectedAsset);
+
+    // Emit the selectedAsset with CreatedDate included
     this.saveAsset.emit(this.selectedAsset);
-    this.employeeService.getMaxAssetId().subscribe((res: any) => {
-      this.maxAssetId = res.data; // OK vì res.data là number
-      this.selectedAsset.STT = this.maxAssetId + 1;
-    });
+
+    // Close the modal
     this.hide();
-  }
+  });
+}
   onEmployeeSelect(employeeID: number) {
     const emp = this.emplylist.find(e => e.ID === employeeID);
+    console.log('employeeID truyền vào:', employeeID);
+    console.log('Danh sách emplylist:', this.emplylist);
     if (emp) {
       this.selectedDepartmentName = emp.DepartmentName || '';
       this.selectedPositionName = emp.PositionName || '';
@@ -117,6 +150,7 @@ export class AssetModalComponent implements AfterViewInit {
       this.selectedDepartmentName = '';
       this.selectedPositionName = '';
     }
+
   }
   generateCode(): void {
     if (!this.allocationDate) return;
@@ -124,7 +158,19 @@ export class AssetModalComponent implements AfterViewInit {
     this.employeeService.getTSCPCode(this.allocationDate).subscribe({
       next: (code: string) => {
         this.generatedCode = code;
-        console.log('Mã cấp phát:', code);
+
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy mã cấp phát:', err);
+      }
+    });
+  }
+    generateTSAssetCodde(): void {
+    if (!this.assetdate) return;
+    this.employeeService.getTassetCode(this.assetdate).subscribe({
+      next: (code: string) => {
+        this.generateTSAssetCode = code;
+        console.log('Mã cấp phát',code);
       },
       error: (err) => {
         console.error('Lỗi khi lấy mã cấp phát:', err);
@@ -173,7 +219,7 @@ export class AssetModalComponent implements AfterViewInit {
             },
 
             { title: 'STT', field: 'STT', hozAlign: 'center', width: 70, headerFilter: true },
-                  { title: 'ID', field: 'ID', hozAlign: 'center', width: 70 ,visible:false},
+            { title: 'ID', field: 'ID', hozAlign: 'center', width: 70, visible: false },
             { title: 'Mã tài sản', field: 'TSAssetCode', headerFilter: true },
 
             { title: 'Tên tài sản', field: 'TSAssetName', headerFilter: true },
@@ -270,7 +316,7 @@ export class AssetModalComponent implements AfterViewInit {
           headerSort: false,
           width: 40
         },
-                 { title: 'ID', field: 'ID', hozAlign: 'center', width: 100 ,visible:false},
+        { title: 'ID', field: 'ID', hozAlign: 'center', width: 100, visible: false },
         { title: "Mã tài sản", field: "assetCode", editor: "input", width: 150 },
         { title: "Tên tài sản", field: "assetName", editor: "input", width: 200 },
         { title: "Số lượng", field: "quantity", editor: "number", width: 100 },
@@ -288,6 +334,38 @@ export class AssetModalComponent implements AfterViewInit {
       ]
     });
   }
+  editAllocation(allocation: any): void {
+    this.isEditMode = true;
+    this.allocationId = allocation.ID;
+    this.generatedCode = allocation.Code;
+    this.allocationDate = allocation.DateAllocation.split('T')[0];
+    this.selectedAsset.EmployeeID = allocation.EmployeeID;
+    this.reportLossDescription = allocation.Note || '';
+    this.selectedDepartmentName = allocation.Department || '';
+    this.selectedPositionName = allocation.Possition || '';
+
+    // Fetch employee details to get DepartmentID
+    const emp = this.emplylist.find(e => e.ID === allocation.EmployeeID);
+    if (emp) {
+      this.selectedAsset.DepartmentID = emp.DepartmentID || 0;
+    }
+
+    // Populate asset table with allocation details, including detail ID
+    const assetRows = allocation.AssetDetails.map((detail: any) => ({
+      detailID: detail.ID, // Include detail ID
+      ID: detail.AssetManagementID,
+      assetCode: detail.TSCodeNCC,
+      assetName: detail.TSAssetName,
+      quantity: detail.Quantity,
+      note: detail.Note || ''
+    }));
+
+    if (this.assetTable) {
+      this.assetTable.setData(assetRows);
+    }
+
+    this.showCapphat();
+  }
   saveAllocation() {
     const rows = this.assetTable.getData();
     if (rows.length === 0) {
@@ -297,7 +375,6 @@ export class AssetModalComponent implements AfterViewInit {
 
     const documentNumber = this.generatedCode;
     const issueDate = this.allocationDate;
-
     if (!documentNumber || !issueDate || !this.selectedAsset.EmployeeID) {
       alert('Vui lòng điền đầy đủ thông tin cấp phát!');
       return;
@@ -314,6 +391,7 @@ export class AssetModalComponent implements AfterViewInit {
     }));
 
     const payload = {
+      ID: this.allocationId || 0, // 👈 Lấy từ biến class đã gán ở editAllocation()
       Code: documentNumber,
       DateAllocation: issueDate,
       EmployeeID: this.selectedAsset.EmployeeID,
@@ -321,22 +399,28 @@ export class AssetModalComponent implements AfterViewInit {
       Status: 0,
       AssetDetails: assetDetails
     };
-    console.log(payload);
-    this.employeeService.postassetallocation(payload).subscribe({
 
+    console.log('📦 Payload gửi API:', payload);
+
+    this.employeeService.postassetallocation(payload).subscribe({
       next: (res) => {
-        alert('✅ Lưu cấp phát thành công!');
+    Swal.fire({
+  icon: 'success',
+  title: 'Thành công!',
+  text: 'Lưu cấp phát thành công',
+  confirmButtonText: 'OK'
+});
+
         this.generatedCode = '';
-        this.allocationDate = ''; // hoặc new Date()
+        this.allocationDate = '';
         this.selectedAsset = {} as any;
         this.selectedDepartmentName = '';
         this.selectedPositionName = '';
         this.reportLossDescription = '';
         this.assetTable.clearData();
 
-        // ✅ Đóng modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('capphat'));
-        modal?.hide();;
+        modal?.hide();
       },
       error: (err) => {
         console.error('❌ Lỗi lưu cấp phát:', err);
@@ -387,7 +471,13 @@ export class AssetModalComponent implements AfterViewInit {
     };
     this.employeeService.addunitt(newUnit).subscribe({
       next: (res) => {
-        alert('Thêm đơn vị tính thành công!');
+      Swal.fire({
+  icon: 'success',
+  title: 'Thành công!',
+  text: 'Thêm đơn vị tính thành công',
+  confirmButtonText: 'OK'
+});
+
         this.employeeService.getUnit().subscribe((data: any) => {
           this.unit = data.data;
           if (res?.ID) {

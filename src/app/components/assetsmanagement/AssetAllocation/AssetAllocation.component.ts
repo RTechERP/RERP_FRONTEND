@@ -2,10 +2,14 @@ import { Component, OnInit, ViewChild, } from '@angular/core';
 import { AssetAllocationService } from './AssetAllocationService/AssetAllocation.service';
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
 import { data } from 'jquery';
+import * as XLSX from 'xlsx';
+(window as any).XLSX = XLSX; 
 import { AssetModalComponent } from '../assets-form/assets-form.component';
 import { NgModule } from '@angular/core';
 import 'tabulator-tables/dist/css/tabulator.min.css'; //import Tabulator stylesheet
 import { CommonModule } from '@angular/common';
+import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-AssetAllocation',
   standalone: true,
@@ -15,29 +19,35 @@ import { CommonModule } from '@angular/common';
 })
 export class AssetAllocationComponent implements OnInit {
   @ViewChild(AssetModalComponent) modalRef!: AssetModalComponent;
+selectedIds: number[] = [];
 
   assetallocation: any[] = [];
   employeeList: any[] = [];
-  // Các tham số lọc / phân trang
-  dateStart: string = '';       // ví dụ: '2025-05-01'
-  dateEnd: string = '';         // ví dụ: '2025-05-14'
-  employeeID: string = '0';      // chuỗi rỗng nghĩa là không lọc
-  status: string = '';          // chuỗi rỗng nghĩa là không lọc
-  filterText: string = '';      // chuỗi rỗng nghĩa là không lọc
+  dateStart: string = '';      
+  dateEnd: string = '';        
+  employeeID: string = '0';    
+  status: string = '';          
+  filterText: string = '';    
   pageSize: number = 1000000;
   pageNumber: number = 1;
   table: Tabulator | null = null;
   detailtable: Tabulator | null = null;
+  
   constructor(private assetAllocationService: AssetAllocationService) { }
   ngOnInit(): void {
     // Khi khởi tạo, tải trang đầu tiên
     this.getAll();
     this.drawDetail();
+    if (this.modalRef) {
+      this.modalRef.allocationSaved.subscribe(() => {
+        this.getAll(); // Refresh table
+      });
+    }
 
   }
   getAll(): void {
     this.assetAllocationService.getAssetsManagement(
-      this.dateStart || '2020-04-01',
+      this.dateStart || '2012-04-01',
       this.dateEnd || '2025-05-01',
       0,  // EmployeeID
       1,  // Status
@@ -45,8 +55,7 @@ export class AssetAllocationComponent implements OnInit {
       this.pageSize,
       this.pageNumber
     ).subscribe((data: any) => {
-      this.assetallocation = data.data.assetallocation;
-      console.log(this.assetallocation);
+      this.assetallocation = data.data.assetallocation;   
       this.drawTable();
     });
   }
@@ -59,7 +68,7 @@ export class AssetAllocationComponent implements OnInit {
         data: this.assetallocation,
         layout: "fitDataStretch",
         pagination: true,
-        selectableRows: 1,
+        selectableRows: 5,
         height: '46vh',
         movableColumns: true,
         paginationSize: 20,
@@ -89,40 +98,40 @@ export class AssetAllocationComponent implements OnInit {
             width: 60, // Tùy chỉnh độ rộng checkbox
             cssClass: 'checkbox-center' // Dùng class tùy chỉnh để căn giữa header
           },
-          { title: 'ID', field: 'ID', visible: false },
-        {
-  title: 'Cá Nhân Duyệt',
-  field: 'IsApprovedPersonalProperty',
-  formatter: function (cell: any) {
-    const value = cell.getValue();
-    const checked = value === true || value === 'true' || value === 1 || value === '1';
-    return `<input type="checkbox" ${checked ? 'checked' : ''} />`;
-  },
-  hozAlign: 'center',
-  headerHozAlign: 'center',
-},
-{
-  title: 'HR Duyệt',
-  field: 'Status',
-  formatter: function (cell: any) {
-    const value = cell.getValue();
-    const checked = value === true || value === 'true' || value === 1 || value === '1';
-    return `<input type="checkbox" ${checked ? 'checked' : ''}  />`;
-  },
-  hozAlign: 'center',
-  headerHozAlign: 'center',
-},
-{
-  title: 'KT Duyệt',
-  field: 'IsApproveAccountant',
-  formatter: function (cell: any) {
-    const value = cell.getValue();
-    const checked = value === true || value === 'true' || value === 1 || value === '1';
-    return `<input type="checkbox" ${checked ? 'checked' : ''}  />`;
-  },
-  hozAlign: 'center',
-  headerHozAlign: 'center',
-},
+          { title: 'ID', field: 'ID'},
+          {
+            title: 'Cá Nhân Duyệt',
+            field: 'IsApprovedPersonalProperty',
+            formatter: function (cell: any) {
+              const value = cell.getValue();
+              const checked = value === true || value === 'true' || value === 1 || value === '1';
+              return `<input type="checkbox" ${checked ? 'checked' : ''} />`;
+            },
+            hozAlign: 'center',
+            headerHozAlign: 'center',
+          },
+          {
+            title: 'HR Duyệt',
+            field: 'Status',
+            formatter: function (cell: any) {
+              const value = cell.getValue();
+              const checked = value === true || value === 'true' || value === 1 || value === '1';
+              return `<input type="checkbox" ${checked ? 'checked' : ''}  />`;
+            },
+            hozAlign: 'center',
+            headerHozAlign: 'center',
+          },
+          {
+            title: 'KT Duyệt',
+            field: 'IsApproveAccountant',
+            formatter: function (cell: any) {
+              const value = cell.getValue();
+              const checked = value === true || value === 'true' || value === 1 || value === '1';
+              return `<input type="checkbox" ${checked ? 'checked' : ''}  />`;
+            },
+            hozAlign: 'center',
+            headerHozAlign: 'center',
+          },
 
           { title: 'Mã', field: 'Code' },
           {
@@ -156,6 +165,7 @@ export class AssetAllocationComponent implements OnInit {
       this.table.on('rowClick', (evt, row: RowComponent) => {
         const rowData = row.getData();
         const id = rowData['ID'];
+        console.log("hgff",id);
 
         this.assetAllocationService.getAssetAllocationDetail(id).subscribe(res => {
           // 1) Lấy đúng mảng detail từ API
@@ -172,6 +182,13 @@ export class AssetAllocationComponent implements OnInit {
         });
       });
 
+    }
+  }
+   exportToExcel() {
+    if (this.table) {
+      this.table.download('xlsx', 'DanhSachTaiSan.xlsx', { sheetName: 'Tài sản' });
+    } else {
+      console.warn('Bảng chưa được khởi tạo');
     }
   }
   private drawDetail(): void {
@@ -208,4 +225,102 @@ export class AssetAllocationComponent implements OnInit {
       this.modalRef.showCapphat(); // Change this from showBaoMat() to showCapphat()
     }
   }
+  openEditModal(): void {
+    const selectedRows = this.table?.getSelectedData() || [];
+    if (selectedRows.length !== 1) {
+      alert('Vui lòng chọn đúng một dòng để chỉnh sửa!');
+      return;
+    }
+
+    const selectedAllocation = selectedRows[0];
+    
+    this.assetAllocationService.getAssetAllocationDetail(selectedAllocation.ID).subscribe({
+      next: (res) => {
+        const allocationDetails = Array.isArray(res.data.assetsallocationdetail)
+          ? res.data.assetsallocationdetail
+          : [];
+
+        if (this.modalRef) {
+          this.modalRef.editAllocation({
+            ...selectedAllocation,
+            AssetDetails: allocationDetails
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy chi tiết cấp phát:', err);
+        alert('Không thể tải chi tiết cấp phát. Vui lòng thử lại!');
+      }
+    });
+  }
+  getSelectedIds(): number[] {
+  if (this.table) {
+    const selectedRows = this.table.getSelectedData();
+    return selectedRows.map((row: any) => row.ID);
+  }
+  return [];
+}
+approveHR(): void {
+  const ids = this.getSelectedIds();
+  if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
+
+  this.assetAllocationService.HrApprove(ids).subscribe({
+    next: res => {
+      alert('HR duyệt thành công');
+      this.getAll(); // Reload lại table
+    },
+    error: err => alert('Lỗi duyệt HR: ' + err.message)
+  });
+}
+DeleteALLocationn():void
+{
+  const ids=this.getSelectedIds();
+  if(ids.length==0) return alert("Vui lòng chọn ít nhất một dòng");
+  this.assetAllocationService.DeleteAllocation(ids).subscribe({
+    next:res=>{
+      alert('Xóa thành công');
+      this.getAll();
+    },
+    error:err=>alert('Lỗi khi xóa')
+  });
+}
+cancelHR(): void {
+  const ids = this.getSelectedIds();
+  if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
+
+  this.assetAllocationService.HrCancelApprove(ids).subscribe({
+    next: res => {
+      alert('HR hủy duyệt thành công');
+      this.getAll();
+    },
+    error: err => alert('Lỗi hủy duyệt HR: ' + err.message)
+  });
+}
+
+approveAccountant(): void {
+  const ids = this.getSelectedIds();
+  if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
+
+  this.assetAllocationService.AccountantApprove(ids).subscribe({
+    next: res => {
+      alert('KT duyệt thành công');
+      this.getAll();
+    },
+    error: err => alert('Lỗi duyệt KT: ' + err.message)
+  });
+}
+
+cancelAccountant(): void {
+  const ids = this.getSelectedIds();
+  if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
+
+  this.assetAllocationService.AccountantCancelApprove(ids).subscribe({
+    next: res => {
+      alert('KT hủy duyệt thành công');
+      this.getAll();
+    },
+    error: err => alert('Lỗi hủy duyệt KT: ' + err.message)
+  });
+}
+
 }
