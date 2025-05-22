@@ -6,7 +6,7 @@ import { MenuService } from './components/menus/menu-service/menu.service';
 import { DymanicComponentComponent } from './dymanic-component/dymanic-component.component';
 import{OfficeSupplyComponentComponent} from"./components/VPP/OfficeSupplyUnit/office-supply-component/office-supply-component.component";
 import { OfficeSupplyRequestSummaryComponent } from './components/VPP/OfficeSupplyRequestSummary/office-supply-request-summary/office-supply-request-summary.component';
-import { DangkyVppComponent } from './components/VPP/DangkyVPP/dangky-vpp/dangky-vpp.component';    
+import{OfficeSupplyRequestsComponent} from './components/VPP/OfficeSupplyRequests/office-supply-requests.component'  
 import { DailyreportComponent } from './components/dailyreport/dailyreport.component';
 import{OfficeSuppliesComponent} from'./components/VPP/OfficeSupplies/office-supplies.component';
 @Component({
@@ -18,7 +18,7 @@ import{OfficeSuppliesComponent} from'./components/VPP/OfficeSupplies/office-supp
         OfficeSuppliesComponent,
         OfficeSupplyComponentComponent,
         OfficeSupplyRequestSummaryComponent,
-        DangkyVppComponent,
+        OfficeSupplyRequestsComponent,
         DailyreportComponent
     ],
     templateUrl: './app.component.html',

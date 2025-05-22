@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { DangkyvppServiceService } from './dangkyvpp-service.service';
+import {DangkyvppServiceService} from './office-supply-requests-service.service';
 
 describe('DangkyvppServiceService', () => {
   let service: DangkyvppServiceService;
