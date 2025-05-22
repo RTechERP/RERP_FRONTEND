@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { AssetsManagementComponent } from './components/assetsmanagement/LoadTSAssetManagement/AssetsManagement/AssetsManagement.component';
+import { AssetsManagementComponent } from './components/assetsmanagement/Assets-Management/AssetsManagement.component';
 import { TypeAssetsComponent } from './components/assetsmanagement/TypeAssets/TypeAssets.component';
 import { AssetsComponent } from './components/assetsmanagement/AssetsResouse/assets.component';
 import { UnitManagementComponent } from './components/assetsmanagement/UnitManagement/UnitManagement.component';

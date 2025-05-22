@@ -2,14 +2,14 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { AssetsManagementComponent } from '../LoadTSAssetManagement/AssetsManagement/AssetsManagement.component';
+import { AssetsManagementComponent } from '../Assets-Management/AssetsManagement.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { EmployeeService } from '../assets-form/Assets-formServices/asset-formservice.service';
 import { AssetsService } from '../AssetsResouse/assets.service';
 import { TypeAssetsService } from '../TypeAssets/TypeAssets.service';
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css'; //import Tabulator stylesheet 
-import { AssetsManagementService } from '../LoadTSAssetManagement/AssetsManagement/AssetsManagementService.service';
+import { AssetsManagementService } from '../Assets-Management/AssetsManagementService.service';
 declare var bootstrap: any;
 import Swal from 'sweetalert2';
 

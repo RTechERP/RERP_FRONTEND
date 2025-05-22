@@ -3,19 +3,19 @@ import { AssetsManagementService } from './AssetsManagementService.service';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DepartmentServiceService } from '../../../Department/DepartmentService.service';
+import { DepartmentServiceService } from '../../Department/DepartmentService.service';
 import * as XLSX from 'xlsx';
 (window as any).XLSX = XLSX;
 import { NgSelectModule } from '@ng-select/ng-select';
-import { AssetStatusService } from '../../AssetStatus/AssetStatusService/AssetStatus.service';
+import { AssetStatusService } from '../AssetStatus/AssetStatusService/AssetStatus.service';
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { Router } from '@angular/router';
-import { AssetModalComponent } from '../../assets-form/assets-form.component';
-import { EmployeeService } from '../../assets-form/Assets-formServices/asset-formservice.service';
+import { AssetModalComponent } from '../assets-form/assets-form.component';
+import { EmployeeService } from '../assets-form/Assets-formServices/asset-formservice.service';
 import { data } from 'jquery';
 import Swal from 'sweetalert2';
-import { AssetManagementServiceService } from '../../BorrowAssets/AssetManagementHistory/AssetManagementHistoryService/AssetManagementService.service';
+import { AssetManagementServiceService } from '../BorrowAssets/AssetManagementHistory/AssetManagementHistoryService/AssetManagementService.service';
 @Component({
   selector: 'app-assetsmanagement',
   standalone: true,
