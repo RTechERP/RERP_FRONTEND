@@ -1,6 +1,5 @@
 import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
-// import { ListVPPService } from '../../../services/list-vpp.service';
-import { ListVPPService } from './vpp-service/vpp-service.service';
+import {OfficeSuppliesService } from './office-supplies-service/office-supplies-service.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
@@ -32,14 +31,14 @@ interface Product {
 
 declare var bootstrap: any; // Đảm bảo khai báo bên ngoài class, trước constructor hoặc ngOnInit
 @Component({
-  selector: 'app-list-vpp',
+  selector: 'app-office-supplies',
   standalone: true,
   imports: [CommonModule, FormsModule, NgSelectModule,SweetAlert2Module],
-  templateUrl: './list-vpp.component.html',
-  styleUrls: ['./list-vpp.component.css'],
+  templateUrl: './office-supplies.component.html',
+  styleUrls: ['./office-supplies.component.css'],
 
 })
-export class ListVPPComponent implements OnInit {
+export class OfficeSuppliesComponent implements OnInit {
 
   lstVP: any[] = [];
   listUnit: any[] = [];
@@ -69,7 +68,7 @@ export class ListVPPComponent implements OnInit {
 
 
 
-  constructor(private lstVPP: ListVPPService) { }
+  constructor(private lstVPP: OfficeSuppliesService) { }
 
   ngOnInit(): void {
     this.drawTable();

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root'
 })
-export class ListVPPService {
+export class OfficeSuppliesService {
   private baseUrl = 'https://localhost:7187/api/OfficeSupplies';
 
   constructor(private httpclient: HttpClient) { }

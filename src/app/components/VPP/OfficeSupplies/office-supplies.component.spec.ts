@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ListVppComponent } from './list-vpp.component';
+import { OfficeSuppliesComponent } from './office-supplies.component';
 
-describe('ListVppComponent', () => {
-  let component: ListVppComponent;
-  let fixture: ComponentFixture<ListVppComponent>;
+describe('OfficeSuppliesComponent', () => {
+  let component: OfficeSuppliesComponent;
+  let fixture: ComponentFixture<OfficeSuppliesComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ListVppComponent]
+      imports: [OfficeSuppliesComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ListVppComponent);
+    fixture = TestBed.createComponent(OfficeSuppliesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
