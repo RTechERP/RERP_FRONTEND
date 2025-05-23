@@ -3,23 +3,27 @@ import { AssetAllocationService } from './AssetAllocationService/AssetAllocation
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
 import { data } from 'jquery';
 import * as XLSX from 'xlsx';
+import { EmployeeService } from '../assets-form/assets-formServices/asset-formservice.service';
+import { NgSelectModule } from '@ng-select/ng-select';
 (window as any).XLSX = XLSX; 0
 import { AssetModalComponent } from '../assets-form/assets-form.component';
 import 'tabulator-tables/dist/css/tabulator.min.css'; //import Tabulator stylesheet
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
-
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-AssetAllocation',
   standalone: true,
   templateUrl: './AssetAllocation.component.html',
   styleUrls: ['./AssetAllocation.component.css'],
-  imports: [AssetModalComponent, CommonModule]
+  imports: [AssetModalComponent, CommonModule,FormsModule,NgSelectModule]
 })
 export class AssetAllocationComponent implements OnInit {
   @ViewChild(AssetModalComponent) modalRef!: AssetModalComponent;
 selectedIds: number[] = [];
-
+  DateStart: string = '';
+  DateEnd: string = '';
+   emplylist: any[] = [];
   assetallocation: any[] = [];
   employeeList: any[] = [];
   dateStart: string = '';      
@@ -32,7 +36,10 @@ selectedIds: number[] = [];
   table: Tabulator | null = null;
   detailtable: Tabulator | null = null;
   
-  constructor(private assetAllocationService: AssetAllocationService) { }
+  
+  constructor(private assetAllocationService: AssetAllocationService,
+    private employeeService: EmployeeService
+  ) { }
   ngOnInit(): void {
     // Khi khởi tạo, tải trang đầu tiên
     this.getAll();
@@ -42,20 +49,36 @@ selectedIds: number[] = [];
         this.getAll(); // Refresh table
       });
     }
-
+      this.employeeService.getEmployeetoadd().subscribe((data: any) => {
+      this.emplylist = data.data[0];
+    });
   }
-  getAll(): void {
-    this.assetAllocationService.getAssetsManagement(
-      this.dateStart || '2012-04-01',
-      this.dateEnd || '2025-05-01',
-      0,  // EmployeeID
-      1,  // Status
-      this.filterText,
-      this.pageSize,
-      this.pageNumber
-    ).subscribe((data: any) => {
-      this.assetallocation = data.data.assetallocation;   
-      this.drawTable();
+ getAll(): void {
+  const employeeId = parseInt(this.employeeID) || 0; // Chuyển thành số, mặc định là 0 nếu không hợp lệ
+  this.assetAllocationService.getAssetsManagement(
+    this.dateStart || '2012-04-01',
+    this.dateEnd || '2025-05-01',
+    employeeId,  // Sử dụng employeeID đã chọn
+    1,  // Status
+    this.filterText,
+    this.pageSize,
+    this.pageNumber
+  ).subscribe((data: any) => {
+    this.assetallocation = data.data.assetallocation || [];
+    this.drawTable();
+  });
+}
+  getEmployees(): void {
+    this.employeeService.getEmployeetoadd().subscribe({
+      next: (data: any) => {
+        // Gán toàn bộ danh sách nhân viên vào employeeList
+        this.employeeList = data.data || [];
+        console.log('Danh sách nhân viên:', this.employeeList);
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy danh sách nhân viên:', err);
+        alert('Không thể tải danh sách nhân viên. Vui lòng thử lại!');
+      }
     });
   }
   public drawTable(): void {
@@ -146,14 +169,7 @@ selectedIds: number[] = [];
             headerHozAlign: 'center',
           },
           {
-            title: 'Người mượn', field: 'EmployeeName', formatter: function (
-              cell: any,
-              formatterParams: any,
-              onRendered: any
-            ) {
-              let value = cell.getValue() || '';
-              return value;
-            },
+            title: 'Người mượn', field: 'EmployeeName',
             headerHozAlign: 'center'
           },
           { title: 'Phòng ban', field: 'Department' },
@@ -294,6 +310,30 @@ handleApprovalAction(action: 'HR_APPROVE' | 'HR_CANCEL' | 'ACCOUNTANT_APPROVE' |
     }
   });
 }
-
+  clearAllFilters(): void {
+  if (this.table) {
+    this.searchText = '';
+    this.DateStart = '';
+    this.DateEnd = '';
+    this.employeeID = '0';
+    this.status = '';
+    this.onFilterChange();
+  }
+}
+  searchText: string = '';
+ onSearchChange(): void {
+    if (!this.table) return;
+    const value = this.searchText.trim();
+    if (value) {
+      this.table.setFilter([
+        { field: 'Code', type: 'like', value }
+      ], 'or', { caseSensitive: false });
+    } else {
+      this.clearAllFilters();
+    }
+  }
+  onFilterChange(): void {
+    this.getAll();
+  }
 
 }

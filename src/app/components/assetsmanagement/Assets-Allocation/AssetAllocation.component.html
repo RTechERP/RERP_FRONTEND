@@ -11,17 +11,19 @@
     </div>
     <div class="offcanvas-body pt-2 pb-0">
       <div class="form-group">
-        <label for="searchInput">Tên tài sản</label>
-        <input id="searchInput" class="form-control form-control-sm" style="font-size:13px;"
-          placeholder="Nhập từ khóa..." />
+        <label for="searchInput">Từ khóa tìm kiếm</label>
+        <input id="searchInput" class="form-control form-control-sm" style="font-size:13px;" [(ngModel)]="searchText"
+          (ngModelChange)="onSearchChange()" placeholder="Nhập từ khóa..." />
       </div>
-      <div class="form-group">
+     <div class="form-group">
         <label>Từ ngày</label>
-        <input type="date" name="date_start" value="{{dateStart}}" class="form-control form-control-sm" required="" />
+        <input type="date" name="date_start" [(ngModel)]="dateStart" (ngModelChange)="onFilterChange()"
+          class="form-control form-control-sm" required />
       </div>
       <div class="form-group">
         <label>Đến ngày</label>
-        <input type="date" name="date_start" value="{{dateEnd}}" class="form-control form-control-sm" required="" />
+        <input type="date" name="date_end" [(ngModel)]="dateEnd" (ngModelChange)="onFilterChange()"
+          class="form-control form-control-sm" required />
       </div>
       <div class="form-group">
         <label for="statusSelect">Trạng thái sử dụng:</label>
@@ -29,12 +31,23 @@
       </div>
       <div class="form-group">
         <label for="employeeSelect">Nhân viên</label>
-        <select name="ID" class="form-control">
-          <option [value]="0">-- Chọn người quản lí --</option>
-          <option *ngFor="let emp of employeeList" [value]="emp.ID">
-            {{ emp.ID }} - {{ emp.FullName }}
-          </option>
-        </select>
+        <ng-select [items]="emplylist" bindLabel="FullName" bindValue="ID" [(ngModel)]="employeeID"
+          (change)="onFilterChange()" placeholder="-- Chọn nhân viên --" [clearable]="false">
+          <ng-template ng-label-tmp let-item="item">
+           {{ item?.FullName }}
+          </ng-template>
+       
+        </ng-select>
+
+      </div>
+      <div class="form-group">
+        <button class="btn btn-outline-primary m-1" (click)="onFilterChange()" data-bs-dismiss="offcanvas">
+          <i class="fas fa-magnifying-glass me-2"></i> Tìm kiếm
+        </button>
+
+        <button class="btn btn-outline-secondary ms-2" (click)="clearAllFilters()">
+          <i class="fas fa-eraser me-2"></i> Xóa lọc
+        </button>
       </div>
     </div>
   </div>

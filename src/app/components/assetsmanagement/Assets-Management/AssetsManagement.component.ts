@@ -15,6 +15,7 @@ import { AssetModalComponent } from '../assets-form/assets-form.component';
 import { EmployeeService } from '../assets-form/assets-formServices/asset-formservice.service';
 import { data } from 'jquery';
 import Swal from 'sweetalert2';
+
 @Component({
   selector: 'app-assetsmanagement',
   standalone: true,
@@ -196,7 +197,6 @@ export class AssetsManagementComponent implements OnInit {
               return value;
             },
             headerHozAlign: 'center',
-
           },
           { title: 'Thông số', field: 'SpecificationsAsset', headerFilter: true },
           { title: 'Ngày mua', field: 'DateBuy', headerFilter: true },
@@ -474,6 +474,7 @@ export class AssetsManagementComponent implements OnInit {
   onFilterChange(): void {
     this.getAll();
   }
+  
 }
 
 
