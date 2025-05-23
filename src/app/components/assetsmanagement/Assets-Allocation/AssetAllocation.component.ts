@@ -3,9 +3,8 @@ import { AssetAllocationService } from './AssetAllocationService/AssetAllocation
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
 import { data } from 'jquery';
 import * as XLSX from 'xlsx';
-(window as any).XLSX = XLSX; 
+(window as any).XLSX = XLSX; 0
 import { AssetModalComponent } from '../assets-form/assets-form.component';
-import { NgModule } from '@angular/core';
 import 'tabulator-tables/dist/css/tabulator.min.css'; //import Tabulator stylesheet
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
@@ -105,10 +104,11 @@ selectedIds: number[] = [];
             formatter: function (cell: any) {
               const value = cell.getValue();
               const checked = value === true || value === 'true' || value === 1 || value === '1';
-              return `<input type="checkbox" ${checked ? 'checked' : ''} />`;
+              return `<input type="checkbox" ${checked ? 'checked' : ''} disabled/>`;
             },
             hozAlign: 'center',
             headerHozAlign: 'center',
+            
           },
           {
             title: 'HR Duyệt',
@@ -116,7 +116,7 @@ selectedIds: number[] = [];
             formatter: function (cell: any) {
               const value = cell.getValue();
               const checked = value === true || value === 'true' || value === 1 || value === '1';
-              return `<input type="checkbox" ${checked ? 'checked' : ''}  />`;
+              return `<input type="checkbox" ${checked ? 'checked' : ''} disabled />`;
             },
             hozAlign: 'center',
             headerHozAlign: 'center',
@@ -127,7 +127,7 @@ selectedIds: number[] = [];
             formatter: function (cell: any) {
               const value = cell.getValue();
               const checked = value === true || value === 'true' || value === 1 || value === '1';
-              return `<input type="checkbox" ${checked ? 'checked' : ''}  />`;
+              return `<input type="checkbox" ${checked ? 'checked' : ''}  disabled/>`;
             },
             hozAlign: 'center',
             headerHozAlign: 'center',
@@ -260,18 +260,7 @@ selectedIds: number[] = [];
   }
   return [];
 }
-approveHR(): void {
-  const ids = this.getSelectedIds();
-  if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
 
-  this.assetAllocationService.HrApprove(ids).subscribe({
-    next: res => {
-      alert('HR duyệt thành công');
-      this.getAll(); // Reload lại table
-    },
-    error: err => alert('Lỗi duyệt HR: ' + err.message)
-  });
-}
 DeleteALLocationn():void
 {
   const ids=this.getSelectedIds();
@@ -284,43 +273,27 @@ DeleteALLocationn():void
     error:err=>alert('Lỗi khi xóa')
   });
 }
-cancelHR(): void {
-  const ids = this.getSelectedIds();
+handleApprovalAction(action: 'HR_APPROVE' | 'HR_CANCEL' | 'ACCOUNTANT_APPROVE' | 'ACCOUNTANT_CANCEL') {
+   const ids = this.getSelectedIds();
+   console.log('ID đã chọn',ids)
   if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
+  
 
-  this.assetAllocationService.HrCancelApprove(ids).subscribe({
-    next: res => {
-      alert('HR hủy duyệt thành công');
-      this.getAll();
+  this.assetAllocationService.updateApprovalStatus(ids, action).subscribe({
+    next: (res) => {
+      if (res.status === 1) {
+        alert('Thành công!');
+        this.getAll();
+      } else {
+        alert('Hành động thất bại: ' + res.message);
+      }
     },
-    error: err => alert('Lỗi hủy duyệt HR: ' + err.message)
+    error: (err) => {
+      console.error(err);
+      alert('Lỗi kết nối máy chủ.');
+    }
   });
 }
 
-approveAccountant(): void {
-  const ids = this.getSelectedIds();
-  if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
-
-  this.assetAllocationService.AccountantApprove(ids).subscribe({
-    next: res => {
-      alert('KT duyệt thành công');
-      this.getAll();
-    },
-    error: err => alert('Lỗi duyệt KT: ' + err.message)
-  });
-}
-
-cancelAccountant(): void {
-  const ids = this.getSelectedIds();
-  if (ids.length === 0) return alert("Vui lòng chọn ít nhất một dòng!");
-
-  this.assetAllocationService.AccountantCancelApprove(ids).subscribe({
-    next: res => {
-      alert('KT hủy duyệt thành công');
-      this.getAll();
-    },
-    error: err => alert('Lỗi hủy duyệt KT: ' + err.message)
-  });
-}
 
 }

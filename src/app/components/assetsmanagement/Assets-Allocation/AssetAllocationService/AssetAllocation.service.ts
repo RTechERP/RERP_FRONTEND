@@ -38,22 +38,14 @@ urlDeleteAllocation='http://localhost:5207/api/Assets/deleteAssetAllocation';
     const url = `${this.urlDetail}?id=${id}`;
     return this.http.get<any>(url);
   }
-  HrApprove(ids:number[]):Observable<any>
-  {
-    return this.http.post<any>(this.urlHrApprove,ids);
-  }
-   HrCancelApprove(ids:number[]):Observable<any>
-  {
-    return this.http.post<any>(this.urlHrCancelApprove,ids);
-  }
-   AccountantApprove(ids:number[]):Observable<any>
-  {
-    return this.http.post<any>(this.urAccountantApprove,ids);
-  }
-   AccountantCancelApprove(ids:number[]):Observable<any>
-  {
-    return this.http.post<any>(this.urlAccountCancelApprove,ids);
-  }
+updateApprovalStatus(ids: number[], action: string): Observable<any> {
+  const updateapprove = {
+    ids: ids,
+    action: action
+  };
+  return this.http.post<any>('http://localhost:5207/api/Assets/UpdateApprovalStatus', updateapprove);
+}
+
   DeleteAllocation(ids:number[]):Observable<any>
   {
     return this.http.post<any>(this.urlDeleteAllocation,ids);

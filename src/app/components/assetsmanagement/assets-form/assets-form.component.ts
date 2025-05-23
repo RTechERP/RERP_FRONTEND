@@ -2,23 +2,22 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { AssetsManagementComponent } from '../Assets-Management/AssetsManagement.component';
+import { AssetsManagementComponent } from '../assets-management/AssetsManagement.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { EmployeeService } from '../assets-form/Assets-formServices/asset-formservice.service';
-import { AssetsService } from '../AssetsResouse/assets.service';
-import { TypeAssetsService } from '../TypeAssets/TypeAssets.service';
+import { EmployeeService } from './assets-formServices/asset-formservice.service';
+import { AssetsService } from '../assets-resouse/assets.service';
+import { TypeAssetsService } from '../assets-type/TypeAssets.service';
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css'; //import Tabulator stylesheet 
-import { AssetsManagementService } from '../Assets-Management/AssetsManagementService.service';
+import { AssetsManagementService } from '../assets-management/AssetsManagementService.service';
 declare var bootstrap: any;
 import Swal from 'sweetalert2';
-
-
 @Component({
   selector: 'app-asset-modal',
   standalone: true,
   templateUrl: './asset-modal.component.html',
-  imports: [CommonModule, FormsModule, NgSelectModule]
+  imports: [CommonModule, FormsModule, NgSelectModule],
+  providers: [AssetsManagementService, EmployeeService, AssetsService, TypeAssetsService]
 })
 export class AssetModalComponent implements AfterViewInit {
   @ViewChild('table', { static: false }) tableRef!: ElementRef;
@@ -150,27 +149,26 @@ save() {
       this.selectedDepartmentName = '';
       this.selectedPositionName = '';
     }
-
   }
-  generateCode(): void {
-    if (!this.allocationDate) return;
+ generateCode(): void {
+  if (!this.allocationDate) return;
 
-    this.employeeService.getTSCPCode(this.allocationDate).subscribe({
-      next: (code: string) => {
-        this.generatedCode = code;
-
-      },
-      error: (err) => {
-        console.error('Lỗi khi lấy mã cấp phát:', err);
-      }
-    });
-  }
+  this.employeeService.getTSCPCode(this.allocationDate).subscribe({
+    next: (res) => {
+      this.generatedCode = res.data; 
+      console.log('Mã cấp phát:', this.generatedCode);
+    },
+    error: (err) => {
+      console.error('Lỗi khi lấy mã cấp phát:', err);
+    }
+  });
+}
     generateTSAssetCodde(): void {
     if (!this.assetdate) return;
     this.employeeService.getTassetCode(this.assetdate).subscribe({
       next: (code: string) => {
         this.generateTSAssetCode = code;
-        console.log('Mã cấp phát',code);
+        console.log('Mã cấp phát ',code);
       },
       error: (err) => {
         console.error('Lỗi khi lấy mã cấp phát:', err);

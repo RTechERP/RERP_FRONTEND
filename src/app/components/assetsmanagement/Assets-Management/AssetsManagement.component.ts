@@ -7,15 +7,14 @@ import { DepartmentServiceService } from '../../Department/DepartmentService.ser
 import * as XLSX from 'xlsx';
 (window as any).XLSX = XLSX;
 import { NgSelectModule } from '@ng-select/ng-select';
-import { AssetStatusService } from '../AssetStatus/AssetStatusService/AssetStatus.service';
+import { AssetStatusService } from '../assets-status/AssetStatusService/AssetStatus.service';
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { Router } from '@angular/router';
 import { AssetModalComponent } from '../assets-form/assets-form.component';
-import { EmployeeService } from '../assets-form/Assets-formServices/asset-formservice.service';
+import { EmployeeService } from '../assets-form/assets-formServices/asset-formservice.service';
 import { data } from 'jquery';
 import Swal from 'sweetalert2';
-import { AssetManagementServiceService } from '../BorrowAssets/AssetManagementHistory/AssetManagementHistoryService/AssetManagementService.service';
 @Component({
   selector: 'app-assetsmanagement',
   standalone: true,

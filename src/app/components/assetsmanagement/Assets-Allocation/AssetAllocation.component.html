@@ -57,19 +57,19 @@
           data-bs-target="#searchOffcanvas" aria-controls="searchOffcanvas" title="Tìm kiếm">
           <i class="fas fa-magnifying-glass"></i>
         </button>
-        <button class="btn btn-outline-success m-1" (click)="approveHR()">
+        <button class="btn btn-outline-success m-1" (click)="handleApprovalAction('HR_APPROVE')">
           <i class="fas fa-check me-2" style="color: #66CC00;"></i>HR duyệt
         </button>
 
-        <button class="btn btn-outline-danger m-1" (click)="cancelHR()">
+        <button class="btn btn-outline-danger m-1" (click)="handleApprovalAction('HR_CANCEL')">
           <i class="fas fa-xmark me-2" style="color: #ff0000;"></i>HR Hủy Duyệt
         </button>
 
-        <button class="btn btn-outline-success m-1" (click)="approveAccountant()">
+        <button class="btn btn-outline-success m-1" (click)="handleApprovalAction('ACCOUNTANT_APPROVE')">
           <i class="fas fa-check me-2" style="color: #66CC00;"></i>KT duyệt
         </button>
 
-        <button class="btn btn-outline-danger m-1" (click)="cancelAccountant()">
+        <button class="btn btn-outline-danger m-1" (click)="handleApprovalAction('ACCOUNTANT_CANCEL')">
           <i class="fas fa-xmark me-2" style="color: #ff0000;"></i>KT Hủy duyệt
         </button>
 

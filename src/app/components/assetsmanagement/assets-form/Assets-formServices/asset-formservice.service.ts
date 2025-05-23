@@ -45,10 +45,11 @@ getMaxAssetId(): Observable<number> {
 addunitt(unit:any): Observable<any> {
   return this.httpclient.post<any>(this.urladdunit, unit);
 }
-getTSCPCode(allocationDate: string): Observable<string> {
+getTSCPCode(allocationDate: string): Observable<{ status: number, data: string }> {
   const params = new HttpParams().set('allocationDate', allocationDate);
-  return this.httpclient.get(this.urlgetCode, { params, responseType: 'text' });
+  return this.httpclient.get<{ status: number, data: string }>(this.urlgetCode, { params });
 }
+
 getTassetCode(assetdate: string): Observable<string> {
   const params = new HttpParams().set('assetdate', assetdate);
   return this.httpclient.get(this.urladdTassetCode, { params, responseType: 'text' });
