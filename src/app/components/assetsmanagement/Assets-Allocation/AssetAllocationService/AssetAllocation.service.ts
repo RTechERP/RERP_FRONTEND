@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { API_ORIGIN } from '../../../../app.config';
 @Injectable({ providedIn: 'root' })
 export class AssetAllocationService {
-  private urlMaster = 'http://localhost:5207/api/Assets/getTSAssestAllocation';
-  private urlDetail = 'http://localhost:5207/api/Assets/getassetsallocationdetail';
-urlHrApprove='http://localhost:5207/api/Assets/HRApproved';
-urlHrCancelApprove='http://localhost:5207/api/Assets/HRCancelApproved ';
-urAccountantApprove='http://localhost:5207/api/Assets/AccountantApproved';
-urlAccountCancelApprove='http://localhost:5207/api/Assets/AccountantCancelApproved';
-urlDeleteAllocation='http://localhost:5207/api/Assets/deleteAssetAllocation';
+  private urlMaster = `${API_ORIGIN}api/Assets/getTSAssestAllocation`;
+  private urlDetail = `${API_ORIGIN}api/Assets/getassetsallocationdetail`;
+urlHrApprove=`${API_ORIGIN}api/Assets/HRApproved`;
+urlHrCancelApprove=`${API_ORIGIN}api/Assets/HRCancelApproved `;
+urAccountantApprove=`${API_ORIGIN}api/Assets/AccountantApproved`;
+urlAccountCancelApprove=`${API_ORIGIN}api/Assets/AccountantCancelApproved`;
+urlDeleteAllocation=`${API_ORIGIN}api/Assets/deleteAssetAllocation`;
   constructor(private http: HttpClient) {}
 
   getAssetsManagement(
@@ -43,7 +43,7 @@ updateApprovalStatus(ids: number[], action: string): Observable<any> {
     ids: ids,
     action: action
   };
-  return this.http.post<any>('http://localhost:5207/api/Assets/UpdateApprovalStatus', updateapprove);
+  return this.http.post<any>(`${API_ORIGIN}api/Assets/UpdateApprovalStatus`, updateapprove);
 }
 
   DeleteAllocation(ids:number[]):Observable<any>

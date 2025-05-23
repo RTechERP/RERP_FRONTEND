@@ -2,21 +2,21 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
-
+import { API_ORIGIN } from '../../../app.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AssetsManagementService {
-  urldeleteassetmanagement='http://localhost:5207/api/Assets/deleteAssetManagement';
-  url = 'http://localhost:5207/api/Assets/getassets';
+  urldeleteassetmanagement=`${API_ORIGIN}api/Assets/deleteAssetManagement`;
+   url = `${API_ORIGIN}api/Assets/getassets`;
   constructor(private httpclient: HttpClient) { }
   saveAssets(assets: any): Observable<any> {
-    const url = 'http://localhost:5207/api/Assets/savedata';
+    const url = `${API_ORIGIN}api/Assets/savedata`;
     return this.httpclient.post<any>(url, assets);
   }
   getEmployeeById(id: number): Observable<any> {
-    const url = `http://localhost:5207/api/Assets/getallocation?ID=${id}`;
+    const url = `${API_ORIGIN}api/Assets/getallocation?ID=${id}`;
     return this.httpclient.get<any>(url);
   }
   dt: any[] = [
@@ -25,7 +25,7 @@ export class AssetsManagementService {
   baoHongTaiSan(data: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.httpclient.post<any>(
-      'http://localhost:5207/api/Assets/savedatareportbroken',
+      `${API_ORIGIN}api/Assets/savedatareportbroken`,
       data,
       { headers }
     );
@@ -33,7 +33,7 @@ export class AssetsManagementService {
   baoMatTaiSan(data: any): Observable<any> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.httpclient.post<any>(
-      'http://localhost:5207/api/Assets/savedatareportlost',
+      `${API_ORIGIN}api/Assets/savedatareportlost`,
       data,
       { headers }
     );
@@ -60,7 +60,7 @@ export class AssetsManagementService {
     return this.httpclient.get<any>(this.url, { params });
   }
   deleteAsset(id: number): Observable<any> {
-    const url = 'http://localhost:5207/api/Assets';
+    const url = `${API_ORIGIN}api/Assets`;
     return this.httpclient.delete<any>(`${url}/${id}`);
   }
    DeleteAssetManagement(ids:number[]):Observable<any>

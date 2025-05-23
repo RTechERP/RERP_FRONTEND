@@ -3,25 +3,26 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 import { AssetModalComponent } from '../assets-form.component';
+import { API_ORIGIN } from '../../../../app.config';
 @Injectable({
   providedIn: 'root'
 })
 export class EmployeeService {        
- url = 'http://localhost:5207/api/Employee/getall';
- urlunit = 'http://localhost:5207/api/Unit/getall';
- urlDepartment = 'http://localhost:5207/api/Department/getall';
- urlAssetManagement = 'http://localhost:5207/api/Assets/getallassetsmanagement';
- urladdunit = 'http://localhost:5207/api/Unit/savedata';
-urlgetemployeetoadd='http://localhost:5207/api/Employee/get-all-with-details';
-urladdTassetCode='http://localhost:5207/api/Assets/generate-allocation-code-asset';
-urlgetCode='http://localhost:5207/api/Assets/generate-allocation-code';
-urlpostassetallocation='http://localhost:5207/api/Assets/SaveAllocation';
+ url = `${API_ORIGIN}api/Employee/getall`;
+ urlunit = `${API_ORIGIN}api/Unit/getall`;
+ urlDepartment = `${API_ORIGIN}api/Department/getall`;
+ urlAssetManagement = `${API_ORIGIN}api/Assets/getallassetsmanagement`;
+ urladdunit = `${API_ORIGIN}api/Unit/savedata`;
+urlgetemployeetoadd=`${API_ORIGIN}api/Employee/get-all-with-details`;
+urladdTassetCode=`${API_ORIGIN}api/Assets/generate-allocation-code-asset`;
+urlgetCode=`${API_ORIGIN}api/Assets/generate-allocation-code`;
+urlpostassetallocation=`${API_ORIGIN}api/Assets/SaveAllocation`;
 constructor(private httpclient: HttpClient) { }
 getDepartment(): Observable<any> {  
   return this.httpclient.get<any>(this.urlDepartment);
 }
 getEmployeeById(id: number): Observable<any> {
-  const url = `http://localhost:5207/api/Assets/getallocation?id=${id}`;
+  const url = `${API_ORIGIN}api/Assets/getallocation?id=${id}`;
   return this.httpclient.get<any>(url);
 }
 getEmployeetoadd():Observable<any>
