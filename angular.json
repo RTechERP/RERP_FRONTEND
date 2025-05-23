@@ -26,10 +26,14 @@
                 "input": "public"
               }
             ],
-            "styles": [
+             "styles": [
+              "node_modules/@ng-select/ng-select/themes/default.theme.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+         
+            ]
           },
           "configurations": {
             "production": {
@@ -86,11 +90,18 @@
             ],
             "styles": [
               "src/styles.css"
+            
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js"
+             
+            ]
           }
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "ea8948a5-2dcd-4386-af46-94ba6c173f7b"
   }
 }

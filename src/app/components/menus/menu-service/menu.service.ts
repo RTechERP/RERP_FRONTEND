@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class MenuService {
 
-    private _url = 'https://localhost:44365/api/menu/';
+    private _url = 'http://localhost:5207/api/menu/';
   constructor(private http:HttpClient) { }
 
 

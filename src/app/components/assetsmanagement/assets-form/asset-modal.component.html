@@ -1,0 +1,419 @@
+<div class="modal fade" id="assetModal" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="assetModalLabel">{{ modalTitle }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+         <div class="row">
+  <div class="col-md-4">
+    <label for="stt" class="col-form-label">STT</label>
+    <input type="number" [(ngModel)]="selectedAsset.STT" name="STT" class="form-control">
+  </div>
+
+  <div class="col-md-4">
+    <label for="employeeID" class="form-label">Chọn người (*)</label>
+    <ng-select [(ngModel)]="selectedAsset.EmployeeID" name="employeeID" [items]="employee"
+      bindLabel="FullName" bindValue="ID" placeholder="-- Chọn nhân viên --"
+      (ngModelChange)="onEmployeeSelect($event)">
+    </ng-select>
+  </div>
+
+  <div class="col-md-4">
+    <label for="department" class="col-form-label">Phòng ban (*)</label>
+    <input type="text" class="form-control" [value]="selectedDepartmentName" disabled />
+  </div>
+</div>
+  
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="col-form-label">Loại tài sản (*)</label>
+              <select [(ngModel)]="selectedAsset.TSAssetID" name="TSAssetID" class="form-control">
+                <option [value]="null">-- Chọn loại tài sản --</option>
+                <option *ngFor="let type of typeAssets" [value]="type.ID">
+                  {{ type.ID }} - {{ type.AssetCode }} - {{ type.AssetType }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="unit" class="col-form-label">Đơn vị tính (*)</label>
+              <select [(ngModel)]="selectedAsset.UnitID" name="UnitID" class="form-control">
+                <option [value]="null">-- Chọn đơn vị tính --</option>
+                <option *ngFor="let un of unit" [value]="un.ID">
+                  {{ un.ID }} - {{ un.UnitName }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="unit" class="col-form-label">Thêm đơn vị tính</label>
+              <button type="button" class="btn btn-info form-control" (click)="openUnitModal()">Thêm</button>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mã NCC (*)</label>
+            <input type="text" [(ngModel)]="selectedAsset.TSCodeNCC" name="TSCodeNCC" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tên tài sản (*)</label>
+            <input type="text" [(ngModel)]="selectedAsset.TSAssetName" name="TSAssetName" class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nguồn gốc (*)</label>
+            <select [(ngModel)]="selectedAsset.SourceID" name="ID" class="form-control">
+              <option [value]="0">-- Chọn nguồn gốc --</option>
+              <option *ngFor="let asset of assets" [value]="asset.ID">
+                {{ asset.ID}} - {{ asset.SourceCode }} - {{ asset.SourceName }}
+              </option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Số Seri (*)</label>
+            <input type="text" [(ngModel)]="selectedAsset.Seri" name="Seri" class="form-control">
+
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mô tả chi tiết (*)</label>
+            <input type="text" [(ngModel)]="selectedAsset.SpecificationsAsset" name="SpecificationsAsset"
+              class="form-control">
+          </div>
+          <div class="row g-3 align-items-center">
+            <div class="col-auto">
+              <label for="stt" class="col-form-label">Ngày mua (*) </label>
+            </div>
+            <div class="col-auto">
+
+              <input type="date" [(ngModel)]="selectedAsset.DateBuy" name="DateBuy" class="form-control">
+            </div>
+            <div class="col-auto">
+              <label for="manager" class="col-form-label">Thời gian bảo hành(tháng)</label>
+            </div>
+            <div class="col-auto">
+              <input type="number" [(ngModel)]="selectedAsset.Insurance" name="Insurance" class="form-control">
+            </div>
+            <div class="col-auto">
+              <label for="manager" class="col-form-label">Hiệu lực từ</label>
+            </div>
+            <div class="col-auto">
+              <input type="date" [(ngModel)]="selectedAsset.DateEffect" name="DateEffect" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Ghi chú </label>
+              <input type="text" [(ngModel)]="selectedAsset.Note" name="Note" class="form-control">
+            </div>
+          </div>
+          <div class="row g-3 align-items-center">
+            <div class="col-auto">
+              <label for="stt" class="col-form-label">ACTIVEOFFICE (*) </label>
+            </div>
+            <div class="col-auto">
+              <input type="text" [(ngModel)]="selectedAsset.OfficeActiveStatus" name="OfficeActiveStatus"
+                class="form-control">
+            </div>
+            <div class="col-auto">
+              <label for="manager" class="col-form-label">ACCTIVEWINDOWS</label>
+            </div>
+            <div class="col-auto">
+              <input type="text" [(ngModel)]="selectedAsset.WindowActiveStatus" name="WindowActiveStatus"
+                class="form-control">
+            </div>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="isAllocationCheck"
+              [(ngModel)]="selectedAsset.IsAllocation" name="isAllocation" />
+            <label class="form-check-label" for="isAllocationCheck">
+              Có cấp phát hay không?
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" (click)="save()" class="btn btn-primary">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Thêm đơn vị tính -->
+<div class="modal fade" id="unitEditModal" tabindex="-1" aria-labelledby="unitModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="unitModalLabel">Thêm đơn vị tính</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" class="form-control" [(ngModel)]="newUnitName" placeholder="Tên đơn vị tính mới" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-pr imary" (click)="addUnit()">Thêm</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal báo hỏng -->
+<div class="modal fade" id="baohong" tabindex="-1" aria-labelledby="baohongModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="baohongModalLabel">Báo hỏng tài sản</h5>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="row g-3">
+            <!-- Phần trái: Thông tin tài sản -->
+            <div class="col-md-6">
+              <h6>Thông tin tài sản</h6>
+              <div class="mb-3">
+                <label class="form-label">Mã NCC</label>
+                <input type="text" [(ngModel)]="selectedAsset.TSCodeNCC" name="TSCodeNCC" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Mã tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.TSAssetCode" name="TSAssetCode" class="form-control"
+                  readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Tên tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.TSAssetName" name="TSAssetName" class="form-control"
+                  readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Loại tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.AssetType" name="AssetType" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Số Seri</label>
+                <input type="text" [(ngModel)]="selectedAsset.Seri" name="Seri" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Ngày mua</label>
+                <input type="date" [value]="selectedAsset.DateBuy | date: 'yyyy-MM-dd'" class="form-control" readonly />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Tình trạng</label>
+                <input type="text" [(ngModel)]="selectedAsset.Status" name="Status" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Quy cách tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.SourceName" name="SpecificationsAsset"
+                  class="form-control" readonly>
+              </div>
+            </div>
+
+            <!-- Phần phải: Thông tin nhân viên sử dụng và báo hỏng -->
+            <div class="col-md-6">
+              <h6>Thông tin nhân viên sử dụng</h6>
+              <div class="mb-3">
+                <label class="form-label">Nhân viên</label>
+                <input type="text" [(ngModel)]="selectedAsset.FullName" name="EmployeeName" class="form-control"
+                  readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Vị trí công việc</label>
+                <input type="text" [(ngModel)]="selectedAsset.Name" name="Position" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Phòng ban công tác</label>
+                <input type="text" [(ngModel)]="selectedAsset.Name" [value]="selectedDepartmentName"
+                  name="DepartmentName" class="form-control" readonly>
+              </div>
+              <h6 class="mt-3">Thông tin báo tài sản hỏng</h6>
+              <div class="mb-3">
+                <label class="form-label">Ngày báo hỏng (*)</label>
+                <input type="date" [(ngModel)]="reportDate" name="reportDate" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Lý do báo hỏng (*)</label>
+                <textarea class="form-control" [(ngModel)]="reportErrorDescription" name="reportErrorDescription"
+                  rows="4" required></textarea>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="saveBaoHong()">Gửi báo hỏng</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!----Modal báo mất--->
+<div class="modal fade" id="baomat" tabindex="-1" aria-labelledby="baomatModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="baomatModalLabel">Báo mất tài sản</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+
+
+        <form>
+          <div class="row g-3">
+            <!-- Phần trái: Thông tin tài sản -->
+            <div class="col-md-6">
+              <h6>Thông tin tài sản</h6>
+              <div class="mb-3">
+                <label class="form-label">Mã NCC</label>
+                <input type="text" [(ngModel)]="selectedAsset.TSCodeNCC" name="TSCodeNCC" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Mã tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.TSAssetCode" name="TSAssetCode" class="form-control"
+                  readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Tên tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.TSAssetName" name="TSAssetName" class="form-control"
+                  readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Loại tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.AssetType" name="AssetType" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Số Seri</label>
+                <input type="text" [(ngModel)]="selectedAsset.Seri" name="Seri" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Ngày mua</label>
+                <input type="date" [value]="selectedAsset.DateBuy | date: 'yyyy-MM-dd'" class="form-control" readonly />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Tình trạng</label>
+                <input type="text" [(ngModel)]="selectedAsset.Status" name="Status" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Quy cách tài sản</label>
+                <input type="text" [(ngModel)]="selectedAsset.SourceName" name="SpecificationsAsset"
+                  class="form-control" readonly>
+              </div>
+            </div>
+
+            <!-- Phần phải: Thông tin nhân viên sử dụng và báo mất -->
+            <div class="col-md-6">
+              <h6>Thông tin nhân viên sử dụng</h6>
+              <div class="mb-3">
+                <label class="form-label">Nhân viên</label>
+                <input type="text" [(ngModel)]="selectedAsset.FullName" name="EmployeeName" class="form-control"
+                  readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Vị trí công việc</label>
+                <input type="text" [(ngModel)]="selectedAsset.Name" name="Position" class="form-control" readonly>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Phòng ban công tác</label>
+                <input type="text" [(ngModel)]="selectedAsset.Name" [value]="selectedDepartmentName"
+                  name="DepartmentName" class="form-control" readonly>
+              </div>
+              <h6 class="mt-3">Thông tin báo mất tài sản</h6>
+              <div class="mb-3">
+                <label class="form-label">Ngày báo mất (*)</label>
+                <input type="date" name="reportLossDate" [(ngModel)]="reportlostDate" class="form-control" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Lý do báo mất (*)</label>
+                <textarea class="form-control" name="reportLossDescription" [(ngModel)]="reportLossDescription" rows="4"
+                  required></textarea>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" (click)="saveBaomat()">Gửi báo mất</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Cấp phát -->
+<div class="modal fade" id="capphat" tabindex="-1" #detailModal>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header bg-success">
+        <h4 class="modal-title text-white" id="priceRequestModalLabel">
+          {{ isEditMode ? 'Chỉnh sửa cấp phát tài sản' : 'Cấp phát tài sản' }}
+        </h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <!-- Body -->
+      <div class="modal-body">
+        <button id="addBtn" class="btn btn-outline-success m-1" (click)="showSelectAssetModal()">
+          <i class="fas fa-plus me-2"></i>Chọn tài sản
+        </button>
+
+        <form class="row g-3">
+          <div class="col-md-6">
+            <label for="documentNumber" class="form-label">Số biên bản (*)</label>
+            <input id="allocationCode" type="text" class="form-control" [value]="generatedCode" readonly />
+          </div>
+          <div class="col-md-6">
+            <label for="issueDate" class="form-label">Ngày cấp phát (*)</label>
+            <input id="issueDate" type="date" class="form-control" name="issueDate" [(ngModel)]="allocationDate"
+              (change)="generateCode()" required />
+          </div>
+          <div class="col-md-6">
+            <label for="employeeID" class="form-label">Chọn người (*)</label>
+            <ng-select [(ngModel)]="selectedAsset.EmployeeID" name="employeeID" [items]="employee" bindLabel="FullName"
+              bindValue="ID" placeholder="-- Chọn nhân viên --" (ngModelChange)="onEmployeeSelect($event)">
+            </ng-select>
+          </div>
+          <div class="col-md-6">
+            <label for="department" class="form-label">Phòng ban (*)</label>
+            <input type="text" class="form-control" [value]="selectedDepartmentName" disabled />
+          </div>
+          <div class="col-md-6">
+            <label for="department" class="form-label">Chức vụ (*)</label>
+            <input type="text" class="form-control" [value]="selectedPositionName" disabled />
+          </div>
+          <div class="col-md-6">
+            <label for="department" class="form-label">Ghi chú (*)</label>
+            <textarea class="form-control" name="reportLossDescription" [(ngModel)]="reportLossDescription" rows="4"
+              required></textarea>
+          </div>
+        </form>
+        <button class="btn btn-sm btn-primary mt-3" type="button" (click)="addRow()">
+          + Thêm dòng
+        </button>
+        <div #table class="mt-3" style="width: 100%"></div>
+      </div>
+      <!-- Footer -->
+      <div class="modal-footer">
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-success" (click)="saveAllocation()">Lưu dữ liệu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Chọn tài sản -->
+<div class="modal fade" id="selectAssetModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Chọn tài sản</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="card-body" style="margin-top:1rem;">
+          <div class="mb-2" id="datatablemanagement"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success mt-2" (click)="selectAssets()">Chọn và đóng</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>

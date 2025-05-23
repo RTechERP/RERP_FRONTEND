@@ -1,0 +1,357 @@
+# html
+<div class="layout-wrapper d-flex" style="height: 100%">
+  <div
+    class="offcanvas offcanvas-left custom-offcanvas border border-1"
+    tabindex="-1"
+    id="searchOffcanvas"
+    data-bs-backdrop="false"
+  >
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Tìm kiếm dự án</h5>
+      <button
+        type="button"
+        class="btn-close text-reset"
+        data-bs-dismiss="offcanvas"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="offcanvas-body pt-0 pb-0">
+      <div class="row h-auto">
+        <div class="col-12">
+          <div class="form-group">
+            <label>Từ ngày</label>
+            <input
+              type="date"
+              name="date_start"
+              value="{{dateS}}"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label>Đến ngày</label>
+            <input
+              type="date"
+              name="date_start"
+              value="{{dateE}}"
+              class="form-control form-control-sm"
+              required=""
+            />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label for="">Sale:</label>
+            <ng-select
+              [items]="users"
+              bindValue="ID"
+              bindLabel="FullName"
+              [(ngModel)]="selectedUser"
+              [searchable]="true"
+              placeholder="Sale..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.Code }} - {{ item.FullName }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.FullName }}
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label for="">PM:</label>
+            <ng-select
+              [items]="pms"
+              bindValue="ID"
+              bindLabel="FullName"
+              [(ngModel)]="selectedPm"
+              [searchable]="true"
+              placeholder="PM..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.Code }} - {{ item.FullName }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.FullName }}
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label for="">Kỹ thuật:</label>
+            <ng-select
+              [items]="users"
+              bindValue="ID"
+              bindLabel="FullName"
+              [(ngModel)]="selectedTechnical"
+              [searchable]="true"
+              placeholder="Kỹ thuật..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.Code }} - {{ item.FullName }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.FullName }}
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label for="">Lĩnh vực dự án:</label>
+            <ng-select
+              [items]="businessFields"
+              bindValue="ID"
+              bindLabel="Name"
+              [(ngModel)]="selectedBusinessField"
+              [searchable]="true"
+              placeholder="Lĩnh vực dự án..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.Code }} - {{ item.Name }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.Name }}
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label for="">Khách hàng:</label>
+            <ng-select
+              [items]="customers"
+              bindValue="ID"
+              bindLabel="CustomerName"
+              [(ngModel)]="selectedCustomer"
+              [searchable]="true"
+              placeholder="Khách hàng..."
+              [clearable]="true"
+              [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0"
+            >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100">
+                  <div class="col-3 ms-1">
+                    {{ item.CustomerCode }} - {{ item.CustomerName }}
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item">
+                {{ item.CustomerCode }}
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label for="">Kiểu dự án:</label>
+            <ng-select
+              [items]="projectTypes"
+              bindLabel="ProjectTypeName"
+              bindValue="ID"
+              [(ngModel)]="selectedProjectTypeIds"
+              [multiple]="true"
+              placeholder="Kiểu dự án..."
+              class="form-control form-control-sm p-0 border border-0"
+            >
+            </ng-select>
+          </div>
+          <div class="col-12 mt-2">
+            <div class="form-group">
+              <label for="">Trạng thái:</label>
+              <ng-select
+                [items]="projecStatuses"
+                bindLabel="StatusName"
+                bindValue="ID"
+                [(ngModel)]="selectedProjecStatusIds"
+                [multiple]="true"
+                placeholder="Trạng thái..."
+                class="form-control form-control-sm p-0 border border-0"
+              >
+              </ng-select>
+            </div>
+          </div>
+          <div class="col-12 mt-2">
+            <div class="form-group">
+              <label for="">Từ khóa:</label>
+              <input class="form-control form-control-sm" type="text" name="" id="" placeholder="Nhập từ khóa...">
+            </div>
+          </div>
+          <div class="col-12 mt-2">
+            <div class="form-group">
+              <button class="btn btn-primary">Áp dụng</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid project-container" id="projectParent">
+      <div class="row">
+        <div class="col-12 p-0">
+          <div class="card">
+            <div class="card-header p-0">
+              <div class="d-flex justify-content-start">
+                <button
+                  type="button"
+                  class="btn btn-outline-info m-1 ms-3"
+                  title="Tìm kiếm"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#searchOffcanvas"
+                >
+                  <i class="fas fa-search"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-primary m-1 m-1"
+                  title="Thêm mới"
+                >
+                  <i class="fas fa-plus"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-success m-1"
+                  title="Sửa"
+                >
+                  <i class="fas fa-pen"></i>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-danger m-1"
+                  title="Xóa"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <div class="card-body p-0">
+              <div class="row m-1 mt-2">
+                <div class="col-12">
+                  <div class="border border-primary">
+                    <div id="tb_projects"></div>
+                  </div>
+                </div>
+
+                <div class="col-3">
+                  <div class="border border-primary">
+                    <div id="tb_projectTypeLinks"></div>
+                  </div>
+                </div>
+                <div class="col-9">
+                  <div class="border border-primary">
+                    <div id="tb_projectitems"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+#css
+/* Đảm bảo phần thân đúng layout */
+.layout-wrapper {
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Thẻ offcanvas */
+.custom-offcanvas {
+  width: 300px;
+  position: absolute;
+  height: 100%;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 1;
+}
+
+/* Khi show, trượt vào */
+.offcanvas-left.show {
+  transform: translateX(0);
+}
+
+/* Container chính */
+.project-container {
+  width: 100%;
+  height: auto;
+  margin-left: 0;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  position: relative;
+  z-index: 0;
+}
+
+.card {
+  height: 100%;
+}
+
+.row {
+  height: 100%;
+}
+
+.offcanvas-left.show + .project-container {
+  margin-left: 300px;
+  width: calc(100% - 300px);
+}
+
+::ng-deep ng-select .ng-value-container {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+}
+
+
+

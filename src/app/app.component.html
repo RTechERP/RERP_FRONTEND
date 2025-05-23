@@ -17,14 +17,31 @@
             <!-- Sidebar menu starts -->
             <div class="sidebarMenuScroll">
                 <ul class="sidebar-menu">
-                    @for (item of menus; track item.ID) {
+                    <li><a routerLink="/assetsmanagement" routerLinkActive="active">Tài sản</a></li>
+                    <li><a routerLink="/assetallocation" routerLinkActive="active">Cấp phát tài sản</a></li>
+                    <li><a routerLink="/assetstatus" routerLinkActive="active">Trạng thái tài sản</a></li>
+
+                    <li><a routerLink="/typeassets" routerLinkActive="active">Loại tài sản</a></li>
+                    <li><a routerLink="/assetsresouce" routerLinkActive="active">Nguồn gốc tài sản</a></li>
+                    <li><a routerLink="/unitmanagement" routerLinkActive="active">Đơn vị    </a></li>
+                    <li><a routerLink="/TransferAssets" routerLinkActive="active">Điều chuyển tài sản</a></li>
+
+                    <li><a routerLink="/reportbroken" routerLinkActive="active">Danh sách báo hỏng</a></li>
+                    <li><a routerLink="/reportbroken" routerLinkActive="active">Danh sách báo mất</a></li>
+
+
+                    <!-- @for (item of menus; track item.ID) {
                     <li>
                         <a href="#" (click)="addComponent('a')">
                             <i class="bi bi-pie-chart"></i>
+
                             <span class="menu-text">{{item.MenuName}}</span>
                         </a>
                     </li>
-                    }
+                    } -->
+
+
+
 
                 </ul>
             </div>
@@ -61,12 +78,15 @@
                 <!-- Breadcrumb start -->
                 <ul class="nav nav-tabs" id="customTab2" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link active"data-bs-toggle="tab" href="#menu_1" role="tab"
-                            aria-controls="oneA" aria-selected="true">Tab One
-                            <span class="badge rounded-pill bg-danger ms-2" (click)="removeComponent()">x</span></a>
+                        <a class="nav-link active" data-bs-toggle="tab" href="#menu_1" role="tab" aria-controls="menu_1"
+                            aria-selected="true">
+                            Tab One
+                            <span class="badge rounded-pill bg-danger ms-2" (click)="removeComponent()">x</span>
+                        </a>
                     </li>
-                    
+
                 </ul>
+
                 <!-- Breadcrumb end -->
 
                 <!-- App header actions start -->
@@ -152,9 +172,7 @@
 
                 <!-- Container starts -->
                 <div class="container-fluid">
-                    <ng-template #viewcomponent></ng-template>
-                    
-
+                    <router-outlet></router-outlet>
                 </div>
                 <!-- Container ends -->
 
@@ -163,7 +181,7 @@
 
             <!-- App footer start -->
             <div class="app-footer">
-                <span>© Bootstrap Gallery 2023</span>
+                <span>Phút tơ </span>
             </div>
             <!-- App footer end -->
 
@@ -174,4 +192,3 @@
     <!-- Main container end -->
 
 </div>
-<router-outlet />
