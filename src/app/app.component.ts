@@ -5,10 +5,11 @@ import { EmployeesComponent } from './components/employees/employees.component';
 import { MenusComponent } from './components/menus/menus.component';
 import { MenuService } from './components/menus/menu-service/menu.service';
 import { DymanicComponentComponent } from './dymanic-component/dymanic-component.component';
+import { ProjectPartlistPriceRequestComponent } from "./components/project-partlist-price-request/project-partlist-price-request.component";
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet],
+    imports: [RouterOutlet, ProjectPartlistPriceRequestComponent],
     templateUrl: './app.component.html',
     styleUrl: './app.component.css'
 })

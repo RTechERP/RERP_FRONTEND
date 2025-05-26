@@ -27,9 +27,13 @@
               }
             ],
             "styles": [
+              "node_modules/@ng-select/ng-select/themes/default.theme.css",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": 
+            [
+              "node_modules/jquery/dist/jquery.min.js"
+            ]
           },
           "configurations": {
             "production": {

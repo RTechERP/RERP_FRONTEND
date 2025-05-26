@@ -1,0 +1,204 @@
+<div class="layout-wrapper d-flex" style="height: 100%">
+  <!-- Nút mở sidebar -->
+  <div
+    class="offcanvas offcanvas-left custom-offcanvas offcanvas-start"
+    tabindex="-1"
+    id="offcanvasSearch"
+    aria-labelledby="offcanvasSearchLabel"
+    data-bs-backdrop="false"
+  >
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvasSearchLabel">Tìm kiếm & Lọc</h5>
+      <div class="d-flex justify-content-end align-items-center">
+        <!-- <button class="btn btn-sm" (click)="toggleSidebarPin()">
+        <i
+          class="fa-solid"
+          [ngClass]="
+            sidebarPinned ? 'fas fa-thumbtack fa-rotate-90' : 'fa-thumbtack'
+          "
+        ></i>
+      </button> -->
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+    </div>
+    <div class="offcanvas-body">
+      <div class="mb-3">
+        <label for="dateStart" class="form-label">Từ ngày:</label>
+        <input
+          type="date"
+          class="form-control"
+          id="dateStart"
+          [(ngModel)]="filters.dateStart"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="dateEnd" class="form-label">Đến ngày:</label>
+        <input
+          type="date"
+          class="form-control"
+          id="dateEnd"
+          [(ngModel)]="filters.dateEnd"
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="statusRequest" class="form-label">Trạng thái:</label>
+        <select
+          class="form-select"
+          id="statusRequest"
+          [(ngModel)]="filters.statusRequest"
+        >
+          <option value="1">Tất cả</option>
+          <option value="2">Yêu cầu báo giá</option>
+          <option value="3">Đã báo giá</option>
+          <option value="4">Đã hoàn thành</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="projectId" class="form-label">Dự án:</label>
+        <ng-select
+          id="ProjectSelect"
+          [(ngModel)]="filters.projectId"
+          name="Project"
+          [items]="dtproject"
+          bindLabel="ProjectName"
+          bindValue="ID"
+          placeholder="Chọn dự án"
+          [searchable]="true"
+        >
+          <ng-template ng-option-tmp let-item="item">
+            <p>{{ item.ProjectCode }}--{{ item.ProjectName }}</p>
+          </ng-template>
+        </ng-select>
+      </div>
+
+      <div class="mb-3">
+        <label for="keyword" class="form-label">Từ khóa:</label>
+        <input
+          type="text"
+          class="form-control"
+          id="keyword"
+          [(ngModel)]="filters.keyword"
+        />
+      </div>
+      <div class="mb-3">
+        <label for="poKHID" class="form-label">PO:</label>
+
+        <ng-select
+          id="POKHSelect"
+          [(ngModel)]="filters.poKHID"
+          name="POKH"
+          [items]="dtPOKH"
+          bindLabel="POCode"
+          bindValue="ID"
+          placeholder="Chọn POKH"
+          [searchable]="true"
+        >
+        </ng-select>
+      </div>
+
+      <button class="btn btn-primary w-100 mb-2" (click)="applyFilters()">
+        Áp dụng
+      </button>
+      <button class="btn btn-outline-secondary w-100" (click)="resetFilters()">
+        Đặt lại
+      </button>
+    </div>
+  </div>
+  <app-project-partlist-price-request-form
+    *ngIf="showDetailModal"
+    [dataInput]="modalData"
+    (formSubmitted)="onFormSubmit()"
+    (closeModal)="showDetailModal = false"
+  >
+  </app-project-partlist-price-request-form>
+  <!-- Nội dung chính -->
+  <div class="project-container container-fluid">
+    <div class="card shadow-sm" style="height: 85vh">
+      <div class="card-header">
+        <div class="d-flex justify-content-start align-items-center">
+          <button
+            class="btn btn-outline-primary mt-2 ms-3"
+            type="button"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#offcanvasSearch"
+            aria-controls="offcanvasSearch"
+          >
+            <i class="fa fa-search me-1"></i>
+          </button>
+          <button
+            class="btn btn-outline-primary mt-2 ms-3"
+            (click)="onAddClick()"
+          >
+            <i class="fa-regular fa-plus"></i>Thêm
+          </button>
+          <button
+            class="btn btn-outline-success mt-2 ms-3"
+            (click)="onEditClick()"
+          >
+            <i class="fa-solid fa-pen-to-square"></i>Sửa
+          </button>
+          <button class="btn btn-outline-secondary mt-2 ms-3" (click)="onSaveData()">
+            <i class="fa-solid fa-floppy-disk"></i>Lưu dữ liệu
+          </button>
+          <button class="btn btn-outline-info mt-2 ms-3 " (click)="CheckPrice(true)">
+            <i class="fa-solid fa-list-check"></i> Check giá
+          </button>
+          <button class="btn btn-outline-danger mt-2 ms-3 " (click)="QuotePrice()">
+            <i class="fa-solid fa-hand-holding-dollar"></i>báo giá
+          </button>
+      </div>
+      <div class="card-body">
+        <div class="custom-tabs-container">
+          <ul class="nav nav-tabs" id="customTab" role="tablist">
+            <li
+              class="nav-item"
+              role="presentation"
+              *ngFor="let type of projectTypes; let i = index"
+            >
+              <a
+                class="nav-link"
+                [class.active]="activeTabId === type.ProjectTypeID"
+                [id]="'tab-' + type.ProjectTypeID"
+                data-bs-toggle="tab"
+                [href]="'#pane-' + type.ProjectTypeID"
+                role="tab"
+                [attr.aria-controls]="'pane-' + type.ProjectTypeID"
+                [attr.aria-selected]="activeTabId === type.ProjectTypeID"
+                (click)="selectProjectType(type.ProjectTypeID)"
+              >
+                {{ type.ProjectTypeName }}
+              </a>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="customTabContent">
+            <div
+              class="tab-pane fade"
+              *ngFor="let type of projectTypes"
+              [class.show]="activeTabId === type.ProjectTypeID"
+              [class.active]="activeTabId === type.ProjectTypeID"
+              [id]="'pane-' + type.ProjectTypeID"
+              role="tabpanel"
+              [attr.aria-labelledby]="'tab-' + type.ProjectTypeID"
+            >
+              <div class="p-3">
+                <div
+                  [id]="'datatable-' + type.ProjectTypeID"
+                  class="tabulator-container"
+                ></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
