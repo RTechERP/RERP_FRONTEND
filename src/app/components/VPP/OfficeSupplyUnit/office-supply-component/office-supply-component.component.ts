@@ -35,7 +35,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
     } else {
       this.table = new Tabulator('#datatable', {
         layout: 'fitDataFill',
-        height: '70vh',
+        height: '75vh',
         pagination: true,
         paginationSize: 50,
         movableColumns: true,
