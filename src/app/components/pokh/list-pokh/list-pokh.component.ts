@@ -8,14 +8,18 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { error, event } from 'jquery';
 import { CustomerPartComponent } from '../../vision-base/customer-part/customer-part.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { CustomerPartService } from '../../vision-base/customer-part/customer-part/customer-part.service';
+
 
 @Component({
   selector: 'app-list-pokh',
-  imports: [CommonModule, FormsModule, NgSelectModule, CustomerPartComponent],
+  imports: [CommonModule, FormsModule, NgSelectModule],
   templateUrl: './list-pokh.component.html',
   styleUrls: ['./list-pokh.component.css']
 })
 export class ListPokhComponent implements OnInit, AfterViewInit {
+  constructor(private pokhService: PokhServiceService, private modalService: NgbModal, private customerPartService: CustomerPartService) { }
+
   @ViewChild('pokhTable', { static: false }) tableElement!: ElementRef;
   @ViewChild('productTable', { static: false }) productTableElement!: ElementRef;
   @ViewChild('fileTable', { static: false }) fileTableElement!: ElementRef;
@@ -36,7 +40,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   selectedProduct: any = null;
   detailUser: any[] = [];
   selectedRow: any = null;
-  nextRowId: number = 1;
+  nextRowId: number = 0;
   selectedId: number = 0;
   Products: any[] = [];
   uploadedFiles: any[] = [];
@@ -57,6 +61,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     poCode: '',
     customerId: 0,
     endUser: '',
+    customerName: '',
     userId: 0,
     poDate: new Date(),
     totalPO: 0,
@@ -66,9 +71,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     departmentId: 0,
     note: '',
     currencyId: 0,
-    isBigAccount: false
+    isBigAccount: false,
+    warehouseId: 1,
   };
-  constructor(private pokhService: PokhServiceService, private modalService: NgbModal) { }
 
   ngOnInit(): void {
     const startDate = new Date('2025-02-10T12:00:00');
@@ -77,26 +82,45 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       console.log(this.pokhs);
       if (this.table) {
         this.table.setData(this.pokhs);
+        this.loadFormData();
+
       }
-      this.loadFormData();
     });
   }
 
   ngAfterViewInit(): void {
     this.initTable();
+
   }
-  openModalPOCode() { 
-     const modalRef = this.modalService.open(CustomerPartComponent, {
+  openModalPOCode() {
+    if (!this.selectedCustomer) {
+      alert('Vui lòng chọn khách hàng trước!');
+      return;
+    }
+
+    const modalRef = this.modalService.open(CustomerPartComponent, {
       centered: true,
       size: 'xl',
       backdrop: 'static',
-      
     });
+
+    modalRef.componentInstance.customerId = this.selectedCustomer.ID;
+
+    modalRef.result.then(
+      (result) => {
+        if (result) {
+          this.loadPart(this.selectedCustomer.ID);
+        }
+      },
+      (reason) => {
+        console.log('Modal dismissed');
+      }
+    );
   }
   //SAVE
   savePOKH() {
     const pokhData = this.getPOKHData();
-    const details = this.getPOKHDetails();
+    const details = this.ProductDetailTreeList.getData();
 
     console.log('POKH Data:', pokhData);
     console.log('Details:', details);
@@ -104,11 +128,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       alert('Vui lòng thêm chi tiết sản phẩm');
       return;
     }
+
     const requestBody = {
       POKH: pokhData,
-      pOKHDetails: details
+      pOKHDetails: this.getTreeRows(details)
     };
-    console.log('Request Body:', requestBody);
+
     //api call
     this.pokhService.handlePOKH(requestBody).subscribe({
       next: (response) => {
@@ -121,95 +146,47 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       }
     })
   }
+  getTreeRows(data: any[]): any[] {
+    let dataTree: any[] = [];
+
+    data.forEach((row) => {
+      dataTree.push(row);
+
+      if (row._children && Array.isArray(row._children)) {
+        dataTree = dataTree.concat(
+          this.getTreeRows(row._children)
+        );
+      }
+    });
+    return dataTree;
+  }
   getPOKHData() {
     const poDate = new Date(this.poFormData.poDate || new Date());
     return {
-      status: this.poFormData.status || 0,
-      userId: this.poFormData.userId || 0,
-      poCode: this.poFormData.poCode || '',
-      receivedDatePO: poDate,
-      totalMoneyPO: this.poFormData.totalPO || 0,
-      totalMoneyKoVAT: this.calculateTotalMoneyKoVAT(),
-      note: this.poFormData.note || '',
-      customerId: this.poFormData.customerId || 0,
-      partId: this.poFormData.partId || 0,
-      projectId: this.poFormData.projectId || 0,
-      poType: this.poFormData.poType || 0,
-      newAccount: this.poFormData.isBigAccount || false,
-      endUser: this.poFormData.endUser || '',
-      isBill: this.poFormData.isBill || false,
-      userType: this.poFormData.userType || 0,
-      quotationId: this.poFormData.quotationId || 0,
-      poNumber: this.poFormData.poNumber || '',
-      warehouseId: this.poFormData.warehouseId || 0,
-      currencyId: this.poFormData.currencyId || 0,
-      year: poDate.getFullYear(),
-      month: poDate.getMonth() + 1
+      Status: this.poFormData.status || 0,
+      UserID: this.poFormData.userId || 0,
+      POCode: this.poFormData.poCode || '',
+      ReceivedDatePO: poDate,
+      TotalMoneyPO: this.poFormData.totalPO || 0,
+      TotalMoneyKoVAT: this.calculateTotalMoneyKoVAT(),
+      Note: this.poFormData.note || '',
+      
+      CustomerID: this.selectedCustomer.ID || 0,
+      PartID: this.poFormData.departmentId || 0,
+      ProjectID: this.poFormData.projectId || 0,
+      CustomerName: this.poFormData.customerName || '',
+      POType: this.poFormData.poType || 0,
+      NewAccount: this.poFormData.isBigAccount || false,
+      EndUser: this.poFormData.endUser || '',
+      IsBill: this.poFormData.isBill || false,
+      UserType: this.poFormData.userType || 0,
+      QuotationID: this.poFormData.quotationId || 0,
+      PONumber: this.poFormData.poNumber || '',
+      WarehouseID: this.poFormData.warehouseId || 0,
+      CurrencyID: this.poFormData.currencyId || 0,
+      Year: poDate.getFullYear(),
+      Month: poDate.getMonth() + 1
     };
-  }
-
-  getPOKHDetails() {
-    if (!this.ProductDetailTreeList) {
-      console.error('ProductDetailTreeList chưa được khởi tạo');
-      return [];
-    }
-
-    const treeData = this.ProductDetailTreeList.getData();
-    console.log('Raw Tree Data:', treeData);
-
-    if (!treeData || treeData.length === 0) {
-      console.warn('Không có dữ liệu chi tiết sản phẩm');
-      return [];
-    }
-
-    const processRows = (rows: any[], parentId: number | null = null, level: number = 0): any[] => {
-      if (!rows || !Array.isArray(rows)) return [];
-
-      let result: any[] = [];
-
-      rows.forEach((row, index) => {
-        if (!row) return;
-
-        console.log(`Processing row level ${level}, index ${index}:`, row);
-
-        const rowData = {
-          ProductId: row.productId || (row.id ? Number(row.id) : null),
-          Qty: row.Qty ? Number(row.Qty) : 0,
-          UnitPrice: row.UnitPrice ? Number(row.UnitPrice) : 0,
-          IntoMoney: (row.Qty ? Number(row.Qty) : 0) * (row.UnitPrice ? Number(row.UnitPrice) : 0),
-          FilmSize: row.FilmSize || null,
-          Vat: row.VAT ? Number(row.VAT) : 0,
-          BillNumber: row.BillNumber || null,
-          BillDate: row.BillDate ? new Date(row.BillDate) : null,
-          TotalPriceIncludeVAT: row.TotalPriceIncludeVAT ? Number(row.TotalPriceIncludeVAT) : 0,
-          DeliveryRequestedDate: row.DeliveryRequestedDate ? new Date(row.DeliveryRequestedDate) : null,
-          PayDate: row.PayDate ? new Date(row.PayDate) : null,
-          EstimatedPay: row.EstimatedPay ? Number(row.EstimatedPay) : 0,
-          QuotationDetailId: row.quotationDetailId ? Number(row.quotationDetailId) : null,
-          GuestCode: row.GuestCode || null,
-          Debt: row.Debt ? Number(row.Debt) : 0,
-          UserReceiver: row.UserReceiver || null,
-          Note: row.Note || null,
-          NetUnitPrice: row.netUnitPrice ? Number(row.netUnitPrice) : 0,
-          ProjectPartListId: row.projectPartListId ? Number(row.projectPartListId) : null,
-          Spec: row.Spec || null,
-          ParentId: parentId,
-          Stt: index + 1
-        };
-
-        result.push(rowData);
-
-        // Xử lý các sản phẩm con nếu có
-        if (row._children && Array.isArray(row._children) && row._children.length > 0) {
-          const childRows = processRows(row._children, rowData.ProductId, level + 1);
-          result = result.concat(childRows);
-        }
-      });
-
-      return result;
-    };
-
-    return processRows(treeData);
   }
 
   calculateTotalMoneyKoVAT() {
@@ -226,7 +203,16 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.closeModal();
   }
   uploadFiles(pokhId: number) {
-    this.pokhService.uploadFiles(this.uploadedFiles, pokhId)
+    const formData = new FormData();
+    
+    // Thêm từng file vào FormData
+    this.uploadedFiles.forEach(fileObj => {
+      if (fileObj.file) {
+        formData.append('files', fileObj.file);
+      }
+    });
+
+    this.pokhService.uploadFiles(formData, pokhId)
       .subscribe({
         next: (response) => {
           console.log('Upload files thành công');
@@ -283,7 +269,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'End User', field: 'EndUser', sorter: 'string', width: 150 },
         { title: 'Ghi chú', field: 'Note', sorter: 'string', width: 200 },
         { title: 'Công nợ', field: 'Debt', sorter: 'number', width: 120, formatter: 'money' },
-        { title: 'Hóa đơn', field: 'BillCode', sorter: 'string', width: 150 },
+        { title: 'Hóa đơn', field: 'ImportStatus', sorter: 'string', width: 150 },
         { title: 'Đặt hàng', field: 'PONumber', sorter: 'string', width: 150 }
       ]
     });
@@ -304,7 +290,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     this.productTable = new Tabulator(this.productTableElement.nativeElement, {
       data: this.POKHProduct,
+      dataTree: true,
       layout: 'fitDataFill',
+      dataTreeStartExpanded: true,
       pagination: true,
       paginationSize: 3,
       height: '18vh',
@@ -342,6 +330,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       ]
     });
   }
+
   initFileTable(): void {
     if (!this.fileTableElement || !this.fileTableElement.nativeElement) return;
 
@@ -353,12 +342,19 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       data: this.POKHFiles,
       layout: 'fitDataFill',
       pagination: true,
-      paginationSize: 3,
+      paginationSize: 5,
       height: '18vh',
       movableColumns: true,
       resizableRows: true,
       columns: [
-        { title: 'Tên file', field: 'FileName', sorter: 'string', width: 373 },
+        { 
+          title: 'STT', 
+          formatter: "rownum", 
+          width: '10%',
+          hozAlign: "center",
+          headerSort: false
+        },
+        { title: 'Tên file', field: 'OriginPath', sorter: 'string', width: '90%' },
       ]
     });
   }
@@ -406,7 +402,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     if (!this.isResponsibleUsersEnabled) this.selectedProduct = null;
   }
   loadCustomers(): void {
-    this.pokhService.getCustomer().subscribe(
+    this.customerPartService.getCustomer().subscribe(
       response => {
         if (response.status === 1) {
           this.customers = response.data;
@@ -464,10 +460,10 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     );
   }
   loadPart(id: number): void {
-    this.pokhService.getPart(id).subscribe(
+    this.customerPartService.getPart(id).subscribe(
       response => {
         if (response.status === 1) {
-          this.parts = response.data;
+          this.parts = response.data[0];
         } else {
           console.error('Lỗi khi tải phòng ban:', response.message);
         }
@@ -495,9 +491,14 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.pokhService.getPOKHProduct(id, idDetail).subscribe(
       response => {
         if (response.status === 1) {
-          this.POKHProduct = response.data;
+          // Chuyển đổi dữ liệu phẳng thành cấu trúc cây
+          const flatData = response.data;
+          const treeData = this.convertToTreeData(flatData);
+          this.POKHProduct = treeData;
+          
           setTimeout(() => {
             this.initProductTable();
+            console.log(this.POKHProduct);
           }, 0);
         } else {
           console.error('Lỗi khi tải chi tiết POKH:', response.message);
@@ -507,6 +508,34 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         console.error('Lỗi kết nối khi tải chi tiết POKH:', error);
       }
     );
+  }
+
+  // Hàm chuyển đổi dữ liệu phẳng thành cấu trúc cây
+  private convertToTreeData(flatData: any[]): any[] {
+    const treeData: any[] = [];
+    const map = new Map();
+
+    // Đầu tiên, tạo map với key là ID của mỗi item
+    flatData.forEach(item => {
+      map.set(item.ID, { ...item, _children: [] });
+    });
+
+    // Sau đó, xây dựng cấu trúc cây
+    flatData.forEach(item => {
+      const node = map.get(item.ID);
+      if (item.ParentID === 0) {
+        // Nếu là node gốc (không có parent)
+        treeData.push(node);
+      } else {
+        // Nếu là node con, thêm vào mảng _children của parent
+        const parent = map.get(item.ParentID);
+        if (parent) {
+          parent._children.push(node);
+        }
+      }
+    });
+
+    return treeData;
   }
   loadPOKHFiles(id: number = 0): void {
     this.pokhService.getPOKHFile(id).subscribe(
@@ -616,10 +645,52 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Số lượng', field: 'Qty', sorter: 'number', width: 250, editor: "number" },
         { title: 'Kích thước phim cắt/Model', field: 'FilmSize', sorter: 'string', width: 250, editor: "input" },
         { title: 'ĐVT', field: 'Unit', sorter: 'string', width: 250, editor: "input" },
-        { title: 'Đơn giá trước VAT', field: 'UnitPrice', sorter: 'number', width: 250, editor: "number" },
-        { title: 'Tổng tiền trước VAT', field: 'IntoMoney', sorter: 'number', width: 250, editor: "number" },
-        { title: 'VAT (%)', field: 'VAT', sorter: 'number', width: 250, editor: "number" },
-        { title: 'Tổng tiền sau VAT', field: 'TotalPriceIncludeVAT', sorter: 'number', width: 250, editor: "number" },
+        { title: 'Đơn giá NET', field: 'NetUnitPrice', sorter: 'number', width: 250, editor: "number",formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+        }},
+        { title: 'Đơn giá trước VAT', field: 'UnitPrice', sorter: 'number', width: 250, editor: "number",formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+        } },
+        { title: 'Tổng tiền trước VAT', field: 'IntoMoney', sorter: 'number', width: 250, editor: "number",formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+        } },
+        {
+          title: 'VAT (%)',
+          field: 'VAT',
+          sorter: 'number',   
+          width: 250,
+          editor: "number",  
+          formatter: function(cell, formatterParams, onRendered) {
+            const value = cell.getValue(); 
+            if (value !== null && value !== undefined && !isNaN(Number(value))) {
+              return value + "%"; 
+            }
+            return "";
+          }
+        },
+        { title: 'Tổng tiền sau VAT', field: 'TotalPriceIncludeVAT', sorter: 'number', width: 250, editor: "number",formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+        } },
         { title: 'Người nhận', field: 'UserReceiver', sorter: 'string', width: 250, editor: "input" },
         { title: 'Ngày yêu cầu giao hàng', field: 'DeliveryRequestedDate', sorter: 'string', width: 250, formatter: this.dateFormatter, editor: "date" },
         { title: 'Thanh toán dự kiến', field: 'EstimatedPay', sorter: 'number', width: 250, editor: "number" },
@@ -639,11 +710,14 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         if (selectedProduct) {
           const row = cell.getRow();
           row.update({
+            productId: selectedProduct.ID,
             ProductCode: selectedProduct.ProductCode,
             ProductName: selectedProduct.ProductName,
             Unit: selectedProduct.Unit,
+            Maker: selectedProduct.Maker,
             ProductGroupName: selectedProduct.ProductGroupName
           });
+          console.log("rowEdited: ", row);
         }
       }
       this.handleCellValueChange(cell);
@@ -668,15 +742,16 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     const vat = row.getData().VAT || 0;
     const billDate = row.getData().BillDate;
     const debt = row.getData().Debt || 0;
+    const intoMoney = quantity * unitPrice;
+    const totalWithVAT = intoMoney + (intoMoney * (vat / 100));
 
     try {
-      // Tính thành tiền
+      // Tính thành tiền và tổng tiền bao gồm VAT
       if (unitPrice >= 0 && quantity > 0) {
         if (columnField === 'Qty' || columnField === 'UnitPrice' || columnField === 'VAT') {
-          const intoMoney = quantity * unitPrice;
           row.update({
             IntoMoney: intoMoney,
-            TotalPriceIncludeVAT: intoMoney + (intoMoney * (vat / 100))
+            TotalPriceIncludeVAT: totalWithVAT
           });
           this.calculateTotal();
         }
@@ -695,7 +770,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         });
       }
 
-      // Tính ngày thanh toán
+      // Tính ngày thanh toán dựa trên ngày hóa đơn và số ngày công nợ
       if (columnField === 'BillDate' || columnField === 'Debt') {
         if (billDate) {
           const payDate = new Date(billDate);
@@ -723,14 +798,24 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       if (rowData["TotalPriceIncludeVAT"] !== undefined && !isNaN(rowData["TotalPriceIncludeVAT"])) {
         totalSum += Number(rowData["TotalPriceIncludeVAT"]);
       }
+      // Tính tổng tiền của các sản phẩm con nếu có
+      if (rowData["_children"] && rowData["_children"].length > 0) {
+        rowData["_children"].forEach((child: any) => {
+          if (child.TotalPriceIncludeVAT !== undefined && !isNaN(child.TotalPriceIncludeVAT)) {
+            totalSum += Number(child.TotalPriceIncludeVAT);
+          }
+        });
+      }
     });
     this.poFormData.totalPO = totalSum;
     console.log("Tổng giá trị sau VAT:", this.poFormData.totalPO);
-  };
+  }
 
   addNewRow(): void {
+    this.nextRowId = this.nextRowId - 1;
     const newRow = {
-      id: "new_" + this.nextRowId++,
+      ID: this.nextRowId,
+      ProductID: null,
       STT: this.POKHProduct.length + 1,
       ProductNewCode: "",
       ProductCode: "",
@@ -743,6 +828,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       UnitPrice: 0,
       IntoMoney: 0,
       VAT: 0,
+      NetUnitPrice: 0,
       TotalPriceIncludeVAT: 0,
       UserReceiver: "",
       DeliveryRequestedDate: null,
@@ -754,9 +840,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       GroupPO: "",
       ActualDeliveryDate: null,
       RecivedMoneyDate: null,
-      QuantityReturn: 0,
-      QuantityExport: 0,
-      QuantityRemain: 0,
+      ParentId: 0,
       _children: []
     };
 
@@ -764,7 +848,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     if (this.ProductDetailTreeList) {
       this.ProductDetailTreeList.addRow(newRow);
-      this.ProductDetailTreeList.scrollToRow(newRow.id, "bottom", true);
+      this.ProductDetailTreeList.scrollToRow(newRow.ID, "bottom", true);
     }
   }
   addChildRow(): void {
@@ -774,8 +858,10 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       alert("Vui lòng chọn một sản phẩm trước khi thêm sản phẩm con!");
       return;
     }
+    this.nextRowId = this.nextRowId - 1;
+    const parentData = this.selectedRow.getData();
     const childRow = {
-      id: "child_" + this.nextRowId++,
+      ID: this.nextRowId,
       STT: this.selectedRow.getData()['_children'] ? this.selectedRow.getData()['_children'].length + 1 : 1,
       ProductNewCode: "",
       ProductCode: "",
@@ -788,6 +874,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       UnitPrice: 0,
       IntoMoney: 0,
       VAT: 0,
+      NetUnitPrice: 0,
       TotalPriceIncludeVAT: 0,
       UserReceiver: "",
       DeliveryRequestedDate: null,
@@ -799,9 +886,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       GroupPO: "",
       ActualDeliveryDate: null,
       RecivedMoneyDate: null,
-      QuantityReturn: 0,
-      QuantityExport: 0,
-      QuantityRemain: 0,
+      ParentId: parentData.ID,
       _children: []
     };
     this.selectedRow.addTreeChild(childRow);
@@ -853,19 +938,20 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             autocomplete: true
           },
         },
-        { title: 'Phần trăm', field: 'PercentUser', sorter: 'number', editor: "input", width: '30%',
+        {
+          title: 'Phần trăm', field: 'PercentUser', sorter: 'number', editor: "input", width: '30%',
           cellEdited: (cell) => {
             const totalPO = this.getTotalPOValue();
             const percentValue = parseFloat(cell.getValue()) || 0;
             const moneyValue = totalPO * (percentValue / 100);
-            cell.getRow().update({MoneyUser: moneyValue});
+            cell.getRow().update({ MoneyUser: moneyValue });
           }
         },
         { title: 'Tiền theo phần trăm', field: 'MoneyUser', sorter: 'number', editor: "input", width: '30%' },
       ]
     });
   }
-  
+
   getTotalPOValue(): number {
     this.calculateTotal();
     return this.poFormData.totalPO;
@@ -912,7 +998,8 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           title: 'Hành động',
           field: 'actions',
           formatter: (cell) => {
-            return `<button class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>`;
+            const rowIndex = cell.getRow().getIndex();
+            return `<button class="btn btn-sm btn-danger" onclick="window.deleteFile(${rowIndex})"><i class="bi bi-trash"></i></button>`;
           },
           width: "10%",
           hozAlign: "center",
@@ -923,7 +1010,21 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Ngày tải lên', field: 'uploadDate', sorter: 'date', width: "10%" }
       ]
     });
+
+    (window as any).deleteFile = (index: number) => {
+      this.deleteFile(index);
+    };
   }
+
+  deleteFile(index: number): void {
+    if (confirm('Bạn có chắc chắn muốn xóa file này?')) {
+      this.uploadedFiles.splice(index, 1);
+      if (this.fileUploadedTable) {
+        this.fileUploadedTable.setData(this.uploadedFiles);
+      }
+    }
+  }
+
   onUploadClick() {
     if (!this.fileInput || !this.fileInput.nativeElement) {
       console.error('File input element not found');
@@ -932,9 +1033,14 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     const files = this.fileInput.nativeElement.files;
     if (files && files.length > 0) {
+      const MAX_FILE_SIZE = 50 * 1024 * 1024; 
       Array.from(files).forEach(file => {
-        this.addFileToTable(file as File);
-        console.log(this.uploadedFiles);
+        const fileObj = file as File;
+        if (fileObj.size > MAX_FILE_SIZE) {
+          alert(`File ${fileObj.name} vượt quá giới hạn dung lượng cho phép (50MB)`);
+          return;
+        }
+        this.addFileToTable(fileObj);
       });
       this.fileInput.nativeElement.value = '';
     }
@@ -945,7 +1051,8 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       fileName: file.name,
       fileSize: this.formatFileSize(file.size),
       fileType: this.getFileType(file.name),
-      uploadDate: new Date().toLocaleDateString('vi-VN')
+      uploadDate: new Date().toLocaleDateString('vi-VN'),
+      file: file  // Lưu file gốc
     };
     this.uploadedFiles.push(newFile);
     if (this.fileUploadedTable) {

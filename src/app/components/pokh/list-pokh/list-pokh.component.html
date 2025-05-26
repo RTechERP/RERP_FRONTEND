@@ -128,7 +128,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label for="txtTotalPO" class="form-label">Tổng tiền PO</label>
-                                        <input type="" class="form-control" id="txtTotalPO"
+                                        <input type="" class="form-control" id="txtTotalPO" readonly
                                             [(ngModel)]="poFormData.totalPO">
                                     </div>
                                     <div class="col-md-3">
@@ -162,7 +162,7 @@
                                     <div class="col-md-3">
                                         <label for="cbPart" class="form-label">Bộ phận</label>
                                         <select class="form-select" id="cbPart" [(ngModel)]="poFormData.departmentId">
-                                            <option [value]="0">Chọn bộ phận</option>
+                                            <option [value]="0">-----Chọn bộ phận-----</option>
                                             <option *ngFor="let part of parts" [value]="part.ID">{{part.PartName}}
                                             </option>
                                         </select>
@@ -194,7 +194,7 @@
                                     <div class="grid-section file-upload-section">
                                         <h5>File đính kèm</h5>
                                         <div class="mb-3 d-flex align-items-center">
-                                            <input type="file"  class="form-control w-auto me-2" #fileInput 
+                                            <input type="file" multiple class="form-control w-auto me-2" #fileInput 
                                                 style="max-width: 300px;">
                                             <button class="btn btn-primary" (click)="onUploadClick()">
                                                 <i class="bi bi-upload"></i> Upload

@@ -7,72 +7,25 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Khách hàng</label>
-                    <select class="form-select">
-                        <option value="" selected disabled>Chọn khách hàng...</option>
-                    </select>
+                    <ng-select 
+                        bindLabel="CustomerName" 
+                        [(ngModel)]="selectedCustomer" 
+                        [items]="customers" 
+                        (change)="onCustomerChange($event)">
+                    </ng-select>
                 </div>
                 
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;"></th>
-                                <th style="width: 40px;"></th>
-                                <th>Mã bộ phận</th>
-                                <th>Tên bộ phận</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary">
-                                        <i class="bi bi-plus"></i>
-                                    </button>
-                                </td>
-                                <td>BP001</td>
-                                <td>Phòng kỹ thuật</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary">
-                                        <i class="bi bi-plus"></i>
-                                    </button>
-                                </td>
-                                <td>BP002</td>
-                                <td>Phòng kinh doanh</td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <button class="btn btn-sm btn-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary">
-                                        <i class="bi bi-plus"></i>
-                                    </button>
-                                </td>
-                                <td>BP003</td>
-                                <td>Phòng tài chính</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary mb-2" (click)="addNewRow()">
+                        <i class="bi bi-plus-circle"></i> Thêm mới
+                    </button>
+                    <div #CustomerPartTable></div>
                 </div>
             </div>
             
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">
+                <button type="button" class="btn btn-primary" (click)="saveCustomerParts()" >
                     <i class="bi bi-save"></i> Cất & Đóng
                 </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="closeModal()">Đóng</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal()">Đóng</button>
             </div>

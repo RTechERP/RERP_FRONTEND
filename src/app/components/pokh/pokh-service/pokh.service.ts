@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { param } from 'jquery';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -55,21 +56,12 @@ export class PokhServiceService {
     return this.http.get<any>(this._url + 'GetTypePO');
   }
 
-  getPart(id: number): Observable<any> {
-    return this.http.get<any>(this._url + 'GetPart', {
-      params: {
-        id: id.toString()
-      }
-    });
-  }
 
   getCurrency(): Observable<any> {
     return this.http.get<any>(this._url + 'GetCurrency');
   }
 
-  getCustomer(): Observable<any> {
-    return this.http.get<any>(this._url + 'GetCustomer');
-  }
+
   getPOKHProduct(id: number = 0, idDetail: number = 0): Observable<any> {
     return this.http.get<any>(this._url + 'LoadPOKHProduct', {
       params: {
@@ -110,14 +102,8 @@ export class PokhServiceService {
       }
     )
   }
-  uploadFiles(files: File[], id: number): Observable<any> {
-    const formData = new FormData();
-    files.forEach(file => {
-      formData.append('files', file);
-    });
-    formData.append('poKHID', id.toString());
-
-    return this.http.post<any>(this._url + 'Upload', formData);
+  uploadFiles(formData: FormData, pokhId: number): Observable<any> {
+    return this.http.post<any>(`${this._url}Upload?poKHID=${pokhId}`, formData);
   }
   
 }
