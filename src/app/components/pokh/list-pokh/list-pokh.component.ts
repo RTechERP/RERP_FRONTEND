@@ -121,9 +121,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   savePOKH() {
     const pokhData = this.getPOKHData();
     const details = this.ProductDetailTreeList.getData();
+    const detailUsers = this.DetailUser.getData();
 
     console.log('POKH Data:', pokhData);
     console.log('Details:', details);
+    console.log('Detail Users:', detailUsers);
+
     if (!details || details.length === 0) {
       alert('Vui lòng thêm chi tiết sản phẩm');
       return;
@@ -131,7 +134,8 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     const requestBody = {
       POKH: pokhData,
-      pOKHDetails: this.getTreeRows(details)
+      pOKHDetails: this.getTreeRows(details),
+      pOKHDetailsMoney: detailUsers,
     };
 
     //api call
