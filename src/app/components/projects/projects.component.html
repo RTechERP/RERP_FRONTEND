@@ -6,10 +6,10 @@
     data-bs-backdrop="false"
   >
     <div class="offcanvas-header pt-0 mt-2 pb-0 mb-2">
-      <h5 class="offcanvas-title">Tìm kiếm</h5>
+      <h5 class="offcanvas-title fs-12">Tìm kiếm</h5>
       <button
         type="button"
-        class="btn-close text-reset"
+        class="btn-close text-reset fs-12"
         data-bs-dismiss="offcanvas"
         aria-label="Close"
       ></button>
@@ -18,31 +18,31 @@
       <div class="row h-auto">
         <div class="col-12">
           <div class="form-group">
-            <label>Từ ngày</label>
+            <label class="fs-12">Từ ngày</label>
             <input
               type="date"
               name="date_start"
               [(ngModel)]="dateS"
-              class="form-control form-control-sm"
+              class="form-control form-control-sm fs-12"
               required=""
             />
           </div>
         </div>
         <div class="col-12 mt-2">
           <div class="form-group">
-            <label>Đến ngày</label>
+            <label class="fs-12">Đến ngày</label>
             <input
               type="date"
               name="date_start"
               [(ngModel)]="dateE"
-              class="form-control form-control-sm"
+              class="form-control form-control-sm fs-12"
               required=""
             />
           </div>
         </div>
         <div class="col-12 mt-2">
           <div class="form-group">
-            <label for="">Sale</label>
+            <label for="" class="fs-12">Sale</label>
             <ng-select
               [items]="users"
               bindValue="ID"
@@ -52,27 +52,29 @@
               placeholder="Chọn sale..."
               [clearable]="true"
               [virtualScroll]="true"
-              class="form-control form-control-sm p-0 border border-0"
+              class="form-control form-control-sm p-0 border border-0 fs-12"
             >
               <!-- Template hiển thị các lựa chọn trong dropdown -->
               <ng-template ng-option-tmp let-item="item">
-                <div class="row text-dark w-100">
-                  <div class="col-3 ms-1">
-                    {{ item.Code }} - {{ item.FullName }}
+                <div class="row text-dark w-100 fs-12">
+                  <div class="col-3 ms-1 fs-12">
+                    <span class="fs-12"
+                      >{{ item.Code }} - {{ item.FullName }}</span
+                    >
                   </div>
                 </div>
               </ng-template>
 
               <!-- Template hiển thị sau khi chọn -->
               <ng-template ng-label-tmp let-item="item">
-                {{ item.FullName }}
+                <span class="fs-12">{{ item.FullName }}</span>
               </ng-template>
             </ng-select>
           </div>
         </div>
         <div class="col-12 mt-2">
           <div class="form-group">
-            <label for="">PM</label>
+            <label for="" class="fs-12">PM</label>
             <ng-select
               [items]="pms"
               bindValue="EmployeeID"
@@ -82,27 +84,29 @@
               placeholder="Chọn pm..."
               [clearable]="true"
               [virtualScroll]="true"
-              class="form-control form-control-sm p-0 border border-0"
+              class="form-control form-control-sm p-0 border border-0 fs-12"
             >
               <!-- Template hiển thị các lựa chọn trong dropdown -->
               <ng-template ng-option-tmp let-item="item">
-                <div class="row text-dark w-100">
+                <div class="row text-dark w-100 fs-12">
                   <div class="col-3 ms-1">
-                    {{ item.Code }} - {{ item.FullName }}
+                    <span class="fs-12"
+                      >{{ item.Code }} - {{ item.FullName }}</span
+                    >
                   </div>
                 </div>
               </ng-template>
 
               <!-- Template hiển thị sau khi chọn -->
               <ng-template ng-label-tmp let-item="item">
-                {{ item.FullName }}
+                <span class="fs-12">{{ item.FullName }}</span>
               </ng-template>
             </ng-select>
           </div>
         </div>
         <div class="col-12 mt-2">
           <div class="form-group">
-            <label for="">Kỹ thuật</label>
+            <label for="" class="fs-12">Kỹ thuật</label>
             <ng-select
               [items]="users"
               bindValue="ID"
@@ -112,27 +116,28 @@
               placeholder="Chọn kỹ thuật thực hiện..."
               [clearable]="true"
               [virtualScroll]="true"
-              class="form-control form-control-sm p-0 border border-0"
+              class="form-control form-control-sm p-0 border border-0 fs-12"
             >
               <!-- Template hiển thị các lựa chọn trong dropdown -->
               <ng-template ng-option-tmp let-item="item">
-                <div class="row text-dark w-100">
-                  <div class="col-3 ms-1">
-                    {{ item.Code }} - {{ item.FullName }}
-                  </div>
+                <div class="row text-dark w-100 fs-12">
+                  <span class="fs-12"
+                    >{{ item.Code }} - {{ item.FullName }}</span
+                  >
+                  <div class="col-3 ms-1"></div>
                 </div>
               </ng-template>
 
               <!-- Template hiển thị sau khi chọn -->
               <ng-template ng-label-tmp let-item="item">
-                {{ item.FullName }}
+                <span class="fs-12">{{ item.FullName }}</span>
               </ng-template>
             </ng-select>
           </div>
         </div>
         <div class="col-12 mt-2">
           <div class="form-group">
-            <label for="">Lĩnh vực dự án</label>
+            <label for="" class="fs-12">Lĩnh vực dự án</label>
             <ng-select
               [items]="businessFields"
               bindValue="ID"
@@ -142,27 +147,27 @@
               placeholder="Chọn lĩnh vực dự án..."
               [clearable]="true"
               [virtualScroll]="true"
-              class="form-control form-control-sm p-0 border border-0"
+              class="form-control form-control-sm p-0 border border-0 fs-12"
             >
               <!-- Template hiển thị các lựa chọn trong dropdown -->
               <ng-template ng-option-tmp let-item="item">
-                <div class="row text-dark w-100">
+                <div class="row text-dark w-100 fs-12">
                   <div class="col-3 ms-1">
-                    {{ item.Code }} - {{ item.Name }}
+                    <span class="fs-12">{{ item.Code }} - {{ item.Name }}</span>
                   </div>
                 </div>
               </ng-template>
 
               <!-- Template hiển thị sau khi chọn -->
               <ng-template ng-label-tmp let-item="item">
-                {{ item.Name }}
+                <span class="fs-12">{{ item.Name }}</span>
               </ng-template>
             </ng-select>
           </div>
         </div>
         <div class="col-12 mt-2">
           <div class="form-group">
-            <label for="">Khách hàng:</label>
+            <label for="" class="fs-12">Khách hàng</label>
             <ng-select
               [items]="customers"
               bindValue="ID"
@@ -172,27 +177,29 @@
               placeholder="Chọn khách hàng..."
               [clearable]="true"
               [virtualScroll]="true"
-              class="form-control form-control-sm p-0 border border-0"
+              class="form-control form-control-sm p-0 border border-0 fs-12"
             >
               <!-- Template hiển thị các lựa chọn trong dropdown -->
               <ng-template ng-option-tmp let-item="item">
-                <div class="row text-dark w-100">
+                <div class="row text-dark w-100 fs-12">
                   <div class="col-3 ms-1">
-                    {{ item.CustomerCode }} - {{ item.CustomerName }}
+                    <span class="fs-12"
+                      >{{ item.CustomerCode }} - {{ item.CustomerName }}</span
+                    >
                   </div>
                 </div>
               </ng-template>
 
               <!-- Template hiển thị sau khi chọn -->
               <ng-template ng-label-tmp let-item="item">
-                {{ item.CustomerCode }}
+                <span class="fs-12">{{ item.CustomerCode }}</span>
               </ng-template>
             </ng-select>
           </div>
         </div>
         <div class="col-12 mt-2">
           <div class="form-group">
-            <label for="">Kiểu dự án:</label>
+            <label for="" class="fs-12">Kiểu dự án</label>
             <ng-select
               [items]="projectTypes"
               bindLabel="ProjectTypeName"
@@ -200,13 +207,29 @@
               [(ngModel)]="selectedProjectTypeIds"
               [multiple]="true"
               placeholder="Kiểu dự án..."
-              class="form-control form-control-sm p-0 border border-0"
+              class="form-control form-control-sm p-0 border border-0 fs-12"
             >
+              <!-- Template hiển thị các lựa chọn trong dropdown -->
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100 fs-12">
+                  <div class="col-3 ms-1">
+                    <span class="fs-12">{{ item.ProjectTypeName }}</span>
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Template hiển thị sau khi chọn -->
+              <ng-template ng-label-tmp let-item="item" let-clear="clear">
+                <span class="badge bg-secondary fs-12 p-1">
+                  {{ item.ProjectTypeName }}
+                  <span class="fs-12" (click)="clear(item)">✕</span>
+                </span>
+              </ng-template>
             </ng-select>
           </div>
           <div class="col-12 mt-2">
             <div class="form-group">
-              <label for="">Trạng thái:</label>
+              <label for="" class="fs-12">Trạng thái</label>
               <ng-select
                 [items]="projecStatuses"
                 bindLabel="StatusName"
@@ -214,17 +237,33 @@
                 [(ngModel)]="selectedProjecStatusIds"
                 [multiple]="true"
                 placeholder="Trạng thái..."
-                class="form-control form-control-sm p-0 border border-0"
+                class="form-control form-control-sm p-0 border border-0 fs-12"
               >
+                <!-- Template hiển thị các lựa chọn trong dropdown -->
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row text-dark w-100 fs-12">
+                    <div class="col-3 ms-1">
+                      <span class="fs-12">{{ item.StatusName }}</span>
+                    </div>
+                  </div>
+                </ng-template>
+
+                <!-- Template hiển thị sau khi chọn -->
+                <ng-template ng-label-tmp let-item="item" let-clear="clear">
+                  <span class="bg-secondary fs-12 badge p-1">
+                    {{ item.StatusName }}
+                    <span class="fs-12" (click)="clear(item)">✕</span>
+                  </span>
+                </ng-template>
               </ng-select>
             </div>
           </div>
           <div class="col-12 mt-2">
             <div class="form-group">
-              <label for="">Từ khóa:</label>
+              <label for="" class="fs-12">Từ khóa</label>
               <input
                 [(ngModel)]="searchText"
-                class="form-control form-control-sm"
+                class="form-control form-control-sm fs-12"
                 type="text"
                 name=""
                 id=""
@@ -234,7 +273,10 @@
           </div>
           <div class="col-12 mt-2">
             <div class="form-group">
-              <button class="btn btn-primary col-12" (click)="getProjects()">
+              <button
+                class="btn btn-secondary col-12 p-0 ps-2 pe-2 fs-12"
+                (click)="getProjects()"
+              >
                 Áp dụng
               </button>
             </div>
@@ -251,62 +293,61 @@
             <div class="d-flex justify-content-start">
               <button
                 type="button"
-                class="btn btn-outline-info m-1 ms-3"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
                 title="Tìm kiếm"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#searchOffcanvas"
               >
-                <i class="fas fa-search"></i>
+                <i class="fas fa-search"></i> Tìm kiếm
               </button>
               <button
                 type="button"
-                class="btn btn-outline-primary m-1 m-1"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
                 title="Thêm mới"
                 (click)="openAddProjectModal()"
               >
-                <i class="fas fa-plus"></i>
+                <i class="fas fa-plus"></i> Thêm
               </button>
               <button
                 type="button"
-                class="btn btn-outline-success m-1"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
                 title="Sửa"
                 (click)="openEditProjectModal()"
               >
-                <i class="fas fa-pen"></i>
+                <i class="fas fa-pen"></i> Sửa
               </button>
               <button
                 type="button"
-                class="btn btn-outline-danger m-1"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
                 title="Xóa"
                 (click)="deletedProjects()"
               >
-                <i class="fas fa-trash"></i>
+                <i class="fas fa-trash"></i> Xóa
               </button>
               <button
                 type="button"
-                class="btn btn-outline-success m-1"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
                 title="Xuất Excel"
                 (click)="exportExcel()"
               >
-                <i class="fas fa-file-excel"></i>
+                <i class="fas fa-file-excel"></i> Xuất excel
               </button>
             </div>
           </div>
           <div class="card-body p-0">
-            <div class="row m-1 mt-2">
-              <div class="col-12">
-                <div class="border border-primary">
+            <div class="row">
+              <div class="col-12 col-sm-12 h-auto">
+                <div class="border-top">
                   <div id="tb_projects"></div>
                 </div>
               </div>
-
-              <div class="col-3">
-                <div class="border border-primary">
+              <div class="col-3 pe-0 col-sm-3">
+                <div class="border">
                   <div id="tb_projectTypeLinks"></div>
                 </div>
               </div>
-              <div class="col-9 ps-0">
-                <div class="border border-primary">
+              <div class="col-9 ps-0 col-sm-9">
+                <div class="border">
                   <div id="tb_projectitems"></div>
                 </div>
               </div>

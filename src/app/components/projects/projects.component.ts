@@ -18,6 +18,8 @@ import moment from 'moment';
 import { NgSelectModule } from '@ng-select/ng-select';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
+import { ProjectFormPriorityComponent } from './project-form-priority/project-form-priority.component';
+
 
 @Component({
   selector: 'app-projects',
@@ -84,7 +86,7 @@ export class ProjectsComponent implements OnInit {
   onLoadTableProject() {
     if (this.tb_projects) this.tb_projects.destroy();
     this.tb_projects = new Tabulator(`#tb_projects`, {
-      height: '450px',
+      height: '54vh',
       layout: 'fitDataFill',
       rowHeader: {
         width: 20,
@@ -338,7 +340,7 @@ export class ProjectsComponent implements OnInit {
     if (this.tb_projectitems) this.tb_projectitems.destroy();
 
     this.tb_projectitems = new Tabulator(`#tb_projectitems`, {
-      height: '250px',
+      height: '27vh',
       selectableRows: 1,
       layout: 'fitDataFill',
       locale: 'vi',
@@ -480,7 +482,7 @@ export class ProjectsComponent implements OnInit {
   onLoadTableProjectTypeLinks() {
     if (this.tb_projectTypeLinks) this.tb_projectTypeLinks.destroy();
     this.tb_projectTypeLinks = new Tabulator(`#tb_projectTypeLinks`, {
-      height: '250px',
+      height: '27vh',
       dataTree: true,
       dataTreeStartExpanded: true,
       layout: 'fitColumns',
@@ -529,37 +531,12 @@ export class ProjectsComponent implements OnInit {
     this.projectService.getProjectTypeLinks(id).subscribe({
       next: (response: any) => {
         console.log('projectlink', response.data);
-        this.tb_projectTypeLinks.setData(this.setDataTree(response.data));
+        this.tb_projectTypeLinks.setData(this.projectService.setDataTree(response.data));
       },
       error: (error) => {
         console.error('Lỗi:', error);
       },
     });
-  }
-
-  setDataTree(flatData: any[]): any[] {
-    const map = new Map<number, any>();
-    const tree: any[] = [];
-
-    // Bước 1: Map từng item theo ID
-    flatData.forEach((item) => {
-      map.set(item.ID, { ...item, _children: [] });
-    });
-
-    // Bước 2: Gắn item vào parent hoặc top-level
-    flatData.forEach((item) => {
-      const current = map.get(item.ID);
-      if (item.ParentID && item.ParentID !== 0) {
-        const parent = map.get(item.ParentID);
-        if (parent) {
-          parent._children.push(current);
-        }
-      } else {
-        tree.push(current);
-      }
-    });
-
-    return tree;
   }
 
   getProjectTypes() {
@@ -731,4 +708,6 @@ export class ProjectsComponent implements OnInit {
       this.downloadExcel();
     }
   }
+
+
 }
