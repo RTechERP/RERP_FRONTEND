@@ -128,8 +128,8 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label for="txtTotalPO" class="form-label">Tổng tiền PO</label>
-                                        <input type="" class="form-control" id="txtTotalPO" readonly
-                                            [(ngModel)]="poFormData.totalPO">
+                                        <input type="text" class="form-control" id="txtTotalPO" readonly
+                                            [value]="poFormData.totalPO | number:'1.0-0'">
                                     </div>
                                     <div class="col-md-3">
                                         <label for="txtPONumber" class="form-label">Số POKH</label>

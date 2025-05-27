@@ -69,9 +69,11 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     projectId: 0,
     poType: 0,
     departmentId: 0,
+    userType: 0,
     note: '',
     currencyId: 0,
     isBigAccount: false,
+    isApproved: false,
     warehouseId: 1,
   };
 
@@ -90,7 +92,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initTable();
-
   }
   openModalPOCode() {
     if (!this.selectedCustomer) {
@@ -131,6 +132,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       alert('Vui lòng thêm chi tiết sản phẩm');
       return;
     }
+
+    // check ckType
+    pokhData.UserType = this.isResponsibleUsersEnabled ? 1 : 0;
 
     const requestBody = {
       POKH: pokhData,
@@ -174,7 +178,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       TotalMoneyPO: this.poFormData.totalPO || 0,
       TotalMoneyKoVAT: this.calculateTotalMoneyKoVAT(),
       Note: this.poFormData.note || '',
-      
+      IsApproved: this.poFormData.isApproved || false,
       CustomerID: this.selectedCustomer.ID || 0,
       PartID: this.poFormData.departmentId || 0,
       ProjectID: this.poFormData.projectId || 0,
@@ -257,7 +261,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Duyệt', field: 'IsApproved', sorter: 'boolean', width: 80, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
         { title: 'Trạng thái', field: 'StatusText', sorter: 'string', width: 200 },
         { title: 'Loại', field: 'MainIndex', sorter: 'string', width: 100 },
-        { title: 'Loại Account', field: 'AccountTypeText', sorter: 'string', width: 150 },
+        { title: 'New Account', field: 'NewAccount', sorter: 'boolean', width: 80, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
         { title: 'Số POKH', field: 'ID', sorter: 'number', width: 80 },
         { title: 'Mã PO', field: 'POCode', sorter: 'string', width: 150 },
         { title: 'Khách hàng', field: 'CustomerName', sorter: 'string', width: 200 },
@@ -633,7 +637,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         {
           title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120, editor: "list", editorParams: {
             values: this.Products.map(product => ({
-              label: `${product.ProductNewCode}  - ${product.ProductCode} - ${product.ProductName} - ${product.Unit} - ${product.ProductGroupName}`,
+              label: `${product.ProductNewCode}  - ${product.ProductCode} - ${product.ProductName}`,
               value: product.ProductNewCode,
               id: product.ID
             })),
@@ -757,7 +761,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             IntoMoney: intoMoney,
             TotalPriceIncludeVAT: totalWithVAT
           });
-          this.calculateTotal();
+          this.calculateTotalIterative();
         }
       }
 
@@ -786,33 +790,56 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       // Tính lại thành tiền khi thay đổi số lượng hoặc đơn giá
       if (columnField === 'Qty' || columnField === 'UnitPrice') {
         row.update({ IntoMoney: quantity * unitPrice });
-        this.calculateTotal();
+        this.calculateTotalIterative();
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  calculateTotal(): void {
+  calculateTotalIterative(): void {
     let totalSum = 0;
     const allRows = this.ProductDetailTreeList.getRows();
+    
     allRows.forEach(row => {
       const rowData = row.getData();
-      // Kiểm tra nếu giá trị không phải là undefined và là số
-      if (rowData["TotalPriceIncludeVAT"] !== undefined && !isNaN(rowData["TotalPriceIncludeVAT"])) {
-        totalSum += Number(rowData["TotalPriceIncludeVAT"]);
-      }
-      // Tính tổng tiền của các sản phẩm con nếu có
-      if (rowData["_children"] && rowData["_children"].length > 0) {
-        rowData["_children"].forEach((child: any) => {
-          if (child.TotalPriceIncludeVAT !== undefined && !isNaN(child.TotalPriceIncludeVAT)) {
-            totalSum += Number(child.TotalPriceIncludeVAT);
-          }
-        });
+      const stack = [rowData]; 
+      
+      while (stack.length > 0) {
+        const currentNode = stack.pop();
+        if (!currentNode) continue;
+        
+        if (currentNode["TotalPriceIncludeVAT"] !== undefined && !isNaN(currentNode["TotalPriceIncludeVAT"])) {
+          totalSum += Number(currentNode["TotalPriceIncludeVAT"]);
+        }
+        
+        if (currentNode["_children"] && currentNode["_children"].length > 0) {
+          currentNode["_children"].forEach((child: any) => {
+            stack.push(child);
+          });
+        }
       }
     });
+    
     this.poFormData.totalPO = totalSum;
     console.log("Tổng giá trị sau VAT:", this.poFormData.totalPO);
+    
+    // Cập nhật lại giá trị tiền trong bảng người phụ trách
+    this.updateResponsibleUsersMoney();
+  }
+
+  updateResponsibleUsersMoney(): void {
+    if (!this.DetailUser) return;
+    
+    const totalPO = this.poFormData.totalPO;
+    this.DetailUser.getRows().forEach(row => {
+      const rowData = row.getData();
+      if (rowData['ResponsibleUser']) {
+        const percentValue = parseFloat(rowData['PercentUser']) || 0;
+        const moneyValue = totalPO * (percentValue / 100);
+        row.update({ MoneyUser: moneyValue });
+      }
+    });
   }
 
   addNewRow(): void {
@@ -923,6 +950,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       pagination: true,
       paginationSize: 5,
       movableColumns: true,
+      
       resizableRows: true,
       columns: [
         {
@@ -947,23 +975,61 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           cellEdited: (cell) => {
             const totalPO = this.getTotalPOValue();
             const percentValue = parseFloat(cell.getValue()) || 0;
+            
+            // Tính tổng phần trăm hiện tại
+            let totalPercent = 0;
+            this.DetailUser.getRows().forEach(row => {
+              const rowData = row.getData();
+              if (rowData['ResponsibleUser']) { // Chỉ tính cho các dòng có người phụ trách
+                totalPercent += parseFloat(rowData['PercentUser']) || 0;
+              }
+            });
+
+            // Kiểm tra nếu tổng phần trăm vượt quá 100%
+            if (totalPercent > 100) {
+              alert('Tổng phần trăm không được vượt quá 100%');
+              cell.setValue(0);
+              cell.getRow().update({ MoneyUser: 0 });
+              return;
+            }
+
             const moneyValue = totalPO * (percentValue / 100);
             cell.getRow().update({ MoneyUser: moneyValue });
+          },
+          formatter: function(cell, formatterParams, onRendered) {
+            const value = cell.getValue();
+            if (value === null || value === undefined || value === '') {
+              return '';
+            }
+            return Number(value) + '%';
           }
         },
-        { title: 'Tiền theo phần trăm', field: 'MoneyUser', sorter: 'number', editor: "input", width: '30%' },
+        { 
+          title: 'Tiền theo phần trăm', 
+          field: 'MoneyUser', 
+          sorter: 'number', 
+          editor: "input", 
+          width: '30%',
+          formatter: function(cell, formatterParams, onRendered) {
+            const value = cell.getValue();
+            if (value === null || value === undefined || value === '') {
+              return '';
+            }
+            return new Intl.NumberFormat('vi-VN').format(value);
+          }
+        },
       ]
     });
   }
 
   getTotalPOValue(): number {
-    this.calculateTotal();
+    this.calculateTotalIterative();
     return this.poFormData.totalPO;
   }
 
   addRowDetailUser(): void {
     const newRow = {
-      id: "new_" + this.nextRowId++,
+
       ResponsibleUser: "",
       PercentUser: 0,
       MoneyUser: 0,
@@ -971,15 +1037,18 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.detailUser.push(newRow);
     if (this.DetailUser) {
       this.DetailUser.addRow(newRow);
-      this.DetailUser.scrollToRow(newRow.id, "bottom", true);
+
     }
   }
   toggleResponsibleUsers() {
     this.isResponsibleUsersEnabled = !this.isResponsibleUsersEnabled;
+    this.poFormData.userType = this.isResponsibleUsersEnabled ? 1 : 0;
     if (this.isResponsibleUsersEnabled) {
       this.initDetailTable();
     } else {
-      this.DetailUser.destroy();
+      if (this.DetailUser) {
+        this.DetailUser.destroy();
+      }
     }
   }
   initFileUploadedTable(): void {
