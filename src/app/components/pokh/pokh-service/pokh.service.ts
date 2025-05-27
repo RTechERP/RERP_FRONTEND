@@ -105,5 +105,11 @@ export class PokhServiceService {
   uploadFiles(formData: FormData, pokhId: number): Observable<any> {
     return this.http.post<any>(`${this._url}Upload?poKHID=${pokhId}`, formData);
   }
-  
+  getPOKHByID(id: number):Observable<any>{
+    return this.http.get<any>(this._url + 'GetPOKHByID',{
+      params:{
+        id:id.toString()
+      }
+    });
+  }
 }

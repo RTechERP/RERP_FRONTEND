@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, viewChild } from '@angular/core';
 import { PokhServiceService } from '../pokh-service/pokh.service';
 import { CommonModule } from '@angular/common';
-import { TabulatorFull as Tabulator } from 'tabulator-tables';
+import { TabulatorFull as Tabulator, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -35,6 +35,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   private ProductDetailTreeList!: Tabulator;
   private DetailUser!: Tabulator;
 
+  isEditMode: boolean = false;
   lockEvents: boolean = false;
   pokhs: any[] = [];
   selectedProduct: any = null;
@@ -119,7 +120,24 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     );
   }
   //SAVE
+  validateForm(): boolean {
+    if (this.poFormData.status < 0) {
+      alert('Xin hãy chọn trạng thái.');
+      return false;
+    }
+    if (!this.poFormData.poType) {
+      alert('Xin hãy chọn loại PO.');
+      return false;
+    }
+    if (!this.poFormData.poCode) {
+      alert('Xin hãy nhập mã PO.');
+      return false;
+    }
+    return true;
+  }
+
   savePOKH() {
+    if (!this.validateForm()) return;
     const pokhData = this.getPOKHData();
     const details = this.ProductDetailTreeList.getData();
     const detailUsers = this.DetailUser.getData();
@@ -152,8 +170,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       error: (error) => {
         this.handleError(error);
       }
-    })
+    });
   }
+
   getTreeRows(data: any[]): any[] {
     let dataTree: any[] = [];
 
@@ -251,24 +270,32 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       data: this.pokhs,
       layout: 'fitDataFill',
       height: '50vh',
+      selectableRows: 1,
       pagination: true,
       paginationSize: 20,
       movableColumns: true,
       resizableRows: true,
       reactiveData: true,
+      columnDefaults:{
+        headerWordWrap: true,
+        headerVertical: false,
+        headerHozAlign: "center",           
+        minWidth: 60,
+        resizable: true
+      },
       columns: [
         { title: 'Hành động', field: 'actions', formatter: this.actionFormatter, width: 120 },
-        { title: 'Duyệt', field: 'IsApproved', sorter: 'boolean', width: 80, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
-        { title: 'Trạng thái', field: 'StatusText', sorter: 'string', width: 200 },
-        { title: 'Loại', field: 'MainIndex', sorter: 'string', width: 100 },
-        { title: 'New Account', field: 'NewAccount', sorter: 'boolean', width: 80, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
-        { title: 'Số POKH', field: 'ID', sorter: 'number', width: 80 },
+        { title: 'Duyệt', field: 'IsApproved', sorter: 'boolean', width: 50, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
+        { title: 'Trạng thái', field: 'StatusText', sorter: 'string', width: 150 },
+        { title: 'Loại', field: 'MainIndex', sorter: 'string', width: 50 },
+        { title: 'New Account', field: 'NewAccount', sorter: 'boolean', width: 50, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
+        { title: 'Số POKH', field: 'ID', sorter: 'number', width: 50 },
         { title: 'Mã PO', field: 'POCode', sorter: 'string', width: 150 },
         { title: 'Khách hàng', field: 'CustomerName', sorter: 'string', width: 200 },
         { title: 'Người phụ trách', field: 'FullName', sorter: 'string', width: 150 },
         { title: 'Dự án', field: 'ProjectName', sorter: 'string', width: 200 },
         { title: 'Ngày nhận PO', field: 'ReceivedDatePO', sorter: 'date', width: 150, },
-        { title: 'Loại tiền', field: 'CurrencyCode', sorter: 'string', width: 100 },
+        { title: 'Loại tiền', field: 'CurrencyCode', sorter: 'string', width: 50 },
         { title: 'Tổng tiền Xuất VAT', field: 'TotalMoneyKoVAT', sorter: 'number', width: 150, formatter: 'money' },
         { title: 'Tổng tiền nhận PO', field: 'TotalMoneyPO', sorter: 'number', width: 150, formatter: 'money' },
         { title: 'Tiền về', field: 'ReceiveMoney', sorter: 'number', width: 150, formatter: 'money' },
@@ -281,6 +308,19 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Đặt hàng', field: 'PONumber', sorter: 'string', width: 150 }
       ]
     });
+
+    this.table.on("rowDblClick", (e: UIEvent, row: RowComponent) => {
+      const id = row.getData()['ID'];
+      this.onEdit(id);
+    });
+
+    (window as any).editPOKH = (id: number) => {
+      this.onEdit(id);
+    };
+
+    (window as any).deletePOKH = (id: number) => {
+      this.onDelete(id);
+    };
     this.table.on("rowClick", (e, row) => {
       const rowData = row.getData();
       this.selectedId = rowData['ID'];
@@ -308,9 +348,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       resizableRows: true,
       columns: [
         { title: 'STT', field: 'STT', sorter: 'number', width: 70 },
-        {
-          title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120
-        },
+        { title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120 },
         { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 120 },
         { title: 'Tên sản phẩm', field: 'ProductName', sorter: 'string', width: 250 },
         { title: 'Mã theo khách', field: 'GuestCode', sorter: 'string', width: 250 },
@@ -377,9 +415,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     const id = cell.getRow().getData().ID;
     return `
     <button style="background-color: #007bff; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer;" 
-            (click)="onEdit(${id})">Sửa</button>
+            onclick="window.editPOKH(${id})">Sửa</button>
     <button style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;" 
-            (click)="onDelete(${id})">Xóa</button>
+            onclick="window.deletePOKH(${id})">Xóa</button>
   `;
   }
   onDelete(id: number): void {
@@ -398,6 +436,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   isModalOpen: boolean = false;
   openModal() {
     this.isModalOpen = true;
+    if (this.isEditMode) {
+      this.loadPOKHData(this.selectedId);
+    }
     setTimeout(() => {
       this.initProductDetailTreeList();
       this.initFileUploadedTable();
@@ -405,6 +446,103 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   }
   closeModal() {
     this.isModalOpen = false;
+    this.isEditMode = false;
+    this.resetForm();
+  }
+  resetForm() {
+    this.poFormData = {
+      status: 0,
+      poCode: '',
+      customerId: 0,
+      endUser: '',
+      customerName: '',
+      userId: 0,
+      poDate: new Date(),
+      totalPO: 0,
+      poNumber: '',
+      projectId: 0,
+      poType: 0,
+      departmentId: 0,
+      userType: 0,
+      note: '',
+      currencyId: 0,
+      isBigAccount: false,
+      isApproved: false,
+      warehouseId: 1,
+    };
+    this.selectedCustomer = null;
+    this.POKHProduct = [];
+    this.detailUser = [];
+    this.uploadedFiles = [];
+  }
+  loadPOKHData(id: number): void {
+    this.pokhService.getPOKHByID(id).subscribe(
+      response => {
+        if (response.status === 1) {
+          const pokhData = response.data;
+          this.poFormData = {
+            status: pokhData.Status,
+            poCode: pokhData.POCode,
+            customerId: pokhData.CustomerID,
+            endUser: pokhData.EndUser,
+            customerName: pokhData.CustomerName,
+            userId: pokhData.UserID,
+            poDate: new Date(pokhData.ReceivedDatePO),
+            totalPO: pokhData.TotalMoneyPO,
+            poNumber: pokhData.PONumber,
+            projectId: pokhData.ProjectID,
+            poType: pokhData.POType,
+            departmentId: pokhData.PartID,
+            userType: pokhData.UserType,
+            note: pokhData.Note,
+            currencyId: pokhData.CurrencyID,
+            isBigAccount: pokhData.NewAccount,
+            isApproved: pokhData.IsApproved,
+            warehouseId: pokhData.WarehouseID,
+          };
+          
+          this.selectedCustomer = this.customers.find(c => c.ID === pokhData.CustomerID);
+
+          this.loadPOKHProducts(id);
+          this.loadPOKHFiles(id);
+
+         
+          if (pokhData.UserType === 1) {
+            this.isResponsibleUsersEnabled = true;
+            this.loadDetailUser(id);
+          }
+
+          setTimeout(() => {
+            if (this.ProductDetailTreeList && this.fileTable) {
+              this.ProductDetailTreeList.setData(this.POKHProduct);
+              this.DetailUser.setData(this.detailUser);
+              this.fileTable.setData(this.POKHFiles);
+            }
+
+            this.initProductDetailTreeList();
+            this.initFileUploadedTable();
+            console.log("FileCheck:", this.POKHFiles)
+            console.log("ProductCheck:", this.POKHProduct)
+            console.log("DetailUserCheck:", this.detailUser)
+            if (this.isResponsibleUsersEnabled && this.DetailUser) {
+              this.DetailUser.setData(this.detailUser);
+              this.initDetailTable();
+            }
+          }, 1000);
+        } else {
+          console.error('Lỗi khi tải dữ liệu POKH:', response.message);
+        }
+      },
+      error => {
+        console.error('Lỗi kết nối khi tải dữ liệu POKH:', error);
+        alert('Có lỗi xảy ra khi tải dữ liệu POKH');
+      }
+    );
+  }
+  onEdit(id: number) {
+    this.selectedId = id;
+    this.isEditMode = true;
+    this.openModal();
   }
   onEnableChange() {
     if (!this.isResponsibleUsersEnabled) this.selectedProduct = null;
@@ -1144,6 +1282,4 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   getFileType(fileName: string): string {
     return fileName.split('.').pop()?.toUpperCase() || '';
   }
-
-
 }
