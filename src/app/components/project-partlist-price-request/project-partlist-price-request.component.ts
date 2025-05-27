@@ -27,7 +27,8 @@ import { take } from 'rxjs/operators';
 import { USER_NAME } from '../../shared/global';
 import { EMPLOYEE_ID } from '../../shared/global';
 import { ISADMIN } from '../../app.config';
-import { data } from 'jquery';
+import * as ExcelJS from 'exceljs';
+import moment from 'moment';
 
 @Component({
   selector: 'app-project-partlist-price-request',
@@ -145,18 +146,43 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     const table = this.tables.get(this.activeTabId);
     if (!table) return;
 
-    const selectedRows = table.getSelectedData();
+    const selectedRows = table.getSelectedRows();
 
-    if (selectedRows.length > 0) {
-    } else {
+    if (selectedRows.length === 0) {
       Swal.fire({
         title: 'Thông báo',
         text: 'Vui lòng chọn ít nhất một dòng để xóa.',
         icon: 'warning',
         confirmButtonText: 'OK',
       });
+      return;
     }
+
+    Swal.fire({
+      title: 'Xác nhận xóa',
+      text: 'Bạn có chắc muốn đánh dấu xóa các dòng đã chọn không?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      const updateData = selectedRows.map((row) => {
+        const data = row.getData();
+        return {
+          ID: data['ID'],
+          IsDeleted: true,
+          UpdatedBy: USER_NAME,
+          UpdatedDate: new Date().toISOString(),
+        };
+      });
+
+      // Gửi về server qua hàm save chung
+      this.saveDataCommon(updateData, 'Xóa dữ yêu cầu thành công');
+    });
   }
+
   private formatDateForInput(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -393,13 +419,13 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       'CurrencyRate',
       'IsCheckPrice',
       'SupplierSaleID',
-      'UpdatedBy',
       'DateExpected',
       'TotalDayLeadTime',
       'TotalPriceExchange',
     ];
     if (!ISADMIN) {
       validFields.push('QuoteEmployeeID');
+      validFields.push('UpdatedBy');
     }
     const filteredData = changedData.map((item) => {
       const filteredItem: any = {};
@@ -408,8 +434,8 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           filteredItem[key] = item[key];
         }
       });
-      filteredItem.UpdatedDate = new Date();
-      filteredItem.UpdatedBy = USER_NAME;
+      filteredItem.UpdatedDate = moment().toDate();
+      filteredItem.UpdatedBy = !ISADMIN ? USER_NAME : '';
       return filteredItem;
     });
 
@@ -461,7 +487,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
 
     // Tính ngày về dự kiến
     if (rowData.TotalDayLeadTime !== undefined) {
-      rowData.DateExpected = this.addWeekdays(new Date(), leadTime);
+      rowData.DateExpected = this.addWeekdays(moment().toDate(), leadTime);
     }
   }
 
@@ -483,7 +509,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     const totalPriceExchange = totalPrice * currencyRate;
 
     const leadtime = Number(data.TotalDayLeadTime);
-    const dateexpect = this.addWeekdays(new Date(), leadtime);
+    const dateexpect = this.addWeekdays(moment().toDate(), leadtime);
 
     // Cập nhật lại các cột liên quan
     row.update({
@@ -522,45 +548,45 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       row.update({ CodeNCC: supplier.CodeNCC });
     }
   }
-  QuotePrice(status: number = 2): void {
-    const table = this.tables.get(this.activeTabId);
-    if (!table) return;
+QuotePrice(status: number = 2): void {
+  const table = this.tables.get(this.activeTabId);
+  if (!table) return;
 
-    // Lấy text trạng thái dựa vào status
-    const statusText =
-      status === 0
-        ? 'Hủy hoàn thành'
-        : status === 1
-        ? 'Hủy báo giá'
-        : status === 2
-        ? 'Báo giá'
-        : status === 3
-        ? 'Hoàn thành'
-        : '';
+  // Map trạng thái
+  const STATUS_TEXT: { [key: number]: string } = {
+    0: 'Hủy hoàn thành',
+    1: 'Hủy báo giá', 
+    2: 'Báo giá',
+    3: 'Hoàn thành'
+  };
+  
+  const statusText = STATUS_TEXT[status] || '';
+  const selectedRows = table.getSelectedRows();
+  
+  // Validate chọn dòng
+  if (selectedRows.length === 0) {
+    Swal.fire({
+      title: 'Thông báo',
+      text: `Vui lòng chọn sản phẩm muốn ${statusText}!`,
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
 
-    // Lấy các dòng đã chọn
-    const selectedRows = table.getSelectedRows();
-    if (selectedRows.length === 0) {
-      Swal.fire({
-        title: 'Thông báo',
-        text: `Vui lòng chọn sản phẩm muốn ${statusText}!`,
-        icon: 'warning',
-        confirmButtonText: 'OK',
-      });
-      return;
-    }
+  // Xử lý dữ liệu
+  const updateData:any[] = [];
+  const shouldValidate = ![1, 3].includes(status);
+  
+  for (const row of selectedRows) {
+    const rowData = row.getData();
+    const id = Number(rowData['ID']);
+    
+    // Bỏ qua các dòng không hợp lệ
+    if (id <= 0) continue;
 
-    // Kiểm tra validate
-    for (const row of selectedRows) {
-      if (status === 1 || status === 3) continue;
-
-      const rowData = row.getData();
-      const id = Number(rowData['ID']);
-      if (id <= 0) continue;
-
-      // Kiểm tra người báo giá
-      if (rowData['QuoteEmployeeID'] !== EMPLOYEE_ID) continue;
-
+    // Validate cho các trường hợp cần kiểm tra
+    if (shouldValidate) {
       const productCode = rowData['ProductCode'] || '';
       const currencyId = Number(rowData['CurrencyID']);
       const currencyCode = rowData['CurrencyCode'] || '';
@@ -576,7 +602,9 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           confirmButtonText: 'OK',
         });
         return;
-      } else if (currencyRate <= 0) {
+      }
+
+      if (currencyRate <= 0) {
         Swal.fire({
           title: 'Thông báo',
           text: `Tỷ giá của [${currencyCode}] phải > 0.\nVui lòng kiểm tra lại Ngày hết hạn!`,
@@ -607,56 +635,32 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       }
     }
 
-    // Xác nhận thao tác
-    status = status === 0 ? 1 : status;
-    Swal.fire({
-      title: 'Thông báo',
-      text: `Bạn có chắc muốn ${statusText} danh sách sản phẩm đã chọn không?\nNhững sản phẩm NV mua không phải bạn sẽ tự động được bỏ qua!`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Hủy',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Lấy danh sách dữ liệu cần cập nhật - chỉ gửi các trường cần thiết
-        const updateData = selectedRows
-          .map((row) => {
-            const rowData = row.getData();
-            if (rowData['QuoteEmployeeID'] !== EMPLOYEE_ID) return null;
-
-            // Chỉ gửi các trường cần thiết để tận dụng UpdateFieldsByID
-            return {
-              ID: Number(rowData['ID']),
-              StatusRequest: status,
-              UpdatedBy: USER_NAME,
-              UpdatedDate: new Date(),
-              DatePriceQuote:
-                status === 1
-                  ? null
-                  : status === 2
-                  ? new Date().toISOString()
-                  : null,
-              // Các trường bắt buộc cho báo giá
-              CurrencyID: rowData['CurrencyID'],
-              CurrencyRate: rowData['CurrencyRate'],
-              UnitPrice: rowData['UnitPrice'],
-              SupplierSaleID: rowData['SupplierSaleID'],
-              TotalPrice: rowData['TotalPrice'],
-              TotalPriceExchange: rowData['TotalPriceExchange'],
-              VAT: rowData['VAT'],
-              TotaMoneyVAT: rowData['TotaMoneyVAT'],
-              DateExpected: rowData['DateExpected'],
-            };
-          })
-          .filter((item) => item !== null);
-
-        if (updateData.length === 0) return;
-
-        // Sử dụng hàm chung để lưu dữ liệu
-        this.saveDataCommon(updateData, `${statusText} thành công`);
-      }
+    // Cập nhật dữ liệu
+    Object.assign(rowData, {
+      StatusRequest: status,
+      UpdatedBy: USER_NAME,
+      UpdatedDate: new Date(),
+      QuoteEmployeeID: !ISADMIN ? EMPLOYEE_ID : rowData['QuoteEmployeeID'],
+      DatePriceQuote: status === 2 ? new Date() : status === 1 ? null : rowData['DatePriceQuote']
     });
+
+    updateData.push(rowData);
   }
+
+  // Xác nhận thao tác
+  Swal.fire({
+    title: 'Thông báo',
+    text: `Bạn có chắc muốn ${statusText} danh sách sản phẩm đã chọn không?\nNhững sản phẩm NV mua không phải bạn sẽ tự động được bỏ qua!`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Đồng ý',
+    cancelButtonText: 'Hủy',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.saveDataCommon(updateData, `${statusText} thành công`);
+    }
+  });
+}
 
   // Cập nhật phương thức CheckPrice để sử dụng hàm chung
   CheckPrice(isCheckPrice: boolean): void {
@@ -690,21 +694,10 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           const rowData = row.getData();
           return {
             ID: Number(rowData['ID']),
-            EmployeeID: rowData['EmployeeID'],
-            Deadline: rowData['Deadline'],
-            Note: rowData['Note'],
-            Unit: rowData['Unit'],
-            Quantity: rowData['Quantity'],
-            TotalPrice: rowData['TotalPrice'],
-            UnitPrice: rowData['UnitPrice'],
-            VAT: rowData['VAT'],
-            TotaMoneyVAT: rowData['TotaMoneyVAT'],
-            CurrencyID: rowData['CurrencyID'],
-            CurrencyRate: rowData['CurrencyRate'],
             IsCheckPrice: isCheckPrice,
-            SupplierSaleID: rowData['SupplierSaleID'],
+            QuoteEmployeeID: isCheckPrice ? EMPLOYEE_ID : 0,
             UpdatedBy: USER_NAME,
-            UpdatedDate: new Date().toISOString(),
+            UpdatedDate: moment().toDate(),
           };
         });
 
@@ -712,6 +705,157 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
         this.saveDataCommon(updateData, `${isCheckText} thành công`);
       }
     });
+  }
+  async exportToExcelAdvanced() {
+    const table = this.tables.get(this.activeTabId);
+    if (!table) return;
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Danh sách yêu cầu báo giá');
+
+    // Lấy dữ liệu
+    const data = table.getData('active');
+    const columns = table
+      .getColumnDefinitions()
+      .filter((col: any) => col.visible !== false);
+
+    // Thêm headers
+    const headerRow = worksheet.addRow(columns.map((col: any) => col.title));
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' },
+    };
+
+    // Thêm dữ liệu
+    data.forEach((row: any) => {
+      const rowData = columns.map((col: any) => {
+        const value = row[col.field];
+
+        // Xử lý null/undefined thành khoảng trống
+        if (value === null || value === undefined) {
+          return '';
+        }
+
+        // Xử lý object rỗng
+        if (
+          typeof value === 'object' &&
+          value !== null &&
+          Object.keys(value).length === 0
+        ) {
+          return '';
+        }
+
+        // Xử lý các trường đặc biệt
+        if (col.field === 'IsCheckPrice') {
+          return value ? 'Có' : 'Không';
+        }
+
+        // Xử lý trường ngày báo giá
+        if (col.field === 'DatePriceQuote') {
+          if (
+            !value ||
+            value === '' ||
+            (typeof value === 'object' && Object.keys(value).length === 0)
+          ) {
+            return '';
+          }
+          return value;
+        }
+
+        // Xử lý các trường số với formatter
+        if (
+          col.field === 'UnitPrice' ||
+          col.field === 'TotalPriceExchange' ||
+          col.field === 'TotaMoneyVAT' ||
+          col.field === 'TotalImportPrice'
+        ) {
+          return value === 0 ? 0 : value || '';
+        }
+
+        // Xử lý trường select với lookup
+        if (col.field === 'CurrencyID') {
+          const currency = this.dtcurrency?.find((c: any) => c.ID === value);
+          return currency ? currency.Code : '';
+        }
+
+        if (col.field === 'SupplierSaleID') {
+          const supplier = this.dtSupplierSale?.find(
+            (s: any) => s.ID === value
+          );
+          return supplier ? supplier.NameNCC : '';
+        }
+
+        // Xử lý chuỗi rỗng
+        if (value === '') {
+          return '';
+        }
+
+        // Return giá trị bình thường
+        return value;
+      });
+      worksheet.addRow(rowData);
+    });
+
+    // Auto-fit columns với xử lý an toàn
+    worksheet.columns.forEach((column, index) => {
+      const col = columns[index];
+      if (col.width) {
+        // Kiểm tra nếu width là string và chứa 'vh'
+        if (typeof col.width === 'string' && col.width.includes('vh')) {
+          column.width = parseFloat(col.width.replace('vh', '')) * 2;
+        }
+        // Nếu width là number
+        else if (typeof col.width === 'number') {
+          column.width = col.width;
+        }
+        // Nếu width là string nhưng không chứa 'vh'
+        else if (typeof col.width === 'string') {
+          column.width = parseFloat(col.width) || 15;
+        }
+      } else {
+        column.width = 15;
+      }
+    });
+
+    // Thêm border cho tất cả cells
+    const range =
+      worksheet.getCell('A1').address +
+      ':' +
+      worksheet.getCell(data.length + 1, columns.length).address;
+
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell, colNumber) => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+
+        // Căn giữa cho header
+        if (rowNumber === 1) {
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        }
+      });
+    });
+
+    // Xuất file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `price-request-${
+      new Date().toISOString().split('T')[0]
+    }.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(link.href);
   }
   private getTableConfig(): any {
     return {
@@ -757,7 +901,6 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           page: 1, // thêm tham số phân trang nếu cần
           size: 25,
         };
-
       },
       ajaxConfig: {
         method: 'GET',
@@ -900,18 +1043,18 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           title: 'Ngày yêu cầu',
           field: 'DateRequest',
           headerHozAlign: 'center',
+          formatter: function (cell: any) {
+            const value = cell.getValue();
+            return value ? moment(value).format('DD/MM/YYYY') : '';
+          },
         },
         { title: 'Deadline', field: 'Deadline', headerHozAlign: 'center' },
         {
           title: 'Ngày báo giá',
           field: 'DatePriceQuote',
-          formatter: function (
-            cell: any,
-            formatterParams: any,
-            onRendered: any
-          ) {
-            let value = cell.getValue() || '';
-            return value;
+          formatter: function (cell: any) {
+            const value = cell.getValue();
+            return value ? moment(value).format('DD/MM/YYYY') : '';
           },
           headerHozAlign: 'center',
         },
@@ -1005,6 +1148,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           title: 'Lead Time (Ngày làm việc)',
           field: 'TotalDayLeadTime',
           headerHozAlign: 'center',
+
           editor: 'input',
           cellEdited: (cell: any) => this.handleCellEdited(cell),
         },
@@ -1012,6 +1156,10 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           title: 'Ngày dự kiến hàng về',
           field: 'DateExpected',
           headerHozAlign: 'center',
+          formatter: function (cell: any) {
+            const value = cell.getValue();
+            return value ? moment(value).format('DD/MM/YYYY') : '';
+          },
         },
         { title: 'Ghi chú', field: 'Note', headerHozAlign: 'center' },
         {
@@ -1062,13 +1210,9 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
           title: 'Lead Time',
           field: 'LeadTime',
           headerHozAlign: 'center',
-          formatter: function (
-            cell: any,
-            formatterParams: any,
-            onRendered: any
-          ) {
-            let value = cell.getValue() || '';
-            return value;
+          formatter: function (cell: any) {
+            const value = cell.getValue();
+            return value ? moment(value).format('DD/MM/YYYY') : '';
           },
         },
         {

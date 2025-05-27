@@ -22,6 +22,7 @@
     "@types/xlsx": "^0.0.35",
     "bootstrap": "^5.3.6",
     "choices.js": "^11.1.0",
+    "exceljs": "^4.4.0",
     "font-awesome": "^4.7.0",
     "jquery": "^3.7.1",
     "moment": "^2.30.1",

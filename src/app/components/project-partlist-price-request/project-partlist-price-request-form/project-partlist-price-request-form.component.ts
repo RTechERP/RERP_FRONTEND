@@ -22,9 +22,8 @@ import { ProjectPartlistPriceRequestService } from '../project-partlist-price-re
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ReactiveFormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
-import * as jQuery from 'jquery';
+import moment from 'moment';
 declare var bootstrap: any;
-import Choices from 'choices.js';
 
 @Component({
   standalone: true,
@@ -48,6 +47,7 @@ export class ProjectPartlistPriceRequestFormComponent
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['dataInput'] && this.modalElementRef) {
       // Delay để chắc chắn phần tử modal đã render
+
       setTimeout(() => {
         if (!this.modalInstance) {
           this.modalInstance = new bootstrap.Modal(
@@ -61,12 +61,12 @@ export class ProjectPartlistPriceRequestFormComponent
   @ViewChild('detailModal', { static: false }) modalElementRef!: ElementRef;
   modalInstance: any;
   // form model
-  requester: string = '';
+  requester: Number = 0;
   requestDate: string = '';
 
   users = [];
   dtProductSale: any[] = [];
-  deletedIDs: number[] = [];
+  lstSave: any[] = [];
   // Tabulator
   @ViewChild('table', { static: false }) tableDiv!: ElementRef;
   table!: Tabulator;
@@ -79,10 +79,16 @@ export class ProjectPartlistPriceRequestFormComponent
     this.modalInstance.show();
   }
   ngOnInit(): void {
-    this.deletedIDs = [];
-    this.tableData = this.dataInput; // Gán dữ liệu từ component cha vào tableData
-    this.getAllUser();
+    this.lstSave = [];
+    this.getAllUser();  
     this.getProductSale();
+              console.log('datainput',this.dataInput);
+    this.requester = Number(this.dataInput[0]['EmployeeID']);
+    console.log('abd',this.requester)
+    this.requestDate = moment(this.dataInput[0]['DateRequest']).format(
+      'YYYY-MM-DD'
+    );
+    this.tableData = this.dataInput;
     this.priceRequestService.getProductSale().subscribe({
       next: (response) => {
         const prd = response.data;
@@ -102,10 +108,11 @@ export class ProjectPartlistPriceRequestFormComponent
                 const row = cell.getRow();
                 const rowData = row.getData();
 
-                // Nếu có ID thì lưu vào deletedIDs
                 if (rowData['ID']) {
-                  this.deletedIDs.push(rowData['ID']);
+                  const deletedRow = { ...rowData, IsDeleted: true };
+                  this.lstSave.push(deletedRow);
                 }
+
                 row.delete();
               },
             },
@@ -128,18 +135,25 @@ export class ProjectPartlistPriceRequestFormComponent
               field: 'ProductNewCode',
               hozAlign: 'center',
               editor: 'list',
+              formatter: (cell: any) => {
+                const value = cell.getValue();
+                const match = this.dtProductSale.find((c) => c.ID === value);
+                return match ? match.ProductCode : '';
+              },
               editorParams: {
-                values: prd.map((p: { ProductNewCode: string }) => p.ProductNewCode),
+                values: this.dtProductSale.map((s) => ({
+                  value: s.ID,
+                  label: s.ProductCode,
+                })),
 
-                allowEmpty: true,
-                showListOnEmpty: true,
                 autocomplete: true,
               },
               cellEdited: (cell) => {
-                const code = cell.getValue();
+                const selectedId = cell.getValue(); // Lấy ID từ giá trị đã chọn
                 const product = prd.find(
-                  (p: { ProductNewCode: string }) => p.ProductNewCode == code
-                );
+                  (p: { ID: any }) => p.ID === selectedId
+                ); // Tìm sản phẩm theo ID
+
                 if (product) {
                   cell.getRow().update({
                     ProductCode: product.ProductCode,
@@ -180,6 +194,10 @@ export class ProjectPartlistPriceRequestFormComponent
               headerSort: false,
               field: 'Deadline',
               editor: 'date',
+              formatter: function (cell: any) {
+                const value = cell.getValue();
+                return value ? moment(value).format('DD/MM/YYYY') : '';
+              },
               headerHozAlign: 'center',
               validator: ['required'],
             },
@@ -234,6 +252,7 @@ export class ProjectPartlistPriceRequestFormComponent
     this.priceRequestService.getUser().subscribe({
       next: (response) => {
         this.users = response.data.dtEmployee;
+
         console.log(this.users);
       },
       error: (err) => {
@@ -266,6 +285,7 @@ export class ProjectPartlistPriceRequestFormComponent
         this.closeModal.emit();
       }
     );
+
   }
 
   addRow() {
@@ -408,31 +428,22 @@ export class ProjectPartlistPriceRequestFormComponent
     if (!this.validate()) return;
 
     // Lấy dữ liệu bảng, loại bỏ trường ProductNewCode nếu backend không cần
-const updatedData = this.table
-  .getRows()
-  .map(row => {
-    const data = row.getData(); // lấy toàn bộ data, kể cả cột ẩn
-    const { ProductNewCode, ...rest } = data;
+    const updatedData = this.table.getRows().map((row) => {
+      const data = row.getData(); // lấy toàn bộ data, kể cả cột ẩn
+      const { ProductNewCode, ...rest } = data;
 
-    return {
-      ...rest,
-       ID: data["ID"] ?? 0, // nếu undefined/null => gán 0
-       Quantity : Number(data['Quantity']),
-    StatusRequest: data["StatusRequest"] ?? '', // nếu không có => mặc định 1
-    Maker:data["Maker"]??'',
-      DateRequest: this.requestDate,
-      EmployeeID: this.requester,
-    };
-  });
-
-
-    // Tạo payload gửi lên API
-    const requestPayload = {
-      lstModel: updatedData, // dữ liệu cần lưu
-      lstID: this.deletedIDs ?? [], // các ID đã xóa (nếu có)
-    };
-
-    this.priceRequestService.saveData(requestPayload).subscribe({
+      return {
+        ...rest,
+        ID: data['ID'] ?? 0, // nếu undefined/null => gán 0
+        Quantity: Number(data['Quantity']),
+        StatusRequest: data['StatusRequest'] ?? '', // nếu không có => mặc định 1
+        Maker: data['Maker'] ?? '',
+        DateRequest: this.requestDate,
+        EmployeeID: this.requester,
+      };
+    });
+    this.lstSave.push(...updatedData);
+    this.priceRequestService.saveData(this.lstSave).subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',

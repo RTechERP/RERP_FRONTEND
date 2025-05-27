@@ -63,8 +63,8 @@ getAPIPricerequest(){
       },
     });
   }
-  saveData(payload: { lstModel: any[]; lstID: number[] }) {
-    return this.http.post(`${this.baseUrl}/saveData`, payload);
+  saveData(lstModel: any[]) {
+    return this.http.post(`${this.baseUrl}/saveData`, lstModel);
   }
   getCurrency():Observable<any>{
     return this.http.get(`${this.baseUrl}/getCurrency`);
@@ -74,6 +74,6 @@ getAPIPricerequest(){
 
   }
   saveChangedData(data:any[]){
-    return this.http.post(`${this.baseUrl}/saveDataPriceRequest`,data);
+    return this.http.post(`${this.baseUrl}/saveData`,data);
   }
 }
