@@ -1,476 +1,82 @@
-body {
-    font-family: Tahoma, sans-serif;
-    margin: 10px;
-  }
-  
-  nav {
-    background-color: #EAEAEA;
-    padding: 5px;
-    display: flex;
-    gap: 5px;
-  }
-  
-  button {
-    font-weight: bold;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  .filter-section {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-  
-  .filter-section label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #495057;
-    margin: 0;
-  }
-  
-  .filter-section input[type="number"] {
-    width: 100px;
-    padding: 6px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 13px;
-  }
-  
-  .filter-section input[type="text"] {
-    width: 200px;
-    padding: 6px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 13px;
-  }
-  
-  .split-container {
-    display: flex;
-    flex-direction: column;
-    padding: 15px;
-    background: #fff;
-    min-height: calc(100vh - 180px);
-  }
-  
-  .panel {
-    flex: 1;
-    overflow: auto;
-  }
-  
-  #panel1 {
-    flex: 2;
-  }
-  
-  #panel2 {
-    flex: 1;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  th,
-  td {
-    border: 1px solid #ddd;
-    padding: 5px;
-    text-align: left;
-  }
-  
-  th {
-    font-weight: bold;
-    background-color: #f2f2f2;
-  }
-  
-  ::ng-deep ng-select .ng-dropdown-panel {
-    min-width: 400px !important;
-    /* Hoặc 100%, hoặc kích thước bạn muốn */
-  }
-  
-  ::ng-deep ng-select .ng-dropdown-panel .ng-dropdown-panel-items {
-    padding: 8px;
-  }
-  
-  /* Tables section */
-  .tables-wrapper {
-    margin-top: 0;
-    padding-top: 0;
-  }
-  
-  .table-container {
-    background: #fff;
-    border-radius: 4px;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-   
-  }
-  
-  .table-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    color: #2c3e50;
-  }
-  
-  /* Tabulator customization */
-  
-  
-  
-  ::ng-deep .tabulator-header .tabulator-col {
-    background-color: #f8f9fa !important;
-    border-right: 1px solid #dee2e6;
-    padding: 8px !important;
-    font-weight: 600 !important;
-    color: #495057 !important;
-  }
-  
-  ::ng-deep .tabulator-row {
-    border-bottom: 1px solid #e9ecef;
-    transition: background-color 0.2s ease;
-  }
-  
-  ::ng-deep .tabulator-row.tabulator-row-even {
-    background-color: #f8f9fa;
-  }
-  
-  ::ng-deep .tabulator-row.tabulator-selected {
-    background-color: #e3f2fd !important;
-  }
-  
-  ::ng-deep .tabulator-row:hover {
-    background-color: #f1f3f5 !important;
-  }
-  
-  ::ng-deep .tabulator-cell {
-    padding: 8px !important;
-    font-size: 13px !important;
-    color: #212529 !important;
-  }
-  
-  ::ng-deep .tabulator-footer {
-    background-color: #f8f9fa;
-    border-top: 1px solid #dee2e6;
-    padding: 8px;
-  }
-  
-  /* Table heights */
-  #table_dailyreportHCNSIT {
-    height: 70vh !important;
-  }
-  
-  /* Button styles */
-  .btn {
-    font-size: 13px;
-    font-weight: 500;
-    /* kích thước button */
-    padding: 0.5rem 1rem; 
-    height: 36px;
-    /*  */
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-    margin-right: 0;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    margin: 0px 8px 0px 0px;
-  }
-  
-  .btn:last-child {
-    margin-right: 0;
-  }
-  
-  .btn i {
-    margin-right: 5px;
-  }
-  
-  .btn-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-  
-  .button-section {
-    color: #212529;
-      line-height: 24px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px;
-      background: #fff;
-      border-radius: 4px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      flex-wrap: wrap;
-  }
-  
-  .button-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-  
-  .vr {
-    height: 20px;
-    margin: 0 8px;
-    display: none;
-  }
-  
-  /* ng-select customization */
-  ::ng-deep .ng-select {
-    min-width: 200px;
-  }
-  
-  ::ng-deep .ng-select .ng-select-container {
-    border-radius: 4px !important;
-    border: 1px solid #ced4da !important;
-    min-height: 34px !important;
-  }
-  
-  ::ng-deep .ng-select.ng-select-focused .ng-select-container {
-    border-color: #80bdff !important;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25) !important;
-  }
-  
-  /* Dropdown panel customization */
-  ::ng-deep .ng-dropdown-panel {
-    max-height: 300px !important;
-    overflow-y: auto !important;
-  }
-  
-  ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items {
-    max-height: 300px !important;
-  }
-  
-  ::ng-deep .ng-dropdown-panel .ng-option {
-    padding: 4px 8px !important;
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-  }
-  
-  ::ng-deep .ng-dropdown-panel .ng-option.ng-option-selected {
-    background-color: #e3f2fd !important;
-    color: #000 !important;
-  }
-  
-  ::ng-deep .ng-dropdown-panel .ng-option.ng-option-marked {
-    background-color: #f8f9fa !important;
-    color: #000 !important;
-  }
-  
-  /* Custom template styles */
-  ::ng-deep .ng-dropdown-panel .ng-option .row {
-    margin: 0 !important;
-    padding: 2px 0 !important;
-  }
-  
-  ::ng-deep .ng-dropdown-panel .ng-option .col-4 {
-    padding: 0 4px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-  }
-  
-  /* Header template styles */
-  ::ng-deep .ng-dropdown-panel .ng-header-tmp {
-    padding: 4px 8px !important;
-    background-color: #f8f9fa !important;
-    border-bottom: 1px solid #dee2e6 !important;
-  }
-  
-  ::ng-deep .ng-dropdown-panel .ng-header-tmp .row {
-    margin: 0 !important;
-    font-size: 12px !important;
-    color: #495057 !important;
-  }
-  
-  /* Selected value styles */
-  ::ng-deep .ng-select .ng-value {
-    font-size: 13px !important;
-    line-height: 1.4 !important;
-  }
-  
-  ::ng-deep .ng-select .ng-value-container {
-    padding: 2px 8px !important;
-  }
-  
-  /* Search box styles */
-  ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-input {
-    padding: 4px 8px !important;
-  }
-  
-  ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items .ng-input input {
-    font-size: 10px !important;
-    padding: 4px !important;
-  }
-  
-  /* Loading overlay */
-  .loading-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  /* Offcanvas styles */
-  .layout-wrapper {
-    height: 100%;
-    display: flex;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  /* Thẻ offcanvas */
-  .custom-offcanvas {
-    width: 300px;
-    position: absolute;
-    height: 100%;
-    transform: translateX(-100%);
-    transition: transform 0.2s ease;
-    z-index: 1;
-    background: white;
-    border-right: 1px solid #dee2e6;
-  }
-  
-  /* Khi show, trượt vào */
-  .offcanvas-left.show {
-    transform: translateX(0);
-  }
-  
-  /* Container chính */
-  .project-container {
-    width: 100%;
-    height: auto;
-    margin-left: 0; 
-    position: relative;
-    z-index: 0;
-    transition: margin-left 0.2s ease;
-  }
-  
-  .offcanvas-left.show + .project-container {
-    margin-left: 300px;
-    width: calc(100% - 300px);
-  }
-  
-  /* Ẩn backdrop của Bootstrap */
-  .modal-backdrop {
-    background-color: transparent !important;
-  }
-  
-  .card {
-    height: 100%;
-  }
-  
-  .row {
-    height: 100%;
-  }
-  
-  ::ng-deep ng-select .ng-value-container {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-  }
-  
-  /* Responsive styles */
-  @media (min-width: 768px) {
-    .vr {
-        display: block;
-    }
-    
-    .button-group {
-        flex-wrap: nowrap;
-    }
-  }
-  
-  @media (max-width: 767px) {
-    .button-section {
-        flex-direction: column;
-        align-items: stretch;
-    }
-  
-    .button-group {
-        width: 100%;
-        justify-content: flex-start;
-    }
-  
-    .btn {
-        flex: 1;
-        min-width: auto;
-    }
-  
-    .project-container {
-        padding: 10px;
-    }
-  }
-  
-  @media (max-width: 576px) {
-    .btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 12px;
-    }
-  
-    .button-group {
-        gap: 4px;
-    }
-  
-    .custom-offcanvas {
-        width: 260px;
-    }
-  
-    .offcanvas-left.show + .project-container {
-        margin-left: 260px;
-        width: calc(100% - 260px);
-    }
-  }
-  
-  /* Responsive table */
-  @media (max-width: 768px) {
-    ::ng-deep .tabulator {
-      font-size: 12px !important;
-    }
-  
-    ::ng-deep .tabulator-header .tabulator-col {
-      padding: 6px !important;
-    }
-  
-    ::ng-deep .tabulator-cell {
-      padding: 6px !important;
-    }
-  }
-  
-  /* Card body padding */
-  .card-body {
-    padding-top: 10px;
-  }
-  #datatable1 {
-    height: 250px !important;
+/* Đảm bảo phần thân đúng layout */
+.layout-wrapper {
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+  position: relative;
 }
 
-#datatable2 {
-    height: 150px !important;
+/* Thẻ offcanvas */
+.custom-offcanvas {
+  width: 300px;
+  position: absolute;
+  height: 100%;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  z-index: 1;
 }
-  
-  /* Tab content padding */
-  .tab-content {
-    padding-top: 0;
-  }
-  
-  .tab-pane {
-    padding-top: 0;
-  }
+
+/* Khi show, trượt vào */
+.offcanvas-left.show {
+  transform: translateX(0);
+}
+
+.card {
+  height: 100%;
+}
+
+.row {
+  height: 100%;
+}
+
+.offcanvas-left.show + .project-container {
+  margin-left: 300px;
+  width: calc(100% - 300px);
+}
+
+::ng-deep ng-select .ng-value-container {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+}
+
+.tabulator {
+  font-size: 0.75rem;
+}
+
+.tabulator-cell {
+  padding: 0px;
+}
+
+.fs-12 {
+  font-size: 0.75rem;
+}
+
+.btn {
+  font-weight: bold;
+  height: 3.5vh;
+  font-size: 0.75rem;
+  border: none;
+}
+
+::ng-deep ng-select.form-control .ng-clear-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+::ng-deep ng-select.form-control .ng-clear-wrapper:hover {
+  color: #d9363e;
+}
+
+::ng-deep .ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+    margin-top: 3px;
+    margin-right: 1px;
+    font-size: .75rem;
+    background-color: #fafafa;
+    border: none;
+    border-radius: 2px;
+    height: 24px;
+    line-height: 22px;
+}

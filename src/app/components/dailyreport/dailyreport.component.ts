@@ -112,7 +112,7 @@ export class DailyreportComponent implements OnInit {
       this.table1 = new Tabulator("#table_dailyreportHCNSIT", {
         data: this.dataTable1,
         layout: "fitDataFill",
-        height: '50vh',
+        height: '65vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,
@@ -186,7 +186,7 @@ export class DailyreportComponent implements OnInit {
       this.table2 = new Tabulator("#table_dailyreportCP", {
         data: this.dataTable2,
         layout: "fitDataFill",
-        height: '70vh',
+        height: '65vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,
@@ -261,7 +261,7 @@ export class DailyreportComponent implements OnInit {
       this.table3 = new Tabulator("#table_dailyreportLX", {
         data: this.dataTable3,
         layout: "fitDataFill",
-        height: '70vh',
+        height: '65vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,

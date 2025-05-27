@@ -107,7 +107,7 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
 
         this.table = new Tabulator("#office-supply-request-summary-table", {
           data: this.datatable,
-          height: '70vh',
+          height: '80vh',
           layout: "fitDataFill",
           pagination: true,
           paginationSize: 50,

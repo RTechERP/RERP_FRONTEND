@@ -15,11 +15,11 @@ export class OfficeSuppliesService {
   }
 
   getUnit(): Observable<any> {
-    return this.httpclient.get<any>(`${this.baseUrl}/getdataofficesupplyunit`);
+    return this.httpclient.get<any>(`https://localhost:7187/api/OfficeSupplyUnit/getdataofficesupplyunit`);
   }
 
   addUnit(data: any): Observable<any> {
-    return this.httpclient.post<any>(`${this.baseUrl}/savedatofficesupplyunit`, data);
+    return this.httpclient.post<any>(`https://localhost:7187/api/OfficeSupplyUnit/savedatofficesupplyunit`, data);
   }
 
   getdatafill(id: number): Observable<any> {
@@ -31,7 +31,7 @@ export class OfficeSuppliesService {
   }
 
   updatedata(data: any): Observable<any> {
-    return this.httpclient.post(`${this.baseUrl}/adddandupdate`, data);
+    return this.httpclient.post(`${this.baseUrl}/addandupdate`, data);
   }
 
   deletedata(ids: number[]): Observable<any> {

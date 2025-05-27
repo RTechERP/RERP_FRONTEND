@@ -1,5 +1,4 @@
-<div class="layout-wrapper">
-  <!-- Offcanvas -->
+<div class="layout-wrapper d-flex" style="height: 100%">
   <div class="offcanvas offcanvas-left custom-offcanvas" tabindex="-1" id="searchOffcanvas" data-bs-backdrop="false">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title">Tìm kiếm</h5>
@@ -46,76 +45,74 @@
 
       <!-- Buttons -->
       <div class="form-group mt-3">
-        <button class="btn btn-outline-primary btn-outline-sm me-2" data-bs-dismiss="offcanvas" (click)="search()">
+        <button class="btn btn-outline-primary btn-outline-sm me-2"
+        style="height: auto;" data-bs-dismiss="offcanvas" (click)="search()">
           <i class="fas fa-search"></i> Tìm kiếm
         </button>
-        <button class="btn btn-outline-secondary btn-outline-sm">
+        <button  style="height: auto;" class="btn btn-outline-secondary btn-outline-sm">
           <i class="fas fa-undo"></i> Đặt lại
         </button>
       </div>
     </div>
   </div>
+  <div class="container-fluid project-container" id="projectParent">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="card">
+          <div class="card-header p-0">
+            <div class="d-flex justify-content-start">
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Tìm kiếm"
+                data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas">
+                <i class="fas fa-search"></i> Tìm kiếm
+              </button>
 
-  <!-- Main content -->
-  <div class="project-container">
-    <!-- Button toolbar -->
-    <div class="button-section">
-      <!-- Search group -->
-      <div class="button-group">
-        <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas"
-          data-bs-target="#searchOffcanvas">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-
-      <div class="vr mt-2"></div>
-
-      <!-- Excel import/export group -->
-      <div class="button-group">
-        <button class="btn btn-outline-success" (click)="exportToExcel()">
-          <i class="fa-solid fa-file-excel"></i> Xuất Excel
-        </button>
-      </div>
-    </div>
-
-    <!-- Tables -->
-  
-      <div class="custom-tabs-container">
-        <ul class="nav nav-tabs" id="customTab3" role="tablist">
-          <li class="nav-item" role="presentation">
-            <a class="nav-link active" id="tab-oneAA" data-bs-toggle="tab" href="#oneAA" role="tab"
-              aria-controls="oneAA" aria-selected="true" (click)="setCheckModeExcel(0)">Hành chính nhân sự IT</a>
-          </li>
-          <li class="nav-item" role="presentation">
-            <a class="nav-link" id="tab-twoAA" data-bs-toggle="tab" href="#twoAA" role="tab" aria-controls="twoAA"
-              aria-selected="false" (click)="setCheckModeExcel(1)">Cắt phim</a>
-          </li>
-          <li class="nav-item" role="presentation">
-            <a class="nav-link" id="tab-threeAA" data-bs-toggle="tab" href="#threeAA" role="tab" aria-controls="threeAA"
-              aria-selected="false" (click)="setCheckModeExcel(2)">Lái xe</a>
-          </li>
-        </ul>
-        <div class="tab-content" id="customTabContent3">
-          <div class="tab-pane fade show active" id="oneAA" role="tabpanel">
-            <div class="card mb-3">
-              <div class="table-container mb-3 ">
-                <div id="table_dailyreportHCNSIT" class="custom-tabulator"></div>
-              </div>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xuất Excel"
+                (click)="exportToExcel()">
+                <i class="fas fa-file-excel"></i> Xuất excel
+              </button>
             </div>
-          </div>
+            <div class="card-body p-0">
+              <div class="custom-tabs-container" >
+                <ul class="nav nav-tabs" id="customTab3" role="tablist" >
+                  <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="tab-oneAA" data-bs-toggle="tab" href="#oneAA" role="tab"
+                      aria-controls="oneAA" aria-selected="true" (click)="setCheckModeExcel(0)">Hành chính nhân sự
+                      IT</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="tab-twoAA" data-bs-toggle="tab" href="#twoAA" role="tab"
+                      aria-controls="twoAA" aria-selected="false" (click)="setCheckModeExcel(1)">Cắt phim</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="tab-threeAA" data-bs-toggle="tab" href="#threeAA" role="tab"
+                      aria-controls="threeAA" aria-selected="false" (click)="setCheckModeExcel(2)">Lái xe</a>
+                  </li>
+                </ul>
+                <div class="tab-content" id="customTabContent3">
+                  <div class="tab-pane fade show active" id="oneAA" role="tabpanel">
+                    <div class="card mb-3">
+                      <div class="table-container mb-3 ">
+                        <div id="table_dailyreportHCNSIT" class="custom-tabulator"></div>
+                      </div>
+                    </div>
+                  </div>
 
-          <div class="tab-pane fade" id="twoAA" role="tabpanel">
-            <div class="card mb-3">
-              <div class="table-container mb-3">
-                <div id="table_dailyreportCP" class="custom-tabulator"></div>
-              </div>
-            </div>
-          </div>
+                  <div class="tab-pane fade" id="twoAA" role="tabpanel">
+                    <div class="card mb-3">
+                      <div class="table-container mb-3">
+                        <div id="table_dailyreportCP" class="custom-tabulator"></div>
+                      </div>
+                    </div>
+                  </div>
 
-          <div class="tab-pane fade" id="threeAA" role="tabpanel">
-            <div class="card mb-3">
-              <div class="table-container mb-3">
-                <div id="table_dailyreportLX" class="custom-tabulator"></div>
+                  <div class="tab-pane fade" id="threeAA" role="tabpanel">
+                    <div class="card mb-3">
+                      <div class="table-container mb-3">
+                        <div id="table_dailyreportLX" class="custom-tabulator"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -123,4 +120,3 @@
       </div>
     </div>
   </div>
-  <!-- thêm -->

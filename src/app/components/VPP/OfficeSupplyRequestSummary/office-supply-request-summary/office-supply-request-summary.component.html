@@ -1,54 +1,90 @@
-<div class="button-section">
-    <!-- Action buttons group -->
-    <div class="button-group">
-        <label for="txtYear">Năm</label>
-        <input type="number" id="txtYear" min="2024" max="9999" class="form-control form-control-sm"
-             [(ngModel)]="searchParams.year">
-
-        <label for="txtMonth">Tháng</label>
-        <input type="number" id="txtMonth" min="1" max="12" class="form-control form-control-sm"
-             [(ngModel)]="searchParams.month">
-    </div>
-    <div class="button-group">
-        <label for="cboDepartment">Phòng ban</label>
-            <ng-select id="cboDepartment" class="department-select" [items]="dataDeparment" bindLabel="Name"
-                [bindValue]="'ID'" [(ngModel)]="searchParams.departmentId" 
-                placeholder="Chọn phòng ban">
-                <ng-template ng-header-tmp>       
-                    <div class="row font-weight-bold text-center">
-                        <div class="col-4" style="font-weight: bold;">Mã phòng ban</div>
-                        <div class="col-4" style="font-weight: bold;">Tên phòng ban</div>
-                    </div>
-                </ng-template>
-                <ng-template ng-option-tmp let-item="item">
-                    <div class="row text-center">
-                        <div class="col-4">{{ item.Code}}</div>
-                        <div class="col-4">{{ item.Name }}</div>
-                    </div>
-                </ng-template>
-            </ng-select>
-        
-            <div class="button-group">
-                   <div class="button-group">
-                <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" 
-                  data-bs-target="#searchOffcanvas" (click)="search()">
-                  <i class="fas fa-search"></i>
+<div class="layout-wrapper d-flex" style="height: 100%">
+    <div class="offcanvas offcanvas-left custom-offcanvas" tabindex="-1" id="searchOffcanvas" data-bs-backdrop="false">
+       <div class="offcanvas-header">
+         <h5 class="offcanvas-title">Tìm kiếm</h5>
+         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+       </div>
+       <div class="offcanvas-body">
+         <!-- Năm -->
+         <div class="form-group">
+           <label for="txtYear">Năm</label>
+           <input type="number" id="txtYear" 
+             min="2024" max="9999" 
+             [(ngModel)]="searchParams.year"
+         
+             class="form-control form-control-sm">
+         </div>
+   
+         <!-- Tháng -->
+         <div class="form-group">
+           <label for="txtMonth">Tháng</label>
+           <input type="number" id="txtMonth" 
+             min="1" max="12" 
+             [(ngModel)]="searchParams.month"
+           
+             class="form-control form-control-sm">
+         </div>
+   
+         <!-- Phòng ban -->
+         <div class="form-group">
+           <label for="cboDepartment">Phòng ban</label>
+          <ng-select id="cboDepartment" class="department-select" [items]="dataDeparment" bindLabel="Name"
+                   [bindValue]="'ID'" [(ngModel)]="searchParams.departmentId" 
+                   placeholder="Chọn phòng ban">
+                   <ng-template ng-header-tmp>       
+                       <div class="row font-weight-bold text-center">
+                           <div class="col-4" style="font-weight: bold;">Mã phòng ban</div>
+                           <div class="col-4" style="font-weight: bold;">Tên phòng ban</div>
+                       </div>
+                   </ng-template>
+                   <ng-template ng-option-tmp let-item="item">
+                       <div class="row text-center">
+                           <div class="col-4">{{ item.Code}}</div>
+                           <div class="col-4">{{ item.Name }}</div>
+                       </div>
+                   </ng-template>
+               </ng-select>
+         </div>
+         <div class="form-group">
+              <div class="button-group">
+                <button class="btn btn-outline-primary p-0 ps-2 pe-2" type="button" data-bs-toggle="offcanvas" 
+                  data-bs-target="#searchOffcanvas" (click)="search()">Tìm kiếm
+                 
                 </button>
               </div>
-              </div>
-    </div>
-
-    <div class="vr"></div>
-
-    <!-- Excel import/export group -->
-    <div class="button-group">
-        <button class="btn btn-outline-success" (click)="exportToExcel()">
-            <i class="fa-solid fa-file-excel"></i> Xuất Excel
-        </button>
-    </div>
-</div>
-<!-- Table section -->
-<div class="table-container mt-3">
-    <div id="office-supply-request-summary-table"></div>
-</div>
-
+            </div>
+   
+         <!-- Buttons -->
+       </div>
+     </div>
+   
+       <div class="container-fluid project-container" id="projectParent">
+         <div class="row">
+           <div class="col-12 p-0">
+             <div class="card">
+               <div class="card-header p-0">
+                   <div class="d-flex justify-content-start">
+                          <button
+                         type="button"
+                         class="btn btn-outline-secondary p-0 ps-2 pe-2"
+                         title="Tìm kiếm"
+                         data-bs-toggle="offcanvas"
+                         data-bs-target="#searchOffcanvas"
+                       >
+                         <i class="fas fa-search"></i> Tìm kiếm
+                       </button>
+                      <button class="btn btn-outline-secondary p-0 ps-2 pe-2" id="btnNew" (click)="exportToExcel()">
+             <i class="fa-solid fa-file-excel"></i>  Xuất Excel
+           </button>
+   
+               </div>
+   
+               <div class="card-body p-0">
+                  <div id="office-supply-request-summary-table"></div>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </div>
+     

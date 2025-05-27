@@ -179,7 +179,8 @@ export class OfficeSupplyRequestsComponent implements OnInit {
       this.table = new Tabulator('#datatable1', {
         data: this.dataTable1,
         layout: 'fitDataFill',
-        height: '20vh',
+        height: '40vh',
+        pagination:true,
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
@@ -260,10 +261,12 @@ export class OfficeSupplyRequestsComponent implements OnInit {
       this.table2 = new Tabulator('#datatable2', {
         data: this.dataTable2,
         layout: 'fitDataFill',
-        height: '20vh',
+        height: '25vh',
+        pagination:true,
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
+        selectableRows: 1,
         rowHeader: {
           headerSort: false,
           resizable: false,
@@ -485,7 +488,8 @@ export class OfficeSupplyRequestsComponent implements OnInit {
   UnIsApproved(): void {
     if (!this.PushSelectedList()) {
       return;
-    } else {
+    }
+     else {
       Swal.fire({
         title: 'Bạn có chắc chắn muốn hủy duyệt các VPP đã chọn không này?',
         icon: 'warning',
