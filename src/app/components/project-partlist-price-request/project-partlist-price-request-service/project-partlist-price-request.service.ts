@@ -38,7 +38,9 @@ export class ProjectPartlistPriceRequestService {
       { params }
     );
   }
-
+getAPIPricerequest(){
+  return this.baseUrl+'/getallProjectParListPriceRequest';
+}
   // Gọi API lấy danh sách types
   getTypes(employeeID: number): Observable<any> {
     const params = new HttpParams().set('employeeID', employeeID.toString());

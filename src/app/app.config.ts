@@ -10,3 +10,5 @@ export const appConfig: ApplicationConfig = {
 export const API_URL = 'https://localhost:7187';
 export const APP_LOGIN_NAME = 'admin';
 export const EMPLOYEE_ID = 0;
+export const ISADMIN = true;
+

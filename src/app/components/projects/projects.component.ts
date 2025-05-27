@@ -18,7 +18,6 @@ import moment from 'moment';
 import { NgSelectModule } from '@ng-select/ng-select';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
-import { ProjectFormPriorityComponent } from './project-form-priority/project-form-priority.component';
 
 
 @Component({
@@ -531,7 +530,7 @@ export class ProjectsComponent implements OnInit {
     this.projectService.getProjectTypeLinks(id).subscribe({
       next: (response: any) => {
         console.log('projectlink', response.data);
-        this.tb_projectTypeLinks.setData(this.projectService.setDataTree(response.data));
+        // this.tb_projectTypeLinks.setData(this.projectService.setDataTree(response.data));
       },
       error: (error) => {
         console.error('Lỗi:', error);

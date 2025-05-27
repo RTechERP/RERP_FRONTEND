@@ -125,34 +125,52 @@
       <div class="card-header">
         <div class="d-flex justify-content-start align-items-center">
           <button
-            class="btn btn-outline-primary mt-2 ms-3"
+            class="btn btn-outline-secondary p-0 ps-2 pe-2"
             type="button"
             data-bs-toggle="offcanvas"
             data-bs-target="#offcanvasSearch"
             aria-controls="offcanvasSearch"
           >
-            <i class="fa fa-search me-1"></i>
+            <i class="fa fa-search p-0 ps-2 pe-2"></i>
           </button>
           <button
-            class="btn btn-outline-primary mt-2 ms-3"
+            class="btn btn-outline-secondary p-0 ps-2 pe-2"
             (click)="onAddClick()"
           >
             <i class="fa-regular fa-plus"></i>Thêm
           </button>
           <button
-            class="btn btn-outline-success mt-2 ms-3"
+            class="btn btn-outline-secondary p-0 ps-2 pe-2"
             (click)="onEditClick()"
           >
             <i class="fa-solid fa-pen-to-square"></i>Sửa
           </button>
-          <button class="btn btn-outline-secondary mt-2 ms-3" (click)="onSaveData()">
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="onSaveData()">
             <i class="fa-solid fa-floppy-disk"></i>Lưu dữ liệu
           </button>
-          <button class="btn btn-outline-info mt-2 ms-3 " (click)="CheckPrice(true)">
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="CheckPrice(true)">
             <i class="fa-solid fa-list-check"></i> Check giá
           </button>
-          <button class="btn btn-outline-danger mt-2 ms-3 " (click)="QuotePrice()">
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice()">
             <i class="fa-solid fa-hand-holding-dollar"></i>báo giá
+          </button>
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice(1)">
+            <i class="fa-solid fa-text-slash"></i>Hủy báo giá
+          </button>
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice(3)">
+            <i class="fa-solid fa-circle-check"></i>Hoàn thành
+          </button>
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice(0)">
+            <i class="fa-solid fa-circle-exclamation"></i>Hủy hoàn thành
+          </button>
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice()">
+            <i class="fa-solid fa-trash"></i>Xóa
+          </button>
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice()">
+            <i class="fa-solid fa-boxes-packing"></i>Thêm nhà cung cấp
+          </button>
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice()">
+            <i class="fa-solid fa-table"></i>Xuất excel
           </button>
       </div>
       <div class="card-body">

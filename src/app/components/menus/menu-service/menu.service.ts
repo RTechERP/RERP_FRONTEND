@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import { API_URL } from '../../../app.config';
 @Injectable({
   providedIn: 'root'
 })
 export class MenuService {
 
-    private _url = 'https://localhost:40687/api/menu/';
+    private _url = `${API_URL}
+    ./api/menu/`;
   constructor(private http:HttpClient) { }
 
 
@@ -17,3 +18,6 @@ export class MenuService {
     return this.http.get<any>(this._url + 'getall');
   }
 }
+
+
+4
