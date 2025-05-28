@@ -230,12 +230,40 @@
     table.import("xlsx", [".xlsx", ".csv", ".ods"], "buffer");
 });
 </script>
-<!-- modal don vi tinh -->
+<!-- modal hiện danh sách đơn vị tính và kèm chức năng thêm, sửa-->
 <div class="modal fade" id="officeSupplyUnitModal" tabindex="-1" aria-labelledby="officeSupplyUnitModalLabel"  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="addUnitModalLabel">Danh sách đơn vị tính</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form class="needs-validation" novalidate>
+          <div class="d-flex gap-2 align-items-center p-2">
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedItem.Name" name="unitName" placeholder="Nhập đơn vị tính">
+			  <button
+              type="button"
+              class="btn btn-outline-primary p-0 ps-2 pe-2"
+              title="Cập nhật đơn vị tính" (click)="saveSelectedItem()"
+              style="white-space: nowrap;"
+            >Cập nhật
+            </button>
+          </div>
+          <div class="card-body p-2">
+            <div id="datatable2"></div>
+          </div>
+        </form>
+      </div>   
+    </div>
+  </div>
+</div>
+<!-- modal hiện nhập khẩu excel  -->
+<div class="modal fade" id="officeSupplyUnitModal" tabindex="-1" aria-labelledby="officeSupplyUnitModalLabel"  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addUnitModalLabel">Nhập khẩu Excel</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">

@@ -184,7 +184,6 @@ export class OfficeSupplyRequestsComponent implements OnInit {
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
-        selectableRows: 10,
         rowHeader: {
           headerSort: false,
           resizable: false,

@@ -280,9 +280,9 @@ export class DailyreportComponent implements OnInit {
               return `${day}-${month}-${year}`;
             }
           },
-          {title: "Lý do muộn", field: "ReasonLate",hozAlign: "center"},
+          {title: "Lý do muộn", field: "ReasonLate",hozAlign: "left"},
           {title: "Tình trạng xe", field: "StatusVehicle",hozAlign: "left"},
-          {title: "Kiến nghị/ đề xuất", field: "Propose",hozAlign: "center"},
+          {title: "Kiến nghị/ đề xuất", field: "Propose",hozAlign: "left"},
           {title: "Số Km", field: "KmNumber",hozAlign: "center"},
           {title: "Số Cuốc muộn", field: "TotalLate",hozAlign: "center"},
           {title: "Tổng số phút chậm", field: "TotalTimeLate",hozAlign: "center"},
