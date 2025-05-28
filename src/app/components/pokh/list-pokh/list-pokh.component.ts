@@ -5,10 +5,11 @@ import { TabulatorFull as Tabulator, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { error, event } from 'jquery';
 import { CustomerPartComponent } from '../../vision-base/customer-part/customer-part.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { CustomerPartService } from '../../vision-base/customer-part/customer-part/customer-part.service';
+import { forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators'
 
 
 @Component({
@@ -85,9 +86,8 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       console.log(this.pokhs);
       if (this.table) {
         this.table.setData(this.pokhs);
-        this.loadFormData();
-
       }
+      this.loadFormData();
     });
   }
 
@@ -436,13 +436,30 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   isModalOpen: boolean = false;
   openModal() {
     this.isModalOpen = true;
-    if (this.isEditMode) {
-      this.loadPOKHData(this.selectedId);
-    }
     setTimeout(() => {
-      this.initProductDetailTreeList();
-      this.initFileUploadedTable();
-    }, 300);
+      if (this.isEditMode) {
+        this.loadPOKHData(this.selectedId); // Tải dữ liệu cho chế độ sửa
+      } else {
+        // Chế độ thêm mới
+        this.resetForm(); // Reset form và dữ liệu
+        this.POKHProduct = [];
+        this.uploadedFiles = [];
+        this.detailUser = [];
+        this.isResponsibleUsersEnabled = false; // Mặc định tắt bảng người phụ trách
+
+        this.initProductDetailTreeList(); // Khởi tạo với dữ liệu rỗng
+        this.ProductDetailTreeList?.setData([]);
+
+        this.initFileUploadedTable(); // Khởi tạo với dữ liệu rỗng
+        this.fileUploadedTable?.setData([]);
+        
+        // Nếu bảng DetailUser đã tồn tại từ lần mở trước, hủy nó đi
+        if (this.DetailUser) {
+            this.DetailUser.destroy();
+            this.isResponsibleUsersEnabled = false;
+        }
+      }
+    }, 0);
   }
   closeModal() {
     this.isModalOpen = false;
@@ -480,6 +497,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       response => {
         if (response.status === 1) {
           const pokhData = response.data;
+          const receivedDate = new Date(pokhData.ReceivedDatePO);
           this.poFormData = {
             status: pokhData.Status,
             poCode: pokhData.POCode,
@@ -487,12 +505,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             endUser: pokhData.EndUser,
             customerName: pokhData.CustomerName,
             userId: pokhData.UserID,
-            poDate: new Date(pokhData.ReceivedDatePO),
+            poDate: receivedDate.toISOString().split('T')[0],
             totalPO: pokhData.TotalMoneyPO,
             poNumber: pokhData.PONumber,
             projectId: pokhData.ProjectID,
             poType: pokhData.POType,
-            departmentId: pokhData.PartID,
+            departmentId: pokhData.PartID || 0,
             userType: pokhData.UserType,
             note: pokhData.Note,
             currencyId: pokhData.CurrencyID,
@@ -506,27 +524,26 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           this.loadPOKHProducts(id);
           this.loadPOKHFiles(id);
 
-         
           if (pokhData.UserType === 1) {
             this.isResponsibleUsersEnabled = true;
             this.loadDetailUser(id);
           }
 
           setTimeout(() => {
-            if (this.ProductDetailTreeList && this.fileTable) {
-              this.ProductDetailTreeList.setData(this.POKHProduct);
-              this.DetailUser.setData(this.detailUser);
-              this.fileTable.setData(this.POKHFiles);
-            }
-
             this.initProductDetailTreeList();
             this.initFileUploadedTable();
             console.log("FileCheck:", this.POKHFiles)
             console.log("ProductCheck:", this.POKHProduct)
             console.log("DetailUserCheck:", this.detailUser)
-            if (this.isResponsibleUsersEnabled && this.DetailUser) {
-              this.DetailUser.setData(this.detailUser);
+            if (this.ProductDetailTreeList && this.fileTable) {
+              this.ProductDetailTreeList.setData(this.POKHProduct);
+              this.fileTable.setData(this.POKHFiles);
+            }
+            if (this.isResponsibleUsersEnabled) {
               this.initDetailTable();
+              if (this.DetailUser) {
+                this.DetailUser.setData(this.detailUser);
+              }
             }
           }, 1000);
         } else {
@@ -1088,7 +1105,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       pagination: true,
       paginationSize: 5,
       movableColumns: true,
-      
       resizableRows: true,
       columns: [
         {
@@ -1098,7 +1114,18 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           width: '5%'
         },
         {
-          title: 'Người phụ trách', field: 'ResponsibleUser', sorter: 'string', width: '35%', editor: "list", editorParams: {
+          title: 'ID', 
+          field: 'ID', 
+          sorter: 'number', 
+          width: 100, 
+        },
+        {
+          title: 'Người phụ trách', 
+          field: 'ResponsibleUser', 
+          sorter: 'string', 
+          width: '25%', 
+          editor: "list", 
+          editorParams: {
             values: this.users.map(user => ({
               label: `${user.FullName}`,
               value: user.FullName,
@@ -1107,6 +1134,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             listOnEmpty: true,
             autocomplete: true
           },
+          cellEdited: (cell) => {
+            const selectedUser = this.users.find(user => user.FullName === cell.getValue());
+            if (selectedUser) {
+              cell.getRow().update({ ID: selectedUser.ID });
+            }
+          }
         },
         {
           title: 'Phần trăm', field: 'PercentUser', sorter: 'number', editor: "input", width: '30%',
@@ -1167,7 +1200,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
   addRowDetailUser(): void {
     const newRow = {
-
       ResponsibleUser: "",
       PercentUser: 0,
       MoneyUser: 0,
@@ -1210,7 +1242,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           field: 'actions',
           formatter: (cell) => {
             const rowIndex = cell.getRow().getIndex();
-            return `<button class="btn btn-sm btn-danger" onclick="window.deleteFile(${rowIndex})"><i class="bi bi-trash"></i></button>`;
+            return `<button class="btn bt n-sm btn-danger" onclick="window.deleteFile(${rowIndex})"><i class="bi bi-trash"></i></button>`;
           },
           width: "10%",
           hozAlign: "center",
