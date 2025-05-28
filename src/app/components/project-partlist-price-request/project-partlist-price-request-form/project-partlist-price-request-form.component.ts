@@ -80,11 +80,11 @@ export class ProjectPartlistPriceRequestFormComponent
   }
   ngOnInit(): void {
     this.lstSave = [];
-    this.getAllUser();  
+    this.getAllUser();
     this.getProductSale();
-              console.log('datainput',this.dataInput);
+    console.log('datainput', this.dataInput);
     this.requester = Number(this.dataInput[0]['EmployeeID']);
-    console.log('abd',this.requester)
+    console.log('abd', this.requester);
     this.requestDate = moment(this.dataInput[0]['DateRequest']).format(
       'YYYY-MM-DD'
     );
@@ -108,10 +108,23 @@ export class ProjectPartlistPriceRequestFormComponent
                 const row = cell.getRow();
                 const rowData = row.getData();
 
-                if (rowData['ID']) {
-                  const deletedRow = { ...rowData, IsDeleted: true };
-                  this.lstSave.push(deletedRow);
-                }
+                  if (rowData['ID']) {
+                    this.lstSave.push({
+                      ID: rowData['ID'],
+                      // Quantity: Number(rowData['Quantity']),
+                      // Deadline: moment(rowData['Deadline']).toDate(),
+                      // ProductCode: rowData['ProductCode'],
+                      // ProductName: rowData['ProductName'],
+                      // Note: rowData['Note'],
+                      // Unit: rowData['Unit'],
+                      // IsCommercialProduct: rowData['IsCommercialProduct'],
+                      // StatusRequest: rowData['StatusRequest'] ?? '',
+                      // Maker: rowData['Maker'] ?? '',
+                      // DateRequest: this.requestDate,
+                      // EmployeeID: this.requester,
+                      IsDeleted: true,
+                    });
+                  }
 
                 row.delete();
               },
@@ -285,7 +298,6 @@ export class ProjectPartlistPriceRequestFormComponent
         this.closeModal.emit();
       }
     );
-
   }
 
   addRow() {
@@ -430,12 +442,15 @@ export class ProjectPartlistPriceRequestFormComponent
     // Lấy dữ liệu bảng, loại bỏ trường ProductNewCode nếu backend không cần
     const updatedData = this.table.getRows().map((row) => {
       const data = row.getData(); // lấy toàn bộ data, kể cả cột ẩn
-      const { ProductNewCode, ...rest } = data;
-
       return {
-        ...rest,
         ID: data['ID'] ?? 0, // nếu undefined/null => gán 0
         Quantity: Number(data['Quantity']),
+        Deadline: moment(data['Deadline']).toDate(),
+        ProductCode: data['ProductCode'],
+        ProductName: data['ProductName'],
+        Note: data['Note'],
+        Unit: data['Unit'],
+        IsCommercialProduct: data['IsCommercialProduct'],
         StatusRequest: data['StatusRequest'] ?? '', // nếu không có => mặc định 1
         Maker: data['Maker'] ?? '',
         DateRequest: this.requestDate,
