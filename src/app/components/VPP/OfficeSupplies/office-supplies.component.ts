@@ -62,6 +62,7 @@ export class OfficeSuppliesComponent implements OnInit {
   selectid: number = 0;
   selectedList: any[] = [];
   selectedId = 0;
+  selectedItem: any = {};
 
   typeOptions = [
     { id: 2, name: 'Dùng chung' },
@@ -209,21 +210,10 @@ export class OfficeSuppliesComponent implements OnInit {
         reactiveData: true,
         columns: [
           {
-            title: "",
-            formatter: "rowSelection",
-            titleFormatter: "rowSelection",
-            hozAlign: "center",
-            headerHozAlign: "center",
-            headerSort: false,
-         
-            frozen: true,
-          },
-          {
             title: 'Mã đơn vị',
             field: 'ID',
             hozAlign: 'center',
             headerHozAlign: 'center',
-        
           },
           {
             title: 'Tên đơn vị',
@@ -233,6 +223,100 @@ export class OfficeSuppliesComponent implements OnInit {
             width: "50%"
           }
         ]
+      });
+
+      // Thêm sự kiện click cho bảng thứ hai
+      this.table2.on("rowClick", (e: MouseEvent, row: RowComponent) => {
+        const rowData = row.getData();
+        this.selectedItem = {
+          ID: rowData['ID'],
+          Name: rowData['Name']
+        };
+        console.log('Selected item:', this.selectedItem);
+        // Gọi API để lấy dữ liệu chi tiết
+        this.getdataUnitbyid(rowData['ID']);
+      });
+    }
+  }
+  getdataUnitbyid(id: number) {
+    console.log("id", id);
+    this.lstVPP.getdataUnitfill(id).subscribe({
+      next: (response) => {
+        console.log('Dữ liệu click sửa được:', response);
+        let data = null;
+        if (response?.data) {
+          data = Array.isArray(response.data) ? response.data[0] : response.data;
+        } else {
+          data = response;
+        }
+
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          this.selectedItem = {
+            ID: data['ID'] || '',
+            Name: data['Name'] || '',
+          };
+          console.log('Selected item after API call:', this.selectedItem);
+        } else {
+          console.warn('Không có dữ liệu để fill');
+          console.log('Giá trị data:', data);
+        }
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy dữ liệu:', err);
+      }
+    });
+  }
+  saveSelectedItem() {
+    if (!this.selectedItem?.Name) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Tên đơn vị không được để trống!',
+      });
+      return;
+    }
+
+    // Nếu không có ID hoặc ID = 0, tạo mới
+    if (!this.selectedItem?.ID || this.selectedItem.ID === 0) {
+      this.lstVPP.addUnit({ ID: 0, Name: this.selectedItem.Name }).subscribe({
+        next: (response) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Thành công',
+            text: 'Thêm mới thành công!',
+          });
+          this.selectedItem = {}; // Reset form
+          this.getUnits(); // Refresh the table
+        },
+        error: (err) => {
+          console.error('Lỗi khi thêm mới:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Lỗi',
+            text: 'Có lỗi xảy ra khi thêm mới!',
+          });
+        }
+      });
+    } else {
+      // Nếu có ID, cập nhật
+      this.lstVPP.updatedataUnit(this.selectedItem).subscribe({
+        next: (response) => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Thành công',
+            text: 'Cập nhật thành công!',
+          });
+          this.selectedItem = {}; // Reset form
+          this.getUnits(); // Refresh the table
+        },
+        error: (err) => {
+          console.error('Lỗi khi cập nhật dữ liệu:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Lỗi',
+            text: 'Có lỗi xảy ra khi cập nhật dữ liệu!',
+          });
+        }
       });
     }
   }

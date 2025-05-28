@@ -230,7 +230,7 @@
     table.import("xlsx", [".xlsx", ".csv", ".ods"], "buffer");
 });
 </script>
-// <!-- modal don vi tinh -->
+<!-- modal don vi tinh -->
 <div class="modal fade" id="officeSupplyUnitModal" tabindex="-1" aria-labelledby="officeSupplyUnitModalLabel"  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -241,22 +241,20 @@
       <div class="modal-body">
         <form class="needs-validation" novalidate>
           <div class="d-flex gap-2 align-items-center p-2">
-              <input type="text" class="form-control form-control-sm " placeholder="Nhập đơn vị tính">
+              <input type="text" class="form-control form-control-sm" [(ngModel)]="selectedItem.Name" name="unitName" placeholder="Nhập đơn vị tính">
 			  <button
               type="button"
-              class="btn btn-outline-secondary p-0 ps-2 pe-2"
-              title="Nhập đơn vị tính" 
-            >Thêm
+              class="btn btn-outline-primary p-0 ps-2 pe-2"
+              title="Cập nhật đơn vị tính" (click)="saveSelectedItem()"
+              style="white-space: nowrap;"
+            >Cập nhật
             </button>
           </div>
           <div class="card-body p-2">
             <div id="datatable2"></div>
-        </div>
+          </div>
         </form>
-      </div>
-      <div class="modal-footer">
-        <button style="height: auto;" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-        <button style="height: auto;" type="button" class="btn btn-outline-primary" (click)="addNewUnit()">Lưu</button>
-      </div>
+      </div>   
     </div>
-  </div> 
+  </div>
+</div> 

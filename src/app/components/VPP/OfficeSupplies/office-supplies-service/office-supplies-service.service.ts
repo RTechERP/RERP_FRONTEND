@@ -24,7 +24,11 @@ export class OfficeSuppliesService {
 
   getdatafill(id: number): Observable<any> {
     return this.httpclient.get(`${this.baseUrl}/getbyidofficesupplies?id=${id}`);
+    
   }
+  getdataUnitfill(id:number):Observable<any>{
+    return this.httpclient.get('https://localhost:7187/api/OfficeSupplyUnit/getbyidofficesupplyunit?id='+id);
+   }
 
   adddata(data: any): Observable<any> {
     return this.httpclient.post(`${this.baseUrl}/addandupdate`, data);
@@ -32,6 +36,9 @@ export class OfficeSuppliesService {
 
   updatedata(data: any): Observable<any> {
     return this.httpclient.post(`${this.baseUrl}/addandupdate`, data);
+  }
+  updatedataUnit(data:any): Observable<any>{
+    return this.httpclient.post<any>('https://localhost:7187/api/OfficeSupplyUnit/savedatofficesupplyunit',data);
   }
 
   deletedata(ids: number[]): Observable<any> {
