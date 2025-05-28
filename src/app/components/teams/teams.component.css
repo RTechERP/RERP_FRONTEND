@@ -1,0 +1,24 @@
+#team-table,
+#employee-table,
+#employee-team-table{
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
+    min-height: 200px;
+}
+    
+.tabulator {
+    font-size: 0.75rem;
+}
+  
+.fs-12 {
+    font-size: 0.75rem;
+}
+  
+.btn {
+    height: 2.5vh;
+    font-size: 0.75rem;
+    border: none;
+    font-weight: bold;
+}
