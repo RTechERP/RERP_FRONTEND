@@ -43,7 +43,9 @@ export class OfficeSuppliesComponent implements OnInit {
   lstVP: any[] = [];
   listUnit: any[] = [];
   table: any; // instance của Tabulator
+  table2: any; // instance của Tabulator cho bảng thứ hai
   dataTable: any[] = [];
+  dataTable2: any[]=[];
   newUnit: any = {ID:0,Name:''};
   newProduct: Product = {
     CodeRTC: '',
@@ -74,7 +76,53 @@ export class OfficeSuppliesComponent implements OnInit {
     this.drawTable();
     this.getAll();
     this.getUnits();
+
+    // Thêm event listener cho việc import
+    // if (this.table) {
+    //   this.table.on("dataLoaded", (data: any[]) => {
+    //     // Xử lý dữ liệu sau khi import
+    //     const processedData = data.map(row => ({
+    //       CodeRTC: row.CodeRTC || '',
+    //       CodeNCC: row.CodeNCC || '',
+    //       NameRTC: row.NameRTC || '',
+    //       NameNCC: row.NameNCC || '',
+    //       SupplyUnitID: this.getUnitIdByName(row.Unit),
+    //       Price: Number(row.Price) || 0,
+    //       RequestLimit: Number(row.RequestLimit) || 0,
+    //       Type: row.Loại === 'Cá nhân' ? 1 : 2
+    //     }));
+
+        // Lưu dữ liệu vào database
+    //     this.lstVPP.adddata(processedData).subscribe({
+    //       next: () => {
+    //         Swal.fire({
+    //           icon: 'success',
+    //           title: 'Thông báo',
+    //           text: 'Nhập dữ liệu thành công!',
+    //           showConfirmButton: true,
+    //           timer: 1500
+    //         });
+    //         this.getAll(); // Refresh the table
+    //       },
+    //       error: (err) => {
+    //         Swal.fire({
+    //           icon: 'error',
+    //           title: 'Thông báo',
+    //           text: 'Có lỗi xảy ra khi nhập dữ liệu!',
+    //           showConfirmButton: true,
+    //           timer: 1500
+    //         });
+    //       }
+    //     });
+    //   });
+    // }
   }
+
+  // Hàm helper để lấy ID của đơn vị tính từ tên
+  // private getUnitIdByName(unitName: string): number {
+  //   const unit = this.listUnit.find(u => u.Name === unitName);
+  //   return unit ? unit.ID : 0;
+  // }
 
 //lấy ra danh sách đơn vị tính
   getUnits(): void {
@@ -82,14 +130,21 @@ export class OfficeSuppliesComponent implements OnInit {
       next: (res) => {
         console.log('Danh sách đơn vị tính:', res);
         this.listUnit = Array.isArray(res?.data) ? res.data : [];
+        this.dataTable2 = res.data;
+        if (this.table2) {
+          this.table2.replaceData(this.dataTable2);
+        } else {
+          this.drawTable();
+        }
       },
       error: (err) => {
         console.error('Lỗi khi lấy đơn vị tính:', err);
       }
     });
   }
-
+ 
   private drawTable(): void {
+    // Khởi tạo bảng đầu tiên
     if (this.table) {
       this.table.replaceData(this.dataTable);
     } else {
@@ -113,7 +168,6 @@ export class OfficeSuppliesComponent implements OnInit {
             headerSort: false,
             width: 40,
             frozen: true,
-            
           },
           { title: 'Mã RTC', field: 'CodeRTC', hozAlign: 'left', headerHozAlign: 'center', width: 80 },
           { title: 'Mã NCC', field: 'CodeNCC', hozAlign: 'left', headerHozAlign: 'center', width: 100 },
@@ -137,6 +191,48 @@ export class OfficeSuppliesComponent implements OnInit {
           { title: 'Định mức', field: 'RequestLimit', hozAlign: 'right', headerHozAlign: 'center', width: 80 },
           { title: 'Loại', field: 'TypeName', hozAlign: 'left', headerHozAlign: 'center', width: 80 }
         ],
+      });
+    }
+
+    // Khởi tạo bảng thứ hai
+    if (this.table2) {
+      this.table2.replaceData(this.dataTable2);
+    } else {
+      this.table2 = new Tabulator('#datatable2', {
+        data: this.dataTable2,
+        layout: 'fitDataFill',
+        height: '50vh',
+        pagination: true,
+        paginationSize: 50,
+        movableColumns: true,
+        resizableRows: true,
+        reactiveData: true,
+        columns: [
+          {
+            title: "",
+            formatter: "rowSelection",
+            titleFormatter: "rowSelection",
+            hozAlign: "center",
+            headerHozAlign: "center",
+            headerSort: false,
+         
+            frozen: true,
+          },
+          {
+            title: 'Mã đơn vị',
+            field: 'ID',
+            hozAlign: 'center',
+            headerHozAlign: 'center',
+        
+          },
+          {
+            title: 'Tên đơn vị',
+            field: 'Name',
+            hozAlign: 'center',
+            headerHozAlign: 'center',
+            width: "50%"
+          }
+        ]
       });
     }
   }
@@ -336,6 +432,23 @@ export class OfficeSuppliesComponent implements OnInit {
 
   }
 
+  openModalDVT(){
+    const modalEl = document.getElementById('officeSupplyUnitModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+      modal.show();
+      console.log('ischeckmode:', this.isCheckmode);
+    }
+  }
+  closeModalDVT() {
+    this.selectedList=[];
+    const modalEl = document.getElementById('officeSupplyUnitModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modal.hide();
+    }
+  }
   //liên quản đến đóng mở modal để khi thêm và update dữ liệu
   openModal() {
     const modalEl = document.getElementById('detailProductModal');
@@ -346,6 +459,7 @@ export class OfficeSuppliesComponent implements OnInit {
       console.log('ischeckmode:', this.isCheckmode);
     }
   }
+  
   openModalForNewProduct() {
     this.isCheckmode = false;
   
@@ -469,101 +583,28 @@ export class OfficeSuppliesComponent implements OnInit {
     }
   }
 
-  async exportToExcel() {
-    // Tạo một workbook (file Excel) mới
-    const workbook = new ExcelJS.Workbook();
-    // Tạo một worksheet (sheet) mới với tên "Danh sách VPP"
-    const worksheet = workbook.addWorksheet('Danh sách VPP');
-
-    // Định nghĩa các tiêu đề cột
-    const headers = [
-      'Mã RTC',
-      'Mã NCC', 
-      'Tên (RTC)',
-      'Tên (NCC)',
-      'Đơn vị tính',
-      'Giá (VND)',
-      'Định mức',
-      'Loại'
-    ];
-
-    // Thêm và định dạng hàng tiêu đề
-    const headerRow = worksheet.addRow(headers);
-    headerRow.eachCell((cell) => {
-      // Đặt màu nền cho tiêu đề (màu xanh)
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF4F81BD' }
-      };
-      // Đặt font chữ đậm và màu trắng
-      cell.font = {
-        bold: true,
-        color: { argb: 'FFFFFFFF' }
-      };
-      // Căn giữa nội dung
-      cell.alignment = {
-        vertical: 'middle',
-        horizontal: 'center'
-      };
-    });
-
-    // Lấy dữ liệu từ bảng và thêm vào Excel
-    const data = this.table.getData();
-    data.forEach((item: any) => {
-      // Thêm từng dòng dữ liệu
-      worksheet.addRow([
-        item.CodeRTC,
-        item.CodeNCC,
-        item.NameRTC,
-        item.NameNCC,
-        item.Unit,
-        item.Price,
-        item.RequestLimit,
-        item.TypeName
-      ]);
-    });
-
-    // Tự động điều chỉnh độ rộng cột
-    worksheet.columns.forEach((column: any) => {
-      let maxLength = 0;
-      // Tìm độ dài lớn nhất trong các ô của cột
-      column.eachCell({ includeEmpty: true }, (cell: any) => {
-        const columnLength = cell.value ? cell.value.toString().length : 10;
-        if (columnLength > maxLength) {
-          maxLength = columnLength;
-        }
+  exportToExcel() {
+    const now = new Date();
+    const dateStr = `${now.getDate()}-${now.getMonth() + 1}-${now.getFullYear()}`;
+    
+    if (this.table) {
+      this.table.download("xlsx", `DanhSachVPP_${dateStr}.xlsx`, {
+        sheetName: "Danh sách VPP",
+        sheetHeader: true,
+        columnHeaders: true,
+        columnGroups: false,
+        rowGroups: false,
+        columnCalcs: false,
+        dataTree: false,
+        style: true
       });
-      // Đặt độ rộng cột (tối thiểu 10, cộng thêm 2 để có khoảng trống)
-      column.width = maxLength < 10 ? 10 : maxLength + 2;
-    });
-
-    // Định dạng các ô dữ liệu
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber > 1) { // Bỏ qua hàng tiêu đề
-        row.eachCell((cell: any) => {
-          // Căn giữa theo chiều dọc, căn phải cho cột giá tiền
-          cell.alignment = {
-            vertical: 'middle',
-            horizontal: cell.col === 6 ? 'right' : 'left'
-          };
-          
-          // Định dạng số cho cột giá tiền (thêm dấu phân cách hàng nghìn)
-          if (cell.col === 6) {
-            cell.numFmt = '#,##0';
-          }
-        });
-      }
-    });
-
-    // Tạo file Excel
-    const buffer = await workbook.xlsx.writeBuffer();
-    // Tạo blob từ buffer
-    const blob = new Blob([buffer], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-    });
-    // Lưu file với tên DanhSachVPP.xlsx
-    saveAs(blob, 'DanhSachVPP.xlsx');
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Bảng chưa được khởi tạo!',
+      });
+    }
   }
 
   formatCurrency(event: any) {
@@ -605,11 +646,14 @@ export class OfficeSuppliesComponent implements OnInit {
   }
 
   importFromExcel(): void {
-    // TODO: Implement Excel import functionality
-    Swal.fire({
-      icon: 'info',
-      title: 'Thông báo',
-      text: 'Tính năng đang được phát triển!',
-    });
+    if (this.table) {
+      this.table.import("xlsx", [".xlsx", ".csv", ".ods"], "buffer");
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Bảng chưa được khởi tạo!',
+      });
+    }
   }
 }

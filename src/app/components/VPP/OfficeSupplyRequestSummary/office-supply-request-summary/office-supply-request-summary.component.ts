@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { OfficeSupplyRequestSummaryServiceService } from '../OfficeSupplyRequestSummaryService/office-supply-request-summary-service.service';
-import { Tabulator } from 'tabulator-tables';
+import { ColumnCalcsModule, Tabulator } from 'tabulator-tables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
@@ -131,6 +131,7 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
                   width: 150,
                   resizable: true,
                   variableHeight: true,
+                  bottomCalc: "count"
                 },
               ]
             },

@@ -449,44 +449,66 @@ export class OfficeSupplyRequestsComponent implements OnInit {
   IsApproved(): void {
     if (!this.PushSelectedList()) {
       return;
-    } else {
-      const ids = this.selectedList.map(item => item.ID);
-      Swal.fire({
-        title: 'Bạn có chắc chắn muốn duyệt các VPP đã chọn không?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Xác nhận',
-        cancelButtonText: 'Hủy bỏ'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          this.lstDKVPP.IsApproved(ids).subscribe({
-            next: (res) => {
-              this.getdataDKVPP();
-              this.selectedList = [];
-              Swal.fire({
-                icon: 'success',
-                title: 'Thông báo',
-                text: 'Duyệt thành công!',
-                showConfirmButton: true,
-                timer: 1500
-              });
-            },
-            error: (error: any) => {
-              Swal.fire({
-                icon: 'error',
-                title: 'Thông báo',
-                text: 'Có lỗi xảy ra khi duyệt!',
-              });
-            }
-          });
-        }
-      })
     }
+    // Kiểm tra xem có item nào chưa được admin duyệt không
+    const hasUnapprovedItems = this.selectedList.some(item => !item.IsAdminApproved);
+    if (hasUnapprovedItems) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        text: 'Vui lòng chờ Admin duyệt!',
+        showConfirmButton: true,
+        timer: 1500
+      });
+      return;
+    }
+    const ids = this.selectedList.map(item => item.ID);
+    Swal.fire({
+      title: 'Bạn có chắc chắn muốn duyệt các VPP đã chọn không?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Xác nhận',
+      cancelButtonText: 'Hủy bỏ'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.lstDKVPP.IsApproved(ids).subscribe({
+          next: (res) => {
+            this.getdataDKVPP();
+            this.selectedList = [];
+            Swal.fire({
+              icon: 'success',
+              title: 'Thông báo',
+              text: 'Duyệt thành công!',
+              showConfirmButton: true,
+              timer: 1500
+            });
+          },
+          error: (error: any) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Thông báo',
+              text: 'Có lỗi xảy ra khi duyệt!',
+            });
+          }
+        });
+      }
+    });
   }
   UnIsApproved(): void {
     if (!this.PushSelectedList()) {
+      return;
+    }
+    const hasUnapprovedItems = this.selectedList.some(item => !item.IsAdminApproved);
+    if (hasUnapprovedItems) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        text: 'Vui lòng chờ Admin duyệt!',
+        showConfirmButton: true,
+        timer: 1500
+      });
       return;
     }
      else {
@@ -500,7 +522,6 @@ export class OfficeSupplyRequestsComponent implements OnInit {
         cancelButtonText: 'Hủy bỏ'
       }).then((result) => {
         if (result.isConfirmed) {
-          debugger;
           const ids = this.selectedList.map(item => item.ID);
           this.lstDKVPP.UnIsApproved(ids).subscribe({
             next: (res) => {
