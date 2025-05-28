@@ -7,16 +7,16 @@ import { API_ORIGIN } from '../../../../app.config';
 @Injectable({
   providedIn: 'root'
 })
-export class EmployeeService {        
+export class ModalService {        
  url = `${API_ORIGIN}api/Employee/getall`;
- urlunit = `${API_ORIGIN}api/Unit/getall`;
+ urlunit = `${API_ORIGIN}api/AssetsUnit/getall`;
  urlDepartment = `${API_ORIGIN}api/Department/getall`;
  urlAssetManagement = `${API_ORIGIN}api/Assets/getallassetsmanagement`;
  urladdunit = `${API_ORIGIN}api/Unit/savedata`;
 urlgetemployeetoadd=`${API_ORIGIN}api/Employee/get-all-with-details`;
 urladdTassetCode=`${API_ORIGIN}api/Assets/generate-allocation-code-asset`;
-urlgetCode=`${API_ORIGIN}api/Assets/generate-allocation-code`;
-urlpostassetallocation=`${API_ORIGIN}api/Assets/SaveAllocation`;
+urlgetCode=`${API_ORIGIN}api/AssetsAllocation/generate-allocation-code`;
+urlpostassetallocation=`${API_ORIGIN}api/AssetsAllocation/SaveAllocation`;
 constructor(private httpclient: HttpClient) { }
 getDepartment(): Observable<any> {  
   return this.httpclient.get<any>(this.urlDepartment);

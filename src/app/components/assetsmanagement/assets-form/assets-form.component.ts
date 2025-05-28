@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { AssetsManagementComponent } from '../assets-management/AssetsManagement.component';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { EmployeeService } from './assets-formServices/asset-formservice.service';
+import { ModalService } from './assets-formServices/asset-formservice.service';
 import { AssetsService } from '../assets-resouse/assets.service';
 import { TypeAssetsService } from '../assets-type/TypeAssets.service';
 import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowComponent } from 'tabulator-tables';
@@ -12,14 +12,16 @@ import 'tabulator-tables/dist/css/tabulator.min.css'; //import Tabulator stylesh
 import { AssetsManagementService } from '../assets-management/AssetsManagementService.service';
 declare var bootstrap: any;
 import Swal from 'sweetalert2';
+import { UnitManagementComponent } from "../assets-unit/UnitManagement.component";
 @Component({
   selector: 'app-asset-modal',
   standalone: true,
   templateUrl: './asset-modal.component.html',
-  imports: [CommonModule, FormsModule, NgSelectModule],
-  providers: [AssetsManagementService, EmployeeService, AssetsService, TypeAssetsService]
+  imports: [CommonModule, FormsModule, NgSelectModule, UnitManagementComponent],
+  providers: [AssetsManagementService, ModalService, AssetsService, TypeAssetsService]
 })
 export class AssetModalComponent implements AfterViewInit {
+ @ViewChild('unitModal', { static: false }) modalRef!: ElementRef;
   @ViewChild('table', { static: false }) tableRef!: ElementRef;
   isEditMode: boolean = false; // Flag to track edit mode
   allocationId: number | null = null; // Store ID of allocation being edited
@@ -32,9 +34,9 @@ export class AssetModalComponent implements AfterViewInit {
   @Output() saveAsset = new EventEmitter<any>();
   department: any[] = [];
   allocationDate: string = '';
-   assetdate: string = '';
+  assetdate: string = '';
   generatedCode: string = '';
-  generateTSAssetCode:string='';
+  generateTSAssetCode: string = '';
   assets: any[] = [];
   typeAssets: any[] = [];
   unit: any[] = [];
@@ -65,7 +67,7 @@ export class AssetModalComponent implements AfterViewInit {
   }
   constructor(
     private assetsmanagemnetservice: AssetsManagementService,
-    private employeeService: EmployeeService,
+    private modalservice: ModalService,
     private assetsService: AssetsService,
     private typeAssetsService: TypeAssetsService
   ) { }
@@ -75,19 +77,19 @@ export class AssetModalComponent implements AfterViewInit {
       const today = new Date();
       this.allocationDate = today.toISOString().split('T')[0]; // "yyyy-MM-dd"
     }
-    this.employeeService.getUnit().subscribe((data: any) => {
+    this.modalservice.getUnit().subscribe((data: any) => {
       this.unit = data.data;
     });
-    this.employeeService.getEmployeetoadd().subscribe((data: any) => {
+    this.modalservice.getEmployeetoadd().subscribe((data: any) => {
       this.emplylist = data.data[0]; // vì data.data là mảng chứa mảng
     });
 
-    this.employeeService.getMaxAssetId().subscribe((res: any) => {
+    this.modalservice.getMaxAssetId().subscribe((res: any) => {
       this.maxAssetId = res.data; // OK vì res.data là number
       this.selectedAsset.STT = this.maxAssetId + 1;
     });
-    this.employeeService.getEmployee().subscribe((data: any) => {
- 
+    this.modalservice.getEmployee().subscribe((data: any) => {
+
       this.employee = data.data;
     });
     this.assetsService.getAssets().subscribe((data: any) => {
@@ -96,46 +98,39 @@ export class AssetModalComponent implements AfterViewInit {
     this.typeAssetsService.getTypeAssets().subscribe((data: any) => {
       this.typeAssets = data.data;
     });
-    this.employeeService.getDepartment().subscribe((data: any) => {
+    this.modalservice.getDepartment().subscribe((data: any) => {
       this.department = data.data;
     });
     this.generateCode();
-this.employeeService.getEmployee().subscribe((data: any) => {
-  if (!this.assetdate) {
-    const today = new Date();
-    this.assetdate = today.toISOString().split('T')[0];
+    this.modalservice.getEmployee().subscribe((data: any) => {
+      if (!this.assetdate) {
+        const today = new Date();
+        this.assetdate = today.toISOString().split('T')[0];
+      }
+      this.employee = data.data;
+      this.generateTSAssetCodde();
+    });
   }
-  this.employee = data.data;
-  this.generateTSAssetCodde();
-});
+  openModalUnit() {
+    const modalInstance = new bootstrap.Modal(this.modalRef.nativeElement);
+    modalInstance.show();
   }
-save() {
-  // Set the TSAssetCode
-  this.selectedAsset.TSAssetCode = this.generateTSAssetCode;
-
-  // Set the CreatedDate to the current date and time
-  const currentDate = new Date().toISOString(); // e.g., "2025-05-22T03:16:00.000Z"
-  this.selectedAsset.CreatedDate = currentDate;
-  this.selectedAsset.CreatedBy='AdminSW';
-  this.selectedAsset.UpdatedDate=currentDate;
-  this.selectedAsset.UpdatedBy='AdminSW';
-  this.selectedAsset.DepartmentID=0;
-
-  // Fetch the max asset ID and set STT
-  this.employeeService.getMaxAssetId().subscribe((res: any) => {
-    this.maxAssetId = res.data;
-    this.selectedAsset.STT = this.maxAssetId + 1;
-
-    // Log the data for debugging
-    console.log('Dữ liệu modal:', this.selectedAsset);
-
-    // Emit the selectedAsset with CreatedDate included
-    this.saveAsset.emit(this.selectedAsset);
-
-    // Close the modal
-    this.hide();
-  });
-}
+  save() {
+    this.selectedAsset.TSAssetCode = this.generateTSAssetCode;
+    const currentDate = new Date().toISOString(); // e.g., "2025-05-22T03:16:00.000Z"
+    this.selectedAsset.CreatedDate = currentDate;
+    this.selectedAsset.CreatedBy = 'AdminSW';
+    this.selectedAsset.UpdatedDate = currentDate;
+    this.selectedAsset.UpdatedBy = 'AdminSW';
+    this.selectedAsset.DepartmentID = 0;
+    this.modalservice.getMaxAssetId().subscribe((res: any) => {
+      this.maxAssetId = res.data;
+      this.selectedAsset.STT = this.maxAssetId + 1;
+      console.log('Dữ liệu modal:', this.selectedAsset);
+      this.saveAsset.emit(this.selectedAsset);
+      this.hide();
+    });
+  }
   onEmployeeSelect(employeeID: number) {
     const emp = this.emplylist.find(e => e.ID === employeeID);
     console.log('employeeID truyền vào:', employeeID);
@@ -150,25 +145,25 @@ save() {
       this.selectedPositionName = '';
     }
   }
- generateCode(): void {
-  if (!this.allocationDate) return;
+  generateCode(): void {
+    if (!this.allocationDate) return;
 
-  this.employeeService.getTSCPCode(this.allocationDate).subscribe({
-    next: (res) => {
-      this.generatedCode = res.data; 
-      console.log('Mã cấp phát:', this.generatedCode);
-    },
-    error: (err) => {
-      console.error('Lỗi khi lấy mã cấp phát:', err);
-    }
-  });
-}
-    generateTSAssetCodde(): void {
+    this.modalservice.getTSCPCode(this.allocationDate).subscribe({
+      next: (res) => {
+        this.generatedCode = res.data;
+        console.log('Mã cấp phát:', this.generatedCode);
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy mã cấp phát:', err);
+      }
+    });
+  }
+  generateTSAssetCodde(): void {
     if (!this.assetdate) return;
-    this.employeeService.getTassetCode(this.assetdate).subscribe({
+    this.modalservice.getTassetCode(this.assetdate).subscribe({
       next: (code: string) => {
         this.generateTSAssetCode = code;
-        console.log('Mã cấp phát ',code);
+        console.log('Mã cấp phát ', code);
       },
       error: (err) => {
         console.error('Lỗi khi lấy mã cấp phát:', err);
@@ -400,14 +395,14 @@ save() {
 
     console.log('📦 Payload gửi API:', payload);
 
-    this.employeeService.postassetallocation(payload).subscribe({
+    this.modalservice.postassetallocation(payload).subscribe({
       next: (res) => {
-    Swal.fire({
-  icon: 'success',
-  title: 'Thành công!',
-  text: 'Lưu cấp phát thành công',
-  confirmButtonText: 'OK'
-});
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: 'Lưu cấp phát thành công',
+          confirmButtonText: 'OK'
+        });
 
         this.generatedCode = '';
         this.allocationDate = '';
@@ -457,49 +452,6 @@ save() {
       modal.show();
     }
   }
-  addUnit() {
-    if (!this.newUnitName.trim()) {
-      alert('Vui lòng nhập tên đơn vị tính!');
-      return;
-    }
-    const newUnit = {
-      ID: 0,
-      UnitName: this.newUnitName,
-      UnitCode: this.newUnitName.toUpperCase()
-    };
-    this.employeeService.addunitt(newUnit).subscribe({
-      next: (res) => {
-      Swal.fire({
-  icon: 'success',
-  title: 'Thành công!',
-  text: 'Thêm đơn vị tính thành công',
-  confirmButtonText: 'OK'
-});
-
-        this.employeeService.getUnit().subscribe((data: any) => {
-          this.unit = data.data;
-          if (res?.ID) {
-            this.selectedAsset.UnitID = res.ID;
-          } else {
-            const addedUnit = this.unit.find(u => u.UnitName === this.newUnitName);
-            if (addedUnit) {
-              this.selectedAsset.UnitID = addedUnit.ID;
-            }
-          }
-        });
-        this.newUnitName = '';
-        const unitModal = document.getElementById('unitModal');
-        if (unitModal) {
-          const modal = bootstrap.Modal.getInstance(unitModal);
-          modal?.hide();
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        alert('Lỗi khi thêm đơn vị tính!');
-      }
-    });
-  }
   show() {
     const modalEl = document.getElementById('assetModal');
     const modal = new bootstrap.Modal(modalEl);
@@ -513,8 +465,6 @@ save() {
     if (!this.selectedAsset.STT) {
       this.selectedAsset.STT = this.maxAssetId + 1;
     }
-
-
     modal.show();
   }
   showBaoHong() {

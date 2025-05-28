@@ -12,7 +12,7 @@ import { TabulatorFull as Tabulator, CellComponent, ColumnDefinition, RowCompone
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { Router } from '@angular/router';
 import { AssetModalComponent } from '../assets-form/assets-form.component';
-import { EmployeeService } from '../assets-form/assets-formServices/asset-formservice.service';
+import { ModalService } from '../assets-form/assets-formServices/asset-formservice.service';
 import { data } from 'jquery';
 import Swal from 'sweetalert2';
 
@@ -46,22 +46,22 @@ export class AssetsManagementComponent implements OnInit {
   selectedEmployee: any | null = null;
   employeeTable: Tabulator | null = null;
   constructor(public assetsService: AssetsManagementService,
-    private employeeService: EmployeeService,
+    private modalservice: ModalService,
     public departmentsv: DepartmentServiceService,
     public statussv: AssetStatusService
   ) { }
   ngOnInit(): void {
     this.getAll();
-    this.employeeService.getEmployee().subscribe((data: any) => {
+    this.modalservice.getEmployee().subscribe((data: any) => {
       this.employee = data.data;
     });
     this.departmentsv.getDepartment().subscribe((res: any) => {
       this.departments = res.data;
-      console.log('Loaded departments:', this.departments);
+
     });
     this.statussv.getStatus().subscribe((res: any) => {
       this.statuss = res.data;
-      console.log('Load status: ', this.statuss);
+
     });
   }
   Math = Math;
@@ -77,7 +77,7 @@ export class AssetsManagementComponent implements OnInit {
       this.selectedDepartment || '1,2,3,4,5,6,7'
     ).subscribe((data: any) => {
       this.assets = data.data.assets;
-      console.log('fhgf', this.assets);
+
       this.drawTable();
       this.drawEmployeeTable();
     });
@@ -114,7 +114,7 @@ export class AssetsManagementComponent implements OnInit {
 
     this.assetsService.baoHongTaiSan(baoHongData).subscribe({
       next: () => {
-         Swal.fire({
+        Swal.fire({
           title: "Thành công!",
           text: "Báo hỏng thành công!",
           icon: "success"
@@ -131,7 +131,7 @@ export class AssetsManagementComponent implements OnInit {
     console.log('Dữ liệu gửi lên API:', baomatdata);
     this.assetsService.baoMatTaiSan(baomatdata).subscribe({
       next: () => {
-           Swal.fire({
+        Swal.fire({
           title: "Thành công!",
           text: "Báo mất thành công!",
           icon: "success"
@@ -283,7 +283,7 @@ export class AssetsManagementComponent implements OnInit {
       this.table.on('rowClick', (evt, row: RowComponent) => {
         const rowData = row.getData();
         const employeeId = rowData['ID'];
-        this.employeeService.getEmployeeById(employeeId).subscribe(res => {
+        this.modalservice.getEmployeeById(employeeId).subscribe(res => {
           this.employeeList = Array.isArray(res.data.assetsallocation) ? res.data.assetsallocation : [res.data];
           this.drawEmployeeTable();
         });
@@ -291,7 +291,7 @@ export class AssetsManagementComponent implements OnInit {
 
     }
   }
-    
+
   private drawEmployeeTable(): void {
     const cols: ColumnDefinition[] = [
       {
@@ -327,8 +327,20 @@ export class AssetsManagementComponent implements OnInit {
       { title: 'Phòng ban', field: 'dpmName' },
       { title: 'Chức vụ', field: 'CVName' },
       { title: 'Ghi chú', field: 'Note' },
-      { title: 'Ngày cập nhật', field: 'UpdatedDate' },
-      { title: 'Ngày tạo', field: 'CreatedDate' }
+      {
+        title: 'Ngày cập nhật', field: 'UpdatedDate',
+        formatter: function (cell, formatterParams, onRendered) {
+          let value = cell.getValue() || '';
+          return value;
+        },
+      },
+      {
+        title: 'Ngày tạo', field: 'CreatedDate',
+        formatter: function (cell, formatterParams, onRendered) {
+          let value = cell.getValue() || '';
+          return value;
+        },
+      }
     ];
     if (this.employeeTable) {
       this.employeeTable.setData(this.employeeList);
@@ -389,7 +401,7 @@ export class AssetsManagementComponent implements OnInit {
       this.modalTitle = 'Thêm tài sản';
       this.selectedAsset = {};
     } else if (action === 'edit' && asset) {
-      this.employeeService.getDepartment().subscribe((data: any) => {
+      this.modalservice.getDepartment().subscribe((data: any) => {
         this.department = data.data;
       });
       this.modalTitle = 'Cập nhật tài sản ';
@@ -413,39 +425,39 @@ export class AssetsManagementComponent implements OnInit {
     const asset = selectedRows[0].getData();
     this.openModal('edit', asset);
   }
-    getSelectedIds(): number[] {
-  if (this.table) {
-    const selectedRows = this.table.getSelectedData();
-    return selectedRows.map((row: any) => row.ID);
+  getSelectedIds(): number[] {
+    if (this.table) {
+      const selectedRows = this.table.getSelectedData();
+      return selectedRows.map((row: any) => row.ID);
+    }
+    return [];
   }
-  return [];
-}
   onDeleteClick() {
     if (!this.table) {
       alert('Vui lòng tải lại trang!');
       return;
     }
-     const ids = this.getSelectedIds();
+    const ids = this.getSelectedIds();
     if (ids.length === 0) {
       alert('Vui lòng chọn ít nhất một hàng để xóa!');
       return;
     }
- 
-   this.assetsService.DeleteAssetManagement(ids).subscribe({
-    next: res => {
-   Swal.fire({
-  icon: 'success',
-  title: 'Thành công!',
-  text: 'Dữ liệu đã được lưu.',
-  timer: 2000,
-  showConfirmButton: false
-});
 
-      this.getAll(); // Reload lại table
-    },
-    error: err => alert('Lỗi duyệt HR: ' + err.message)
-  });
-    
+    this.assetsService.DeleteAssetManagement(ids).subscribe({
+      next: res => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công!',
+          text: 'Dữ liệu đã được lưu.',
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+        this.getAll(); // Reload lại table
+      },
+      error: err => alert('Lỗi duyệt HR: ' + err.message)
+    });
+
   }
   clearAllFilters(): void {
     if (this.table) {
@@ -474,7 +486,5 @@ export class AssetsManagementComponent implements OnInit {
   onFilterChange(): void {
     this.getAll();
   }
-  
+
 }
-
-

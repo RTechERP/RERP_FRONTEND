@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import {  MenuService } from './employee-service/employee.service';
-import { EmployeeService } from '../assetsmanagement/assets-form/Assets-formServices/asset-formservice.service';
+import { ModalService } from '../assetsmanagement/assets-form/assets-formServices/asset-formservice.service';
 
 declare var bootstrap: any;
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
@@ -19,16 +19,14 @@ import 'tabulator-tables/dist/css/tabulator.min.css';
   standalone:true,
   
 })
-
 export class EmployeesComponent implements OnInit{
-  constructor(private employeeservice : EmployeeService) { }
+  constructor(private modalservice : ModalService) { }
   employeesID: number[] = [];
   table: Tabulator | null = null; // Declare assets as an array of any type
   ngOnInit(): void {
- 
   }
   getAll(){
-    this.employeeservice.getEmployee().subscribe((data: any) => {
+    this.modalservice.getEmployee().subscribe((data: any) => {
       this.employeesID = data.data; // Assign the response data to the assets property
       console.log(this.employeesID);
       this.drawTable(); // Log the assets to the console
@@ -51,5 +49,4 @@ export class EmployeesComponent implements OnInit{
       });
     }
   }
-
 }

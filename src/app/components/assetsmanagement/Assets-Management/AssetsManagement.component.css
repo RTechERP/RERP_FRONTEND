@@ -21,15 +21,6 @@
   transform: translateX(0);
 }
 
-/* Container chính */
-.project-container {
-  width: 100%;
-  height: auto;
-  margin-left: 0; 
-  position: relative;
-  z-index: 0;
-}
-
 .card {
   height: 100%;
 }
@@ -49,6 +40,43 @@
   overflow-x: auto !important;
   white-space: nowrap !important;
 }
-.modal-backdrop {
-  background-color: transparent !important;
-}     
+
+.tabulator {
+  font-size: 0.75rem;
+}
+
+.tabulator-cell {
+  padding: 0px;
+}
+
+.fs-12 {
+  font-size: 0.75rem;
+}
+
+.btn {
+  font-weight: bold;
+  height: 2.5vh;
+  font-size: 0.75rem;
+  border: none;
+}
+
+::ng-deep ng-select.form-control .ng-clear-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+::ng-deep ng-select.form-control .ng-clear-wrapper:hover {
+  color: #d9363e;
+}
+
+::ng-deep .ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+    margin-top: 3px;
+    margin-right: 1px;
+    font-size: .75rem;
+    background-color: #fafafa;
+    border: none;
+    border-radius: 2px;
+    height: 24px;
+    line-height: 22px;
+}

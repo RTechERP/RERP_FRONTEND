@@ -7,7 +7,7 @@ import { API_ORIGIN } from '../../../app.config';
   providedIn: 'root'
 })
 export class AssetsService {
-  url = `${API_ORIGIN}api/Assets/getall`;
+  url = `${API_ORIGIN}api/AssetSource/getsourceassets`;
   constructor(private httpclient: HttpClient) { }
   getAssets(): Observable<any> {
     return this.httpclient.get<any>(this.url);

@@ -1,0 +1,332 @@
+<div class="layout-wrapper d-flex" style="height: 100%">
+  <app-asset-modal></app-asset-modal>
+  <!-- Offcanvas cho tìm kiếm -->
+  <div class="offcanvas offcanvas-left custom-offcanvas border border-1" tabindex="-1" id="searchOffcanvas"
+    data-bs-backdrop="false">
+    <div class="offcanvas-header pt-0 mt-2 pb-0 mb-2">
+      <h5 class="offcanvas-title fs-12">Tìm kiếm</h5>
+      <button type="button" class="btn-close text-reset fs-12" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body pt-0 pb-0">
+      <div class="row h-auto">
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Từ khóa</label>
+            <input id="searchInput" class="form-control form-control-sm fs-12" [(ngModel)]="filterText"
+              (ngModelChange)="onSearchChange()" placeholder="Nhập từ khóa..." />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Từ ngày</label>
+            <input type="date" name="date_start" [(ngModel)]="dateStart" (ngModelChange)="onFilterChange()"
+              class="form-control form-control-sm fs-12" required />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Đến ngày</label>
+            <input type="date" name="date_end" [(ngModel)]="dateEnd" (ngModelChange)="onFilterChange()"
+              class="form-control form-control-sm fs-12" required />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Trạng thái sử dụng</label>
+            <ng-select [items]="statusList" bindLabel="label" bindValue="value" [(ngModel)]="status"
+              (change)="onFilterChange()" placeholder="Chọn trạng thái..." [clearable]="true"
+              class="form-control form-control-sm p-0 border border-0 fs-12">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100 fs-12">
+                  <div class="col-3 ms-1">
+                    <span class="fs-12">{{ item.label }}</span>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item">
+                <span class="fs-12">{{ item.label }}</span>
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Thu hồi từ</label>
+            <ng-select [items]="emplylist" bindLabel="FullName" bindValue="ID" [(ngModel)]="employeeReturnID"
+              (change)="onFilterChange()" placeholder="Chọn nhân viên..." [clearable]="true" [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0 fs-12">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100 fs-12">
+                  <div class="col-3 ms-1">
+                    <span class="fs-12">{{ item.Code }} - {{ item.FullName }}</span>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item">
+                <span class="fs-12">{{ item.FullName }}</span>
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Người thu hồi</label>
+            <ng-select [items]="emplylist" bindLabel="FullName" bindValue="ID" [(ngModel)]="employeeRecoveryID"
+              (change)="onFilterChange()" placeholder="Chọn nhân viên..." [clearable]="true" [virtualScroll]="true"
+              class="form-control form-control-sm p-0 border border-0 fs-12">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100 fs-12">
+                  <div class="col-3 ms-1">
+                    <span class="fs-12">{{ item.Code }} - {{ item.FullName }}</span>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item">
+                <span class="fs-12">{{ item.FullName }}</span>
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <button class="btn btn-secondary col-12 p-0 ps-2 pe-2 fs-12" data-bs-dismiss="offcanvas">
+              <i class="fas fa-magnifying-glass me-2"></i> Áp dụng
+            </button>
+            <button class="btn btn-outline-secondary col-12 p-0 ps-2 pe-2 fs-12 mt-2" (click)="clearAllFilters()">
+              <i class="fas fa-eraser me-2"></i> Xóa lọc
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Nội dung chính -->
+  <div class="container-fluid project-container" id="projectParent">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="card">
+          <div class="card-header p-0">
+            <div class="d-flex justify-content-start">
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Tìm kiếm"
+                data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas">
+                <i class="fas fa-search"></i> Tìm kiếm
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Thêm mới"
+                (click)="OpenModalThuHoi()">
+                <i class="fas fa-plus"></i> Thêm
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Sửa">
+                <i class="fas fa-pen"></i> Sửa
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xóa">
+                <i class="fas fa-trash"></i> Xóa
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xuất Excel">
+                <i class="fas fa-file-excel"></i> Xuất excel
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="HR duyệt">
+                <i class="fas fa-check me-2" style="color: #66CC00;"></i> HR duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="HR Hủy duyệt">
+                <i class="fas fa-xmark me-2" style="color: #ff0000;"></i> HR Hủy duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="KT duyệt">
+                <i class="fas fa-check me-2" style="color: #66CC00;"></i> KT duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="KT Hủy duyệt">
+                <i class="fas fa-xmark me-2" style="color: #ff0000;"></i> KT Hủy duyệt
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="row">
+              <div class="col-12 col-sm-12 h-auto">
+                <div class="border-top">
+                  <div id="datatablerecovery"></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-12">
+                <div class="border">
+                  <div id="datablerecoverydetail" style="height: 25vh;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Cấp phát -->
+<!-- Modal Thu hồi tài sản -->
+<div class="modal fade" id="modalThuHoi" tabindex="-1" #detailModal>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success">
+        <h4 class="modal-title text-white fs-12" id="priceRequestModalLabel">Thu hồi tài sản</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12">
+          <i class="fa-solid fa-floppy-disk"></i> Cất và Đóng
+        </button>
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12">
+          <i class="fas fa-plus me-2"></i> Cất và Thêm mới
+        </button>
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12">
+          <i class="fas fa-plus me-2"></i> Chọn tài sản
+        </button>
+        <form class="row g-3 mt-2">
+          <!-- Số biên bản -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label  for="allocationCode" class="fs-12">
+                Số biên bản <span style="color: red;">(*)</span>
+              </label>
+              <input id="allocationCode" type="text" class="form-control form-control-sm fs-12" 
+                     [(ngModel)]="RecoveryCode" name="allocationCode" required disabled/>
+            </div>
+          </div>
+          <!-- Ngày thu hồi -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="issueDate" class="fs-12">
+                Ngày thu hồi <span style="color: red;">(*)</span>
+              </label>
+              <input id="issueDate" type="date" class="form-control form-control-sm fs-12" 
+                     [(ngModel)]="RecoveryDate" name="issueDate" required />
+            </div>
+          </div>
+          <!-- Thu hồi từ -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="employeeReturn" class="fs-12">
+                Thu hồi từ <span style="color: red;">(*)</span>
+              </label>
+              <ng-select [items]="emplylist" bindLabel="FullName" bindValue="ID" 
+                         [(ngModel)]="employeeReturnID" name="employeeReturn"
+                         placeholder="Chọn nhân viên..." (ngModelChange)="onEmployeeSelect($event, 'return')" 
+                         [clearable]="true" [virtualScroll]="true" 
+                         class="form-control form-control-sm p-0 border border-0 fs-12">
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row text-dark w-100 fs-12">
+                    <div class="col-3 ms-1">
+                      <span class="fs-12">{{ item.ID }} - {{ item.FullName }}</span>
+                    </div>
+                  </div>
+                </ng-template>
+                <ng-template ng-label-tmp let-item="item">
+                  <span class="fs-12">{{ item.FullName }}</span>
+                </ng-template>
+              </ng-select>
+            </div>
+          </div>
+          <!-- Người thu hồi -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="employeeRecovery" class="fs-12">
+                Người thu hồi <span style="color: red;">(*)</span>
+              </label>
+              <ng-select [items]="emplylist" bindLabel="FullName" bindValue="ID" 
+                         [(ngModel)]="employeeRecoveryID" name="employeeRecovery"
+                         placeholder="Chọn nhân viên..." (ngModelChange)="onEmployeeSelect($event, 'recovery')"
+                         [clearable]="true" [virtualScroll]="true" 
+                         class="form-control form-control-sm p-0 border border-0 fs-12">
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row text-dark w-100 fs-12">
+                    <div class="col-3 ms-1">
+                      <span class="fs-12">{{ item.ID }} - {{ item.FullName }}</span>
+                    </div>
+                  </div>
+                </ng-template>
+                <ng-template ng-label-tmp let-item="item">
+                  <span class="fs-12">{{ item.FullName }}</span>
+                </ng-template>
+              </ng-select>
+            </div>
+          </div>
+          <!-- Phòng ban (Thu hồi từ) -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="departmentReturn" class="fs-12">
+                Phòng ban (Thu hồi từ) <span style="color: red;">(*)</span>
+              </label>
+              <input id="departmentReturn" type="text" class="form-control form-control-sm fs-12" 
+                     [(ngModel)]="selectedDepartmentReturnName" [ngModelOptions]="{standalone: true}" readonly />
+            </div>
+          </div>
+          <!-- Phòng ban (Người thu hồi) -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="departmentRecovery" class="fs-12">
+                Phòng ban (Người thu hồi) <span style="color: red;">(*)</span>
+              </label>
+              <input id="departmentRecovery" type="text" class="form-control form-control-sm fs-12" 
+                     [(ngModel)]="selectedDepartmentRecoveryName" [ngModelOptions]="{standalone: true}" readonly />
+            </div>
+          </div>
+          <!-- Chức vụ (Thu hồi từ) -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="positionReturn" class="fs-12">
+                Chức vụ (Thu hồi từ) <span style="color: red;">(*)</span>
+              </label>
+              <input id="positionReturn" type="text" class="form-control form-control-sm fs-12" 
+                     [(ngModel)]="selectedPositionReturnName" [ngModelOptions]="{standalone: true}" readonly />
+            </div>
+          </div>
+          <!-- Chức vụ (Người thu hồi) -->
+          <div class="col-12 col-md-6">
+            <div class="form-group">
+              <label for="positionRecovery" class="fs-12">
+                Chức vụ (Người thu hồi) <span style="color: red;">(*)</span>
+              </label>
+              <input id="positionRecovery" type="text" class="form-control form-control-sm fs-12" 
+                     [(ngModel)]="selectedPositionRecoveryName" [ngModelOptions]="{standalone: true}" readonly />
+            </div>
+          </div>
+          <!-- Lý do -->
+          <div class="col-12 col-md-12">
+            <div class="form-group">
+              <label for="reportLossDescription" class="fs-12">
+                Lý do <span style="color: red;">(*)</span>
+              </label>
+              <textarea id="reportLossDescription" class="form-control form-control-sm fs-12" 
+                       name="reportLossDescription" rows="4" required></textarea>
+            </div>
+          </div>
+        </form>
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12 mt-3" type="button" (click)="addRow()">
+          <i class="fas fa-plus me-2"></i> Thêm dòng
+        </button>
+        <div #table class="mt-3" style="width: 100%"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" data-bs-dismiss="modal">Hủy</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Chọn tài sản -->
+<div class="modal fade" id="selectAssetModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-secondary">
+        <h5 class="modal-title fs-12 text-white">Chọn tài sản</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="card-body p-0">
+          <div class="border-top">
+            <div id="datatablemanagement"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary p-0 ps-2 pe-2 fs-12">Chọn và đóng</button>
+        <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12"
+          data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,3 +1,4 @@
+
 <div class="modal fade" id="assetModal" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
 
@@ -49,7 +50,7 @@
             </div>
             <div class="col-md-4">
               <label for="unit" class="col-form-label">Thêm đơn vị tính</label>
-              <button type="button" class="btn btn-info form-control" (click)="openUnitModal()">Thêm</button>
+              <button type="button" class="btn btn-info form-control" (click)="openModalUnit()">Thêm</button>
             </div>
           </div>
           <div class="mb-3">
@@ -136,25 +137,6 @@
     </div>
   </div>
 </div>
-<!-- Modal Thêm đơn vị tính -->
-<div class="modal fade" id="unitEditModal" tabindex="-1" aria-labelledby="unitModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="unitModalLabel">Thêm đơn vị tính</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <input type="text" class="form-control" [(ngModel)]="newUnitName" placeholder="Tên đơn vị tính mới" />
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-        <button type="button" class="btn btn-pr imary" (click)="addUnit()">Thêm</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- Modal báo hỏng -->
 <div class="modal fade" id="baohong" tabindex="-1" aria-labelledby="baohongModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
@@ -168,7 +150,7 @@
           <div class="row g-3">
             <!-- Phần trái: Thông tin tài sản -->
             <div class="col-md-6">
-              <h6>Thông tin tài sản</h6>
+              <h6>Thông tin tài sản</h6>        
               <div class="mb-3">
                 <label class="form-label">Mã NCC</label>
                 <input type="text" [(ngModel)]="selectedAsset.TSCodeNCC" name="TSCodeNCC" class="form-control" readonly>

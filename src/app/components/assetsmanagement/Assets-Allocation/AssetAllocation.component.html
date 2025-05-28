@@ -1,104 +1,130 @@
 <div class="layout-wrapper d-flex" style="height: 100%">
-  <app-asset-modal></app-asset-modal>
   <!-- Offcanvas cho tìm kiếm -->
-
-
-  <div class="offcanvas offcanvas-left custom-offcanvas border border-1" tabindex="-1" id="searchOffcanvas"
-    data-bs-backdrop="false">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title">Tìm kiếm tài sản</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  <app-asset-modal></app-asset-modal>
+  <div class="offcanvas offcanvas-left custom-offcanvas border border-1" tabindex="-1" id="searchOffcanvas" data-bs-backdrop="false">
+    <div class="offcanvas-header pt-0 mt-2 pb-0 mb-2">
+      <h5 class="offcanvas-title fs-12">Tìm kiếm tài sản</h5>
+      <button type="button" class="btn-close text-reset fs-12" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
-    <div class="offcanvas-body pt-2 pb-0">
-      <div class="form-group">
-        <label for="searchInput">Từ khóa tìm kiếm</label>
-        <input id="searchInput" class="form-control form-control-sm" style="font-size:13px;" [(ngModel)]="searchText"
-          (ngModelChange)="onSearchChange()" placeholder="Nhập từ khóa..." />
-      </div>
-     <div class="form-group">
-        <label>Từ ngày</label>
-        <input type="date" name="date_start" [(ngModel)]="dateStart" (ngModelChange)="onFilterChange()"
-          class="form-control form-control-sm" required />
-      </div>
-      <div class="form-group">
-        <label>Đến ngày</label>
-        <input type="date" name="date_end" [(ngModel)]="dateEnd" (ngModelChange)="onFilterChange()"
-          class="form-control form-control-sm" required />
-      </div>
-      <div class="form-group">
-        <label for="statusSelect">Trạng thái sử dụng:</label>
-
-      </div>
-      <div class="form-group">
-        <label for="employeeSelect">Nhân viên</label>
-        <ng-select [items]="emplylist" bindLabel="FullName" bindValue="ID" [(ngModel)]="employeeID"
-          (change)="onFilterChange()" placeholder="-- Chọn nhân viên --" [clearable]="false">
-          <ng-template ng-label-tmp let-item="item">
-           {{ item?.FullName }}
-          </ng-template>
-       
-        </ng-select>
-
-      </div>
-      <div class="form-group">
-        <button class="btn btn-outline-primary m-1" (click)="onFilterChange()" data-bs-dismiss="offcanvas">
-          <i class="fas fa-magnifying-glass me-2"></i> Tìm kiếm
-        </button>
-
-        <button class="btn btn-outline-secondary ms-2" (click)="clearAllFilters()">
-          <i class="fas fa-eraser me-2"></i> Xóa lọc
-        </button>
+    <div class="offcanvas-body pt-0 pb-0">
+      <div class="row h-auto">
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Từ khóa</label>
+            <input id="searchInput" class="form-control form-control-sm fs-12" [(ngModel)]="filterText" (ngModelChange)="onSearchChange()" placeholder="Nhập từ khóa..." />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Từ ngày</label>
+            <input type="date" name="date_start" [(ngModel)]="dateStart" (ngModelChange)="onFilterChange()" class="form-control form-control-sm fs-12" required />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Đến ngày</label>
+            <input type="date" name="date_end" [(ngModel)]="dateEnd" (ngModelChange)="onFilterChange()" class="form-control form-control-sm fs-12" required />
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Trạng thái sử dụng</label>
+            <ng-select  bindLabel="label" bindValue="value" [(ngModel)]="status" (change)="onFilterChange()" placeholder="Chọn trạng thái..." [clearable]="true" [virtualScroll]="true" class="form-control form-control-sm p-0 border border-0 fs-12">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100 fs-12">
+                  <div class="col-3 ms-1">
+                    <span class="fs-12">{{ item.label }}</span>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item">
+                <span class="fs-12">{{ item.label }}</span>
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <label class="fs-12">Nhân viên</label>
+            <ng-select [items]="emplylist" bindLabel="FullName" bindValue="ID" [(ngModel)]="employeeID" (change)="onFilterChange()" placeholder="Chọn nhân viên..." [clearable]="true" [virtualScroll]="true" class="form-control form-control-sm p-0 border border-0 fs-12">
+              <ng-template ng-option-tmp let-item="item">
+                <div class="row text-dark w-100 fs-12">
+                  <div class="col-3 ms-1">
+                    <span class="fs-12">{{ item.Code }} - {{ item.FullName }}</span>
+                  </div>
+                </div>
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item">
+                <span class="fs-12">{{ item.FullName }}</span>
+              </ng-template>
+            </ng-select>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="form-group">
+            <button class="btn btn-secondary col-12 p-0 ps-2 pe-2 fs-12" (click)="onFilterChange()" data-bs-dismiss="offcanvas">
+              <i class="fas fa-magnifying-glass me-2"></i> Áp dụng
+            </button>
+            <button class="btn btn-outline-secondary col-12 p-0 ps-2 pe-2 fs-12 mt-2" (click)="clearAllFilters()">
+              <i class="fas fa-eraser me-2"></i> Xóa lọc
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
   <!-- Nội dung chính -->
-  <div class="container-fluid project-container">
-    <!-- Thanh công cụ -->
-    <div class="d-flex align-items-center p-2">
-      <div class="card-header">
-        <button id="addBtn" class="btn btn-outline-primary m-1 m-1" (click)="OpenModalCapphat()">
-          <i class="fas fa-plus me-2"></i>
-        </button>
-
-        <button id="editBtn" class="btn btn-outline-success m-1" (click)="openEditModal()">
-          <i class="fas fa-edit me-2"></i>
-        </button>
-        <button class="btn btn-outline-danger m-1" (click)="DeleteALLocationn()">
-          <i class="fas fa-trash-alt me-2"></i>
-        </button>
-        <button class="btn btn-outline-primary me-2" type="button" data-bs-toggle="offcanvas"
-          data-bs-target="#searchOffcanvas" aria-controls="searchOffcanvas" title="Tìm kiếm">
-          <i class="fas fa-magnifying-glass"></i>
-        </button>
-        <button class="btn btn-outline-success m-1" (click)="handleApprovalAction('HR_APPROVE')">
-          <i class="fas fa-check me-2" style="color: #66CC00;"></i>HR duyệt
-        </button>
-
-        <button class="btn btn-outline-danger m-1" (click)="handleApprovalAction('HR_CANCEL')">
-          <i class="fas fa-xmark me-2" style="color: #ff0000;"></i>HR Hủy Duyệt
-        </button>
-
-        <button class="btn btn-outline-success m-1" (click)="handleApprovalAction('ACCOUNTANT_APPROVE')">
-          <i class="fas fa-check me-2" style="color: #66CC00;"></i>KT duyệt
-        </button>
-
-        <button class="btn btn-outline-danger m-1" (click)="handleApprovalAction('ACCOUNTANT_CANCEL')">
-          <i class="fas fa-xmark me-2" style="color: #ff0000;"></i>KT Hủy duyệt
-        </button>
-
-
-
-        <button id="addBtn" class="btn btn-outline-success m-1 m-1" (click)="exportToExcel()">
-          <i class="fas fa-file-excel me-2"></i>Xuất phiếu
-        </button>
+  <div class="container-fluid project-container" id="projectParent">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="card">
+          <div class="card-header p-0">
+            <div class="d-flex justify-content-start">
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="Tìm kiếm" data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas">
+                <i class="fas fa-search"></i> Tìm kiếm
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="Thêm mới" (click)="OpenModalCapphat()">
+                <i class="fas fa-plus"></i> Thêm
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="Sửa" (click)="openEditModal()">
+                <i class="fas fa-pen"></i> Sửa
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="Xóa" (click)="SaveData('Delete')" >
+                <i class="fas fa-trash"></i> Xóa
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="HR duyệt" (click)="SaveData('HR_APPROVE')">
+                <i class="fas fa-check me-2" style="color: #66CC00;"></i> HR duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="HR Hủy duyệt" (click)="SaveData('HR_CANCEL')">
+                <i class="fas fa-xmark me-2" style="color: #ff0000;"></i> HR Hủy duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="KT duyệt" (click)="SaveData('ACCOUNTANT_APPROVE')">
+                <i class="fas fa-check me-2" style="color: #66CC00;"></i> KT duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="KT Hủy duyệt" (click)="SaveData('ACCOUNTANT_CANCEL')">
+                <i class="fas fa-xmark me-2" style="color: #ff0000;"></i> KT Hủy duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2 fs-12" title="Xuất phiếu" (click)="exportToExcel()">
+                <i class="fas fa-file-excel"></i> Xuất phiếu
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="row">
+              <div class="col-12 col-sm-12 h-auto">
+                <div class="border-top">
+                  <div id="datatableassetallocation"></div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-12">
+                <div class="border">
+                  <div id="databledetailta" style="height: 25vh;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <!-- Modal thêm/sửa tài sản -->
-
-    <!-- Bảng dữ liệu -->
-    <div class="card-body" style=" margin-top:1rem;">
-      <div class="mb-2" id="datatableassetallocation"></div>
-    </div>
-    <div style="height: 25vh;" id="databledetailta"></div>
   </div>
 </div>

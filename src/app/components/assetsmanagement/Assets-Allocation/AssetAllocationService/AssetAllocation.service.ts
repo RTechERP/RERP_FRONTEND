@@ -4,12 +4,9 @@ import { Observable } from 'rxjs';
 import { API_ORIGIN } from '../../../../app.config';
 @Injectable({ providedIn: 'root' })
 export class AssetAllocationService {
-  private urlMaster = `${API_ORIGIN}api/Assets/getTSAssestAllocation`;
-  private urlDetail = `${API_ORIGIN}api/Assets/getassetsallocationdetail`;
-urlHrApprove=`${API_ORIGIN}api/Assets/HRApproved`;
-urlHrCancelApprove=`${API_ORIGIN}api/Assets/HRCancelApproved `;
-urAccountantApprove=`${API_ORIGIN}api/Assets/AccountantApproved`;
-urlAccountCancelApprove=`${API_ORIGIN}api/Assets/AccountantCancelApproved`;
+  private urlMaster = `${API_ORIGIN}api/AssetsAllocation/getTSAssestAllocation`;
+  private urlDetail = `${API_ORIGIN}api/AssetsAllocation/getassetsallocationdetail`;
+private urldelete=`${API_ORIGIN}api/AssetsAllocation/savedata`;
 urlDeleteAllocation=`${API_ORIGIN}api/Assets/deleteAssetAllocation`;
   constructor(private http: HttpClient) {}
 
@@ -38,16 +35,8 @@ urlDeleteAllocation=`${API_ORIGIN}api/Assets/deleteAssetAllocation`;
     const url = `${this.urlDetail}?id=${id}`;
     return this.http.get<any>(url);
   }
-updateApprovalStatus(ids: number[], action: string): Observable<any> {
-  const updateapprove = {
-    ids: ids,
-    action: action
-  };
-  return this.http.post<any>(`${API_ORIGIN}api/Assets/UpdateApprovalStatus`, updateapprove);
+updateApproval(data: { id: number, status?: number, isApproveAccountant?: boolean }[]): Observable<any> {
+  return this.http.post<any>(`${API_ORIGIN}api/AssetsAllocation/savedata`, data);
 }
 
-  DeleteAllocation(ids:number[]):Observable<any>
-  {
-    return this.http.post<any>(this.urlDeleteAllocation,ids);
-  }
 }

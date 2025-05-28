@@ -5,7 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { UnitService } from './UnitService/Unit.service';
 import { TabulatorFull as Tabulator, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
+import { ModalService } from '../assets-form/assets-formServices/asset-formservice.service';
 declare var bootstrap: any;
+import Swal from 'sweetalert2';
 
 @Component({
   standalone: true,
@@ -17,14 +19,18 @@ declare var bootstrap: any;
 export class UnitManagementComponent implements OnInit {
   unit: any[] = [];
   table: Tabulator | null = null;
+  selectedUnit: any = {};
+  action: 'add' | 'edit' | 'delete' = 'add';
 
-  // modal chung add/edit
-  action: 'add' | 'edit' = 'add';
+
   modalTitle = '';
   newUnitName = '';
+  savelist: any[] = [];
   editingUnitId: number | null = null;
+  constructor(private unitService: UnitService,
+    private modalservice: ModalService
 
-  constructor(private unitService: UnitService) { }
+  ) { }
 
   ngOnInit() {
     this.loadUnits();
@@ -43,27 +49,27 @@ export class UnitManagementComponent implements OnInit {
     } else {
       this.table = new Tabulator('#datatableunit', {
         data: this.unit,
-     layout: "fitDataFill",
+        layout: "fitDataStretch",
         pagination: true,
-        selectableRows: 1,
+        selectableRows: 100,
         height: '50vh',
         movableColumns: true,
-        paginationSize: 15,
+        paginationSize: 20,
         paginationSizeSelector: [5, 10, 20, 50, 100],
         reactiveData: true,
         placeholder: 'Không có dữ liệu',
         dataTree: true,
-        addRowPos: "bottom",          //when adding a new row, add it to the top of the table
-        history: true,  
+        addRowPos: "bottom",
+        history: true,
         columns: [
-          // cột chọn hàng tương tự AssetsManagement
           {
             formatter: 'rowSelection',
             titleFormatter: 'rowSelection',
             hozAlign: 'center',
-            
             headerSort: false,
-            width: 50
+            width: 50,
+            headerHozAlign: 'center',
+            cssClass: 'custom-checkbox-cell'
           },
           { title: 'Mã đơn vị', field: 'ID', hozAlign: 'center', width: 80 },
           { title: 'Tên đơn vị', field: 'UnitName' },
@@ -71,26 +77,29 @@ export class UnitManagementComponent implements OnInit {
         rowClick: (e: MouseEvent, row: RowComponent) => {
           this.table!.getSelectedRows().forEach(r => r.deselect());
           row.select();
+          this.selectedUnit = row.getData();
         },
       } as any);
     }
   }
-
-  openUnitModal(mode: 'add' | 'edit', unit?: any) {
+  openUnitModal(mode: 'add' | 'edit' | 'delete', unit?: any) {
     this.action = mode;
     if (mode === 'add') {
       this.modalTitle = 'Thêm đơn vị tính';
       this.newUnitName = '';
       this.editingUnitId = null;
-    } else {
+    } else if (mode === 'edit') {
       this.modalTitle = 'Sửa đơn vị tính';
+      this.editingUnitId = unit.ID;
+      this.newUnitName = unit.UnitName;
+    } else if (mode === 'delete') {
+      this.modalTitle = 'Xóa đơn vị tính';
       this.editingUnitId = unit.ID;
       this.newUnitName = unit.UnitName;
     }
     const el = document.getElementById('unitModal')!;
     new bootstrap.Modal(el).show();
   }
-
   onEditClick() {
     if (!this.table) return alert('Chưa khởi tạo bảng!');
     const rows = this.table.getSelectedRows();
@@ -98,21 +107,50 @@ export class UnitManagementComponent implements OnInit {
     const data = rows[0].getData();
     this.openUnitModal('edit', data);
   }
-
-  saveUnit() {
-    const name = this.newUnitName.trim();
-    if (!name) return alert('Tên đơn vị không được trống!');
-    const payload: any = { UnitName: name };
-    if (this.action === 'edit' && this.editingUnitId != null) {
-      payload.ID = this.editingUnitId;
+  onDeleteClick() {
+    if (!this.table) return alert('Chưa khởi tạo bảng!');
+    const rows = this.table.getSelectedRows();
+    if (rows.length === 0) return alert('Chọn 1 đơn vị để xóa.');
+    const data = rows[0].getData()
+    this.action = 'delete';
+    this.editingUnitId = data['ID'];
+    this.newUnitName = data['UnitName'];
+        this.saveUnit(true);
+  }
+  saveUnit(isDelete: boolean = false) {
+    if (!this.newUnitName.trim() && !isDelete) {
+      Swal.fire('Lỗi', 'Tên đơn vị không được để trống!', 'error');
+      return;
     }
-    this.unitService.SaveUnit(payload)
-      .subscribe(() => this.afterUnitChange());
+    const unit = {
+      ID: (this.action === 'edit' || this.action === 'delete') ? this.editingUnitId : 0,
+      UnitName: this.newUnitName.trim(),
+      IsDeleted: isDelete
+    };
+    this.unitService.SaveData([unit]).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Thành công',
+          text: isDelete
+            ? 'Xóa đơn vị thành công!'
+            : this.action === 'add'
+              ? 'Thêm đơn vị thành công!'
+              : 'Cập nhật đơn vị thành công!'
+        });
+        this.loadUnits();
+        const modalEl = document.getElementById('unitModal');
+        const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+        modal?.hide();
+      },
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Lỗi',
+          text: 'Không thể lưu dữ liệu. Vui lòng thử lại.'
+        });
+      }
+    });
   }
 
-  private afterUnitChange() {
-    this.loadUnits();
-    const el = document.getElementById('unitModal')!;
-    bootstrap.Modal.getInstance(el)!.hide();
-  }
 }

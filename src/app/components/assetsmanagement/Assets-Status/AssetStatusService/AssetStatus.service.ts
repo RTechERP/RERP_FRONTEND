@@ -6,12 +6,11 @@ import { API_ORIGIN } from '../../../../app.config';
   providedIn: 'root'
 })
 export class AssetStatusService {
-  url=`${API_ORIGIN}api/Assets/getstatus`;
-
+  url=`${API_ORIGIN}api/AssetsStatus/getstatus`;
 constructor(private hhtpclient:HttpClient) { }
 getStatus():Observable<any>
 {
   return this.hhtpclient.get<any>(this.url);
 }
-
 }
+ 

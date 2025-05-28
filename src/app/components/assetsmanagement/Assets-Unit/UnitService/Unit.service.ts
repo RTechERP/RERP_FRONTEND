@@ -6,17 +6,22 @@ import { API_ORIGIN } from '../../../../app.config';
   providedIn: 'root'
 })
 export class UnitService {
-url = `${API_ORIGIN}api/Unit/getall`;
-urlsave=`${API_ORIGIN}api/Unit/savedata`;
+url = `${API_ORIGIN}api/AssetsUnit/getall`;
+
+urlsavedata=`${API_ORIGIN}api/AssetsUnit/savedataa`;
 constructor(private httpclient: HttpClient) {
 
  }
- SaveUnit(unit : any):Observable<any>
- {
-return this.httpclient.post<any>(this.urlsave,unit)
- }
+deleteUnit(unit: any) {
+  unit.IsDeleted = true;
+  return this.SaveData([unit]);
+}
  getUnit():Observable<any>{
   return this.httpclient.get<any>(this.url);
+ }
+ SaveData(unit:any):Observable<any>
+ {
+  return this.httpclient.post(this.urlsavedata,unit)
  }
 
 }

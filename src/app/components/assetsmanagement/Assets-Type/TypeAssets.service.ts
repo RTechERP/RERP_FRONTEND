@@ -7,7 +7,7 @@ import { API_ORIGIN } from '../../../app.config';
   providedIn: 'root'
 })
 export class TypeAssetsService {
- url = `${API_ORIGIN}api/Assets/gettype`;
+ url = `${API_ORIGIN}api/AssetType/gettype`;
 
 constructor(private httpclient: HttpClient) { }
 
