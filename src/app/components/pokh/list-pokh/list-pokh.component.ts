@@ -231,7 +231,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   }
   uploadFiles(pokhId: number) {
     const formData = new FormData();
-    
+
     // Thêm từng file vào FormData
     this.uploadedFiles.forEach(fileObj => {
       if (fileObj.file) {
@@ -276,10 +276,10 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       movableColumns: true,
       resizableRows: true,
       reactiveData: true,
-      columnDefaults:{
+      columnDefaults: {
         headerWordWrap: true,
         headerVertical: false,
-        headerHozAlign: "center",           
+        headerHozAlign: "center",
         minWidth: 60,
         resizable: true
       },
@@ -393,9 +393,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       movableColumns: true,
       resizableRows: true,
       columns: [
-        { 
-          title: 'STT', 
-          formatter: "rownum", 
+        {
+          title: 'STT',
+          formatter: "rownum",
           width: '10%',
           hozAlign: "center",
           headerSort: false
@@ -430,7 +430,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.loadTypePO();
     this.loadCurrency();
     this.loadProducts();
-    this.loadDetailUser();
+    // this.loadDetailUser();
   }
 
   isModalOpen: boolean = false;
@@ -452,11 +452,11 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
         this.initFileUploadedTable(); // Khởi tạo với dữ liệu rỗng
         this.fileUploadedTable?.setData([]);
-        
+
         // Nếu bảng DetailUser đã tồn tại từ lần mở trước, hủy nó đi
         if (this.DetailUser) {
-            this.DetailUser.destroy();
-            this.isResponsibleUsersEnabled = false;
+          this.DetailUser.destroy();
+          this.isResponsibleUsersEnabled = false;
         }
       }
     }, 0);
@@ -465,6 +465,18 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.isModalOpen = false;
     this.isEditMode = false;
     this.resetForm();
+    if (this.ProductDetailTreeList) {
+      this.ProductDetailTreeList.destroy();
+      // this.ProductDetailTreeList = undefined; 
+    }
+    if (this.DetailUser) {
+      this.DetailUser.destroy();
+      // this.DetailUser = undefined; 
+    }
+    if (this.fileUploadedTable) { 
+      this.fileUploadedTable.destroy();
+      // this.fileUploadedTable = undefined;
+    }
   }
   resetForm() {
     this.poFormData = {
@@ -498,6 +510,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         if (response.status === 1) {
           const pokhData = response.data;
           const receivedDate = new Date(pokhData.ReceivedDatePO);
+
           this.poFormData = {
             status: pokhData.Status,
             poCode: pokhData.POCode,
@@ -518,41 +531,86 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             isApproved: pokhData.IsApproved,
             warehouseId: pokhData.WarehouseID,
           };
-          
+
           this.selectedCustomer = this.customers.find(c => c.ID === pokhData.CustomerID);
+          this.isResponsibleUsersEnabled = pokhData.UserType === 1;
 
-          this.loadPOKHProducts(id);
-          this.loadPOKHFiles(id);
+          // Tạo các Observables cho việc tải dữ liệu phụ
+          const POKHProducts$ = this.pokhService.getPOKHProduct(id, 0).pipe(
+            map(res => (res.status === 1 ? this.convertToTreeData(res.data) : [])),
+            catchError(err => {
+              console.error('Lỗi tải POKHProduct:', err);
+              return of([]);
+            })
+          );
 
-          if (pokhData.UserType === 1) {
-            this.isResponsibleUsersEnabled = true;
-            this.loadDetailUser(id);
+          const POKHFiles$ = this.pokhService.getPOKHFile(id).pipe(
+            map(res => (res.status === 1 ? res.data : [])),
+            catchError(err => {
+              console.error('Lỗi tải POKHFile:', err);
+              return of([]);
+            })
+          );
+
+          let detailUser$ = of([]); // Mặc định
+          if (this.isResponsibleUsersEnabled) {
+            detailUser$ = this.pokhService.loadUserDetail(id, 0).pipe(
+              map(res => (res.status === 1 ? res.data : [])),
+              catchError(err => {
+                console.error('Lỗi tải DetailUser:', err);
+                return of([]);
+              })
+            );
           }
 
-          setTimeout(() => {
-            this.initProductDetailTreeList();
-            this.initFileUploadedTable();
-            console.log("FileCheck:", this.POKHFiles)
-            console.log("ProductCheck:", this.POKHProduct)
-            console.log("DetailUserCheck:", this.detailUser)
-            if (this.ProductDetailTreeList && this.fileTable) {
-              this.ProductDetailTreeList.setData(this.POKHProduct);
-              this.fileTable.setData(this.POKHFiles);
-            }
-            if (this.isResponsibleUsersEnabled) {
-              this.initDetailTable();
-              if (this.DetailUser) {
-                this.DetailUser.setData(this.detailUser);
+          // Sử dụng forkJoin để đợi tất cả các observables hoàn thành
+          forkJoin([POKHProducts$, POKHFiles$, detailUser$]).subscribe(
+            ([productsData, filesData, userDetailsData]) => {
+              this.POKHProduct = productsData;
+              // Chuyển đổi POKHFiles (từ server) sang định dạng của uploadedFiles
+              this.uploadedFiles = filesData.map((fileFromServer: any) => ({
+                fileName: fileFromServer.OriginPath, // Điều chỉnh theo cấu trúc dữ liệu thực tế
+                fileType: this.getFileType(fileFromServer.OriginPath || ''),
+                uploadDate: fileFromServer.UploadDate ? new Date(fileFromServer.UploadDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN'),
+              }));
+              this.detailUser = userDetailsData;
+
+              // tiến hành khởi tạo bảng và setData
+              this.initProductDetailTreeList();
+              this.ProductDetailTreeList?.setData(this.POKHProduct);
+
+              this.initFileUploadedTable();
+              this.fileUploadedTable?.setData(this.uploadedFiles);
+
+              if (this.isResponsibleUsersEnabled) {
+                this.initDetailTable(); // Đảm bảo users đã được load trong loadFormData
+                this.DetailUser?.setData(this.detailUser);
+              } else {
+                // Nếu bảng DetailUser đã tồn tại, hủy nó hoặc xóa dữ liệu
+                if (this.DetailUser) {
+                  this.DetailUser.destroy();
+                  this.isResponsibleUsersEnabled = false;
+                  // this.DetailUser = undefined; // Hoặc gán null nếu bạn quản lý instance như vậy
+                }
               }
+            },
+            forkJoinError => {
+              console.error('Lỗi khi forkJoin tải dữ liệu chi tiết POKH:', forkJoinError);
+              alert('Có lỗi xảy ra khi tải chi tiết POKH.');
+              // Xử lý lỗi: có thể reset các bảng về trạng thái rỗng
+              this.ProductDetailTreeList?.setData([]);
+              this.fileUploadedTable?.setData([]);
+              if (this.DetailUser) this.DetailUser.setData([]);
             }
-          }, 1000);
+          );
         } else {
-          console.error('Lỗi khi tải dữ liệu POKH:', response.message);
+          console.error('Lỗi khi tải dữ liệu POKH chính:', response.message);
+          alert('Có lỗi xảy ra khi tải dữ liệu POKH.');
         }
       },
       error => {
-        console.error('Lỗi kết nối khi tải dữ liệu POKH:', error);
-        alert('Có lỗi xảy ra khi tải dữ liệu POKH');
+        console.error('Lỗi kết nối khi tải dữ liệu POKH chính:', error);
+        alert('Có lỗi xảy ra khi tải dữ liệu POKH.');
       }
     );
   }
@@ -658,7 +716,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           const flatData = response.data;
           const treeData = this.convertToTreeData(flatData);
           this.POKHProduct = treeData;
-          
+
           setTimeout(() => {
             this.initProductTable();
             console.log(this.POKHProduct);
@@ -733,7 +791,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
   generatePOCode(CustomerName: string): void {
     const { isCopy = false, warehouseId = 1, pokhId = 0 } = this.poFormData;
-
     console.log('Gọi generatePOCode với:', {
       CustomerName,
       isCopy,
@@ -808,52 +865,60 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Số lượng', field: 'Qty', sorter: 'number', width: 250, editor: "number" },
         { title: 'Kích thước phim cắt/Model', field: 'FilmSize', sorter: 'string', width: 250, editor: "input" },
         { title: 'ĐVT', field: 'Unit', sorter: 'string', width: 250, editor: "input" },
-        { title: 'Đơn giá NET', field: 'NetUnitPrice', sorter: 'number', width: 250, editor: "number",formatter: "money",
+        {
+          title: 'Đơn giá NET', field: 'NetUnitPrice', sorter: 'number', width: 250, editor: "number", formatter: "money",
           formatterParams: {
             precision: 0,
             decimal: ".",
             thousand: ",",
             symbol: "",
             symbolAfter: true
-        }},
-        { title: 'Đơn giá trước VAT', field: 'UnitPrice', sorter: 'number', width: 250, editor: "number",formatter: "money",
+          }
+        },
+        {
+          title: 'Đơn giá trước VAT', field: 'UnitPrice', sorter: 'number', width: 250, editor: "number", formatter: "money",
           formatterParams: {
             precision: 0,
             decimal: ".",
             thousand: ",",
             symbol: "",
             symbolAfter: true
-        } },
-        { title: 'Tổng tiền trước VAT', field: 'IntoMoney', sorter: 'number', width: 250, editor: "number",formatter: "money",
+          }
+        },
+        {
+          title: 'Tổng tiền trước VAT', field: 'IntoMoney', sorter: 'number', width: 250, editor: "number", formatter: "money",
           formatterParams: {
             precision: 0,
             decimal: ".",
             thousand: ",",
             symbol: "",
             symbolAfter: true
-        } },
+          }
+        },
         {
           title: 'VAT (%)',
           field: 'VAT',
-          sorter: 'number',   
+          sorter: 'number',
           width: 250,
-          editor: "number",  
-          formatter: function(cell, formatterParams, onRendered) {
-            const value = cell.getValue(); 
+          editor: "number",
+          formatter: function (cell, formatterParams, onRendered) {
+            const value = cell.getValue();
             if (value !== null && value !== undefined && !isNaN(Number(value))) {
-              return value + "%"; 
+              return value + "%";
             }
             return "";
           }
         },
-        { title: 'Tổng tiền sau VAT', field: 'TotalPriceIncludeVAT', sorter: 'number', width: 250, editor: "number",formatter: "money",
+        {
+          title: 'Tổng tiền sau VAT', field: 'TotalPriceIncludeVAT', sorter: 'number', width: 250, editor: "number", formatter: "money",
           formatterParams: {
             precision: 0,
             decimal: ".",
             thousand: ",",
             symbol: "",
             symbolAfter: true
-        } },
+          }
+        },
         { title: 'Người nhận', field: 'UserReceiver', sorter: 'string', width: 250, editor: "input" },
         { title: 'Ngày yêu cầu giao hàng', field: 'DeliveryRequestedDate', sorter: 'string', width: 250, formatter: this.dateFormatter, editor: "date" },
         { title: 'Thanh toán dự kiến', field: 'EstimatedPay', sorter: 'number', width: 250, editor: "number" },
@@ -955,19 +1020,19 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   calculateTotalIterative(): void {
     let totalSum = 0;
     const allRows = this.ProductDetailTreeList.getRows();
-    
+
     allRows.forEach(row => {
       const rowData = row.getData();
-      const stack = [rowData]; 
-      
+      const stack = [rowData];
+
       while (stack.length > 0) {
         const currentNode = stack.pop();
         if (!currentNode) continue;
-        
+
         if (currentNode["TotalPriceIncludeVAT"] !== undefined && !isNaN(currentNode["TotalPriceIncludeVAT"])) {
           totalSum += Number(currentNode["TotalPriceIncludeVAT"]);
         }
-        
+
         if (currentNode["_children"] && currentNode["_children"].length > 0) {
           currentNode["_children"].forEach((child: any) => {
             stack.push(child);
@@ -975,17 +1040,17 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         }
       }
     });
-    
+
     this.poFormData.totalPO = totalSum;
     console.log("Tổng giá trị sau VAT:", this.poFormData.totalPO);
-    
+
     // Cập nhật lại giá trị tiền trong bảng người phụ trách
     this.updateResponsibleUsersMoney();
   }
 
   updateResponsibleUsersMoney(): void {
     if (!this.DetailUser) return;
-    
+
     const totalPO = this.poFormData.totalPO;
     this.DetailUser.getRows().forEach(row => {
       const rowData = row.getData();
@@ -1080,21 +1145,21 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.selectedRow.treeExpand();
 
   }
-  loadDetailUser(id: number = 0, idDetail: number = 0): void {
-    this.pokhService.loadUserDetail(id, idDetail).subscribe(
-      response => {
-        if (response.status === 1) {
-          this.detailUser = response.data;
-        }
-        else {
-          console.error('Lỗi khi tải chi tiết người dùng:', response.message);
-        }
-      },
-      error => {
-        console.error('Lỗi kết nối khi tải chi tiết người dùng:', error);
-      }
-    );
-  }
+  // loadDetailUser(id: number = 0, idDetail: number = 0): void {
+  //   this.pokhService.loadUserDetail(id, idDetail).subscribe(
+  //     response => {
+  //       if (response.status === 1) {
+  //         this.detailUser = response.data;
+  //       }
+  //       else {
+  //         console.error('Lỗi khi tải chi tiết người dùng:', response.message);
+  //       }
+  //     },
+  //     error => {
+  //       console.error('Lỗi kết nối khi tải chi tiết người dùng:', error);
+  //     }
+  //   );
+  // }
   initDetailTable(): void {
     if (!this.DetailUserElement || !this.DetailUserElement.nativeElement) return;
     if (this.DetailUser) {
@@ -1114,17 +1179,17 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           width: '5%'
         },
         {
-          title: 'ID', 
-          field: 'ID', 
-          sorter: 'number', 
-          width: 100, 
+          title: 'ID',
+          field: 'ID',
+          sorter: 'number',
+          width: 100,
         },
         {
-          title: 'Người phụ trách', 
-          field: 'ResponsibleUser', 
-          sorter: 'string', 
-          width: '25%', 
-          editor: "list", 
+          title: 'Người phụ trách',
+          field: 'ResponsibleUser',
+          sorter: 'string',
+          width: '25%',
+          editor: "list",
           editorParams: {
             values: this.users.map(user => ({
               label: `${user.FullName}`,
@@ -1146,7 +1211,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           cellEdited: (cell) => {
             const totalPO = this.getTotalPOValue();
             const percentValue = parseFloat(cell.getValue()) || 0;
-            
+
             // Tính tổng phần trăm hiện tại
             let totalPercent = 0;
             this.DetailUser.getRows().forEach(row => {
@@ -1167,7 +1232,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             const moneyValue = totalPO * (percentValue / 100);
             cell.getRow().update({ MoneyUser: moneyValue });
           },
-          formatter: function(cell, formatterParams, onRendered) {
+          formatter: function (cell, formatterParams, onRendered) {
             const value = cell.getValue();
             if (value === null || value === undefined || value === '') {
               return '';
@@ -1175,13 +1240,13 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             return Number(value) + '%';
           }
         },
-        { 
-          title: 'Tiền theo phần trăm', 
-          field: 'MoneyUser', 
-          sorter: 'number', 
-          editor: "input", 
+        {
+          title: 'Tiền theo phần trăm',
+          field: 'MoneyUser',
+          sorter: 'number',
+          editor: "input",
           width: '30%',
-          formatter: function(cell, formatterParams, onRendered) {
+          formatter: function (cell, formatterParams, onRendered) {
             const value = cell.getValue();
             if (value === null || value === undefined || value === '') {
               return '';
@@ -1213,14 +1278,38 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   toggleResponsibleUsers() {
     this.isResponsibleUsersEnabled = !this.isResponsibleUsersEnabled;
     this.poFormData.userType = this.isResponsibleUsersEnabled ? 1 : 0;
-    if (this.isResponsibleUsersEnabled) {
-      this.initDetailTable();
-    } else {
-      if (this.DetailUser) {
-        this.DetailUser.destroy();
+    // Chỉ khởi tạo hoặc hủy bảng khi trạng thái thay đổi và modal đang mở.
+    // Việc setData sẽ được thực hiện khi dữ liệu được tải hoặc reset.
+    if (this.isModalOpen) { // Chỉ thực hiện nếu modal đang mở
+      if (this.isResponsibleUsersEnabled) {
+        // Nếu bật và chưa có dữ liệu (ví dụ đang thêm mới), hoặc muốn load lại
+        if (!this.isEditMode || this.detailUser.length === 0 && this.selectedId > 0) {
+          // Nếu là thêm mới hoặc sửa nhưng chưa có data thì load (hoặc để trống nếu không có ID)
+          if (this.selectedId > 0) { // Chỉ load lại nếu đang ở chế độ sửa và có ID
+            this.pokhService.loadUserDetail(this.selectedId, 0).subscribe(res => {
+              this.detailUser = res.status === 1 ? res.data : [];
+              this.initDetailTable();
+              this.DetailUser?.setData(this.detailUser);
+            });
+          } else { // Thêm mới
+            this.detailUser = [];
+            this.initDetailTable();
+            this.DetailUser?.setData([]);
+          }
+        } else { // Đã có dữ liệu (trường hợp sửa và đã load trước đó)
+          this.initDetailTable(); // Khởi tạo lại nếu cần
+          this.DetailUser?.setData(this.detailUser); // Gán lại dữ liệu đã có
+        }
+      } else {
+        if (this.DetailUser) {
+          this.DetailUser.destroy();
+          // this.DetailUser = undefined; // Hoặc null
+        }
+        this.detailUser = []; // Xóa dữ liệu khi tắt
       }
     }
   }
+
   initFileUploadedTable(): void {
     if (!this.fileUploadedElement || !this.fileUploadedElement.nativeElement) return;
 
@@ -1248,9 +1337,8 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           hozAlign: "center",
         },
         { title: 'Tên file', field: 'fileName', sorter: 'string', width: "60%" },
-        { title: 'Kích thước', field: 'fileSize', sorter: 'string', width: "10%" },
         { title: 'Loại file', field: 'fileType', sorter: 'string', width: "10%" },
-        { title: 'Ngày tải lên', field: 'uploadDate', sorter: 'date', width: "10%" }
+        { title: 'Ngày tải lên', field: 'uploadDate', sorter: 'date', width: "30%" }
       ]
     });
 
@@ -1276,7 +1364,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     const files = this.fileInput.nativeElement.files;
     if (files && files.length > 0) {
-      const MAX_FILE_SIZE = 50 * 1024 * 1024; 
+      const MAX_FILE_SIZE = 50 * 1024 * 1024;
       Array.from(files).forEach(file => {
         const fileObj = file as File;
         if (fileObj.size > MAX_FILE_SIZE) {
