@@ -54,4 +54,8 @@ export class OfficeSuppliesService {
   nextCodeRTC(): Observable<any> {
     return this.httpclient.get<any>(`${this.baseUrl}/next-codeRTC`, { responseType: 'text' as 'json' });
   }
+
+  checkProductCodes(codes: any[]): Observable<any> {
+    return this.httpclient.post(`${this.baseUrl}/checkcodes`, codes);
+  }
 }

@@ -13,7 +13,7 @@ export class DailyreportService {
   constructor(private http: HttpClient) { }
 
   getdataEmployee(departmentId: number, projectId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/dailyreport/GetdataEmployee?departmentId=${departmentId}&projectId=${projectId}`);
+    return this.http.get(`https://localhost:7187/api/DailyReport/getdataemployee?departmentId=${departmentId}&projectId=${projectId}`);
   }
   getDailyReportHCNSIT(departmentId: number, dateStart: Date, dateEnd: Date, userId: number, keyword: string): Observable<any> {
     const params: any = {
@@ -24,7 +24,7 @@ export class DailyreportService {
       keyword: keyword?.trim() || ''
     };
     
-    return this.http.get(`${this.apiUrl}/dailyreport/GetDailyReportTechnical`, { params });
+    return this.http.get(`https://localhost:7187/api/DailyReport/getdailyreporttechnical`, { params });
   }
 
   getDailyReportFilmAndDriver(dateStart: Date, dateEnd: Date, keyword: string, employeeId: number): Observable<any> {
