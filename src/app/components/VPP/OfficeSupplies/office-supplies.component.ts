@@ -326,8 +326,7 @@ export class OfficeSuppliesComponent implements OnInit {
     this.lstVPP.getdata(this.searchText).subscribe({
       next: (res) => {
         console.log('Dữ liệu nhận được:', res);
-        this.lstVP = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-
+        this.lstVP = res.data.officeSupply;
         // Cập nhật lại dataTable và reload bảng
         this.dataTable = this.lstVP;
         if (this.table) {
@@ -548,11 +547,11 @@ export class OfficeSuppliesComponent implements OnInit {
     this.isCheckmode = false;
   
     // Gọi API để lấy mã CodeRTC mới
-    this.lstVPP.nextCodeRTC().subscribe({
+    this.lstVPP.getdata(this.searchText).subscribe({
       next: (res) => {
         console.log('Response từ nextCodeRTC:', res);
         this.newProduct = {
-          CodeRTC: res,
+          CodeRTC: res.data.nextCode,
           CodeNCC: '',
           NameRTC: '',
           NameNCC: '',
