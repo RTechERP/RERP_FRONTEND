@@ -33,7 +33,31 @@ body {
 .table td {
   vertical-align: middle;
 }
+.custom-modal .modal-dialog {
+    max-width: 90%;
+    margin: 1.75rem auto;
+}
 
+.custom-modal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.project-select-group {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.project-select-group ng-select {
+    flex: 1;
+}
+
+.project-select-group .btn {
+    margin-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
 .file-upload-section {
   margin-top: 20px;
 }

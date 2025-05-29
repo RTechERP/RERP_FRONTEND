@@ -19,239 +19,224 @@
     </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="pokhModal" tabindex="-1" aria-labelledby="pokhModalLabel" aria-hidden="true"
-    [ngClass]="{'show': isModalOpen}" [ngStyle]="{'display': isModalOpen ? 'block' : 'none'}" *ngIf="isModalOpen">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="pokhModalLabel">Chi tiết PO</h5>
-                <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+<!-- Modal Template -->
+<ng-template #pokhModal>
+    <div class="modal-header">
+        <h5 class="modal-title">Chi tiết PO</h5>
+        <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        <div class="container-fluid">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <button class="btn btn-primary" (click)="savePOKH()"><i class="bi bi-save"></i> Thêm mới</button>
+                <button class="btn btn-secondary" onclick="alert('Add Customer')"><i
+                        class="bi bi-person-plus"></i> Thêm khách hàng</button>
+                <button class="btn btn-secondary" onclick="alert('Add New Product')"><i class="bi bi-box"></i>
+                    Thêm sản phẩm mới</button>
+                <button class="btn btn-secondary" onclick="alert('Select Quotation')"><i
+                        class="bi bi-file-earmark"></i> Chọn báo giá</button>
+                <button class="btn btn-secondary" onclick="alert('Search Inventory')"><i
+                        class="bi bi-search"></i> Tìm kiếm kho</button>
+                <button class="btn btn-secondary" onclick="alert('Select Partlist')"><i class="bi bi-list"></i>
+                    Chọn partlist</button>
+                <button class="btn btn-secondary" onclick="alert('Import Excel')"><i
+                        class="bi bi-file-excel"></i> Nhập Excel</button>
             </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <!-- Toolbar -->
-                    <div class="toolbar">
-                        <button class="btn btn-primary" (click)="savePOKH()"><i class="bi bi-save"></i> Thêm mới</button>
-                        <button class="btn btn-secondary" onclick="alert('Add Customer')"><i
-                                class="bi bi-person-plus"></i> Thêm khách hàng</button>
-                        <button class="btn btn-secondary" onclick="alert('Add New Product')"><i class="bi bi-box"></i>
-                            Thêm sản phẩm mới</button>
-                        <button class="btn btn-secondary" onclick="alert('Select Quotation')"><i
-                                class="bi bi-file-earmark"></i> Chọn báo giá</button>
-                        <button class="btn btn-secondary" onclick="alert('Search Inventory')"><i
-                                class="bi bi-search"></i> Tìm kiếm kho</button>
-                        <button class="btn btn-secondary" onclick="alert('Select Partlist')"><i class="bi bi-list"></i>
-                            Chọn partlist</button>
-                        <button class="btn btn-secondary" onclick="alert('Import Excel')"><i
-                                class="bi bi-file-excel"></i> Nhập Excel</button>
+
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="po-details-tab" data-bs-toggle="tab"
+                        data-bs-target="#po-details" type="button" role="tab" aria-controls="po-details"
+                        aria-selected="true">Chi tiết PO</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="product-details-tab" data-bs-toggle="tab"
+                        data-bs-target="#product-details" type="button" role="tab"
+                        aria-controls="product-details" aria-selected="false">Chi tiết sản phẩm</button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- PO Details Tab -->
+                <div class="tab-pane fade show active" id="po-details" role="tabpanel"
+                    aria-labelledby="po-details-tab">
+                    <div class="form-section">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label for="cboStatus" class="form-label">Trạng thái</label>
+                                <ng-select [items]="statusOptions" 
+                                         bindLabel="label" 
+                                         bindValue="value" 
+                                         [(ngModel)]="poFormData.status"
+                                         [disabled]="true">
+                                </ng-select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="txtPOCode" class="form-label">Mã PO</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="txtPOCode"
+                                        [(ngModel)]="poFormData.poCode">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                        (click)="openModalPOCode()">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="cboCustomer" class="form-label">Khách hàng</label>
+                                <ng-select [items]="customers" 
+                                         bindLabel="CustomerName"
+                                         [(ngModel)]="selectedCustomer" 
+                                         (change)="onCustomerChange($event)">
+                                </ng-select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="txtEndUser" class="form-label">End User</label>
+                                <input type="text" class="form-control" id="txtEndUser"
+                                    [(ngModel)]="poFormData.endUser">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <label for="cboUser" class="form-label">Sales phụ trách</label>
+                                <ng-select [items]="users" 
+                                         bindLabel="FullName" 
+                                         bindValue="ID"
+                                         [(ngModel)]="poFormData.userId"
+                                         placeholder="Chọn người phụ trách">
+                                </ng-select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label for="dtpPOdate" class="form-label">Ngày PO</label>
+                                <input type="date" class="form-control" id="dtpPOdate"
+                                    [(ngModel)]="poFormData.poDate">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="txtTotalPO" class="form-label">Tổng tiền PO</label>
+                                <input type="text" class="form-control" id="txtTotalPO" readonly
+                                    [value]="poFormData.totalPO | number:'1.0-0'">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="txtPONumber" class="form-label">Số POKH</label>
+                                <input type="text" class="form-control" id="txtPONumber"
+                                    [(ngModel)]="poFormData.poNumber">
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="cbProject" class="form-label">Dự án</label>
+                                <div class="project-select-group">
+                                    <ng-select [items]="projects" 
+                                             bindLabel="ProjectName" 
+                                             bindValue="ID"
+                                             [(ngModel)]="poFormData.projectId"
+                                             placeholder="Chọn dự án">
+                                    </ng-select>
+                                    <button class="btn btn-outline-secondary" onclick="alert('New Project')">
+                                        <i class="bi bi-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="cbType" class="form-label">Loại PO</label>
+                                <ng-select [items]="poTypes" 
+                                         bindLabel="MainIndex" 
+                                         bindValue="ID"
+                                         [(ngModel)]="poFormData.poType"
+                                         placeholder="Chọn loại PO">
+                                </ng-select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="cbPart" class="form-label">Bộ phận</label>
+                                <ng-select [items]="parts" 
+                                         bindLabel="PartName" 
+                                         bindValue="ID"
+                                         [(ngModel)]="poFormData.departmentId"
+                                         placeholder="Chọn bộ phận">
+                                </ng-select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="txtNote" class="form-label">Chú thích</label>
+                                <textarea class="form-control" id="txtNote" rows="4"
+                                    [(ngModel)]="poFormData.note"></textarea>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="cboCurrency" class="form-label">Loại tiền</label>
+                                <ng-select [items]="currencies" 
+                                         bindLabel="Code" 
+                                         bindValue="ID"
+                                         [(ngModel)]="poFormData.currencyId"
+                                         placeholder="Chọn loại tiền">
+                                </ng-select>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="ckbBigAccount"
+                                        [(ngModel)]="poFormData.isBigAccount">
+                                    <label class="form-check-label" for="ckbBigAccount">New Account</label>
+                                </div>
+                            </div>
+                            <!-- Attached Files Tab -->
+                        </div>
+                    </div>
+                    <div class="grid-section file-upload-section">
+                        <h5>File đính kèm</h5>
+                        <div class="mb-3 d-flex align-items-center">
+                            <input type="file" multiple class="form-control w-auto me-2" #fileInput 
+                                style="max-width: 300px;">
+                            <button class="btn btn-primary" (click)="onUploadClick()">
+                                <i class="bi bi-upload"></i> Upload
+                            </button>
+                        </div>
+                        <div #fileUploaded></div>
+                    </div>
+                </div>
+
+                <!-- Product Details Tab -->
+                <div class="tab-pane fade" id="product-details" role="tabpanel"
+                    aria-labelledby="product-details-tab">
+                    <div class="grid-section">
+                        <div class="mb-3">
+                            <button class="btn btn-primary" (click)="addNewRow()"><i
+                                    class="bi bi-plus"></i>Thêm</button>
+                            <button class="btn btn-outline-secondary ms-3" (click)="addChildRow()"><i
+                                    class="bi bi-plus-circle"></i> Thêm Con</button>
+                        </div>
+                        <div class="table-responsive">
+                            <div #ProductDetailTreeList></div>
+                        </div>
                     </div>
 
-                    <!-- Tabs Navigation -->
-                    <ul class="nav nav-tabs" id="myTab" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="po-details-tab" data-bs-toggle="tab"
-                                data-bs-target="#po-details" type="button" role="tab" aria-controls="po-details"
-                                aria-selected="true">Chi tiết PO</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="product-details-tab" data-bs-toggle="tab"
-                                data-bs-target="#product-details" type="button" role="tab"
-                                aria-controls="product-details" aria-selected="false">Chi tiết sản phẩm</button>
-                        </li>
-                    </ul>
-
-                    <!-- Tab Content -->
-                    <div class="tab-content">
-                        <!-- PO Details Tab -->
-                        <div class="tab-pane fade show active" id="po-details" role="tabpanel"
-                            aria-labelledby="po-details-tab">
-                            <div class="form-section">
-
-                                <div class="row">
-                                    <div class="col-md-3">
-                                        <label for="cboStatus" class="form-label">Trạng thái</label>
-                                        <select class="form-select" id="cboStatus" [(ngModel)]="poFormData.status"
-                                            disabled>
-                                            <option value="0">Chưa giao, chưa thanh toán</option>
-                                            <option value="1">Đã giao, đã thanh toán</option>
-                                            <option value="2">Chưa giao, đã thanh toán</option>
-                                            <option value="3">Đã giao, nhưng chưa thanh toán</option>
-                                            <option value="4">Đã thanh toán, GH chưa xuất hóa đơn</option>
-                                            <option value="5">Giao một phần, đã thanh toán một phần</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="txtPOCode" class="form-label">Mã PO</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" id="txtPOCode"
-                                                [(ngModel)]="poFormData.poCode">
-                                            <button class="btn btn-outline-secondary" type="button"
-                                                (click)="openModalPOCode()">
-                                                <i class="bi bi-plus"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label for="cboCustomer" class="form-label">Khách hàng</label>
-                                        <ng-select [items]="customers" bindLabel="CustomerName"
-                                            [(ngModel)]="selectedCustomer" (change)="onCustomerChange($event)">
-                                        </ng-select>
-
-                                        <!-- <ng-select [items]="customers" bindLabel="CustomerName" bindValue="ID"
-                                            placeholder="Chọn khách hàng" [(ngModel)]="poFormData.customerId"
-                                            (ngModelChange)="onCustomerChange($event)">
-                                        </ng-select> -->
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="txtEndUser" class="form-label">End User</label>
-                                        <input type="text" class="form-control" id="txtEndUser"
-                                            [(ngModel)]="poFormData.endUser">
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-3">
-                                        <label for="cboUser" class="form-label">Sales phụ trách</label>
-                                        <select class="form-select" id="cboUser" [(ngModel)]="poFormData.userId">
-                                            <option [value]="0">Chọn người phụ trách</option>
-                                            <option *ngFor="let user of users" [value]="user.ID">{{user.FullName}}
-                                            </option>
-                                        </select>
-
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label for="dtpPOdate" class="form-label">Ngày PO</label>
-                                        <input type="date" class="form-control" id="dtpPOdate"
-                                            [(ngModel)]="poFormData.poDate">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="txtTotalPO" class="form-label">Tổng tiền PO</label>
-                                        <input type="text" class="form-control" id="txtTotalPO" readonly
-                                            [value]="poFormData.totalPO | number:'1.0-0'">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="txtPONumber" class="form-label">Số POKH</label>
-                                        <input type="text" class="form-control" id="txtPONumber"
-                                            [(ngModel)]="poFormData.poNumber">
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <label for="cbProject" class="form-label">Dự án</label>
-                                        <div class="input-group">
-                                            <select class="form-select" id="cbProject"
-                                                [(ngModel)]="poFormData.projectId">
-                                                <option [value]="0">Chọn dự án</option>
-                                                <option *ngFor="let project of projects" [value]="project.ID">
-                                                    {{project.ProjectName}}</option>
-                                            </select>
-                                            <button class="btn btn-outline-secondary" onclick="alert('New Project')"><i
-                                                    class="bi bi-plus"></i></button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="cbType" class="form-label">Loại PO</label>
-                                        <select class="form-select" id="cbType" [(ngModel)]="poFormData.poType">
-                                            <option [value]="0">Chọn loại PO</option>
-                                            <option *ngFor="let type of poTypes" [value]="type.ID">{{type.MainIndex}}
-                                            </option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="cbPart" class="form-label">Bộ phận</label>
-                                        <select class="form-select" id="cbPart" [(ngModel)]="poFormData.departmentId">
-                                            <option [value]="0">-----Chọn bộ phận-----</option>
-                                            <option *ngFor="let part of parts" [value]="part.ID">{{part.PartName}}
-                                            </option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <label for="txtNote" class="form-label">Chú thích</label>
-                                        <textarea class="form-control" id="txtNote" rows="4"
-                                            [(ngModel)]="poFormData.note"></textarea>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label for="cboCurrency" class="form-label">Loại tiền</label>
-                                        <select class="form-select" id="cboCurrency"
-                                            [(ngModel)]="poFormData.currencyId">
-                                            <option [value]="0">Chọn loại tiền</option>
-                                            <option *ngFor="let currency of currencies" [value]="currency.ID">
-                                                {{currency.Code}}</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-check mt-4">
-                                            <input class="form-check-input" type="checkbox" id="ckbBigAccount"
-                                                [(ngModel)]="poFormData.isBigAccount">
-                                            <label class="form-check-label" for="ckbBigAccount">New Account</label>
-                                        </div>
-                                    </div>
-                                    <!-- Attached Files Tab -->
-                                    <div class="grid-section file-upload-section">
-                                        <h5>File đính kèm</h5>
-                                        <div class="mb-3 d-flex align-items-center">
-                                            <input type="file" multiple class="form-control w-auto me-2" #fileInput 
-                                                style="max-width: 300px;">
-                                            <button class="btn btn-primary" (click)="onUploadClick()">
-                                                <i class="bi bi-upload"></i> Upload
-                                            </button>
-                                        </div>
-
-                                        <div #fileUploaded></div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div class="grid-section">
+                        <h5>Người phụ trách cho sản phẩm đã chọn</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <button class="btn btn-primary"
+                                [ngStyle]="{ 'background-color': isResponsibleUsersEnabled ? 'red' : 'green' }"
+                                (click)="toggleResponsibleUsers()">
+                                {{ isResponsibleUsersEnabled ? 'Disable' : 'Enable' }}
+                            </button>
+                            <button class="btn btn-primary" (click)="addRowDetailUser()">
+                                Thêm người phụ trách
+                            </button>
                         </div>
-
-                        <!-- Product Details Tab -->
-                        <div class="tab-pane fade" id="product-details" role="tabpanel"
-                            aria-labelledby="product-details-tab">
-                            <div class="grid-section">
-                                <div class="mb-3">
-                                    <button class="btn btn-primary" (click)="addNewRow()"><i
-                                            class="bi bi-plus"></i>Thêm</button>
-                                    <button class="btn btn-outline-secondary ms-3" (click)="addChildRow()"><i
-                                            class="bi bi-plus-circle"></i> Thêm Con</button>
-                                </div>
-                                <div class="table-responsive">
-                                    <div #ProductDetailTreeList></div>
-                                </div>
-                            </div>
-
-
-                            <div class="grid-section">
-                                <h5>Người phụ trách cho sản phẩm đã chọn</h5>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <button class="btn btn-primary"
-                                        [ngStyle]="{ 'background-color': isResponsibleUsersEnabled ? 'red' : 'green' }"
-                                        (click)="toggleResponsibleUsers()">
-                                        {{ isResponsibleUsersEnabled ? 'Disable' : 'Enable' }}
-                                    </button>
-                                    <button class="btn btn-primary" (click)="addRowDetailUser()">
-                                        Thêm người phụ trách
-                                    </button>
-                                </div>
-                                <div #DetailUser [style.display]="isResponsibleUsersEnabled ? 'block' : 'none'"></div>
-                            </div>
-                        </div>
-
-
+                        <div #DetailUser [style.display]="isResponsibleUsersEnabled ? 'block' : 'none'"></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
-            </div>
         </div>
     </div>
-</div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+    </div>
+</ng-template>
 
-<!-- Modal Backdrop -->
-<div class="modal-backdrop fade show" *ngIf="isModalOpen"></div>
 <!-- Include Bootstrap CSS and JS links -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
@@ -263,3 +248,4 @@
         document.getElementById('userGrid').style.display = checkbox.checked ? 'table' : 'none';
     }
 </script>
+

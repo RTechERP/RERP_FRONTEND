@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, viewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, viewChild, TemplateRef } from '@angular/core';
 import { PokhServiceService } from '../pokh-service/pokh.service';
 import { CommonModule } from '@angular/common';
 import { TabulatorFull as Tabulator, RowComponent } from 'tabulator-tables';
@@ -6,15 +6,14 @@ import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { CustomerPartComponent } from '../../vision-base/customer-part/customer-part.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { CustomerPartService } from '../../vision-base/customer-part/customer-part/customer-part.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators'
 
-
 @Component({
   selector: 'app-list-pokh',
-  imports: [CommonModule, FormsModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, NgbModule],
   templateUrl: './list-pokh.component.html',
   styleUrls: ['./list-pokh.component.css']
 })
@@ -28,6 +27,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   @ViewChild('DetailUser', { static: false }) DetailUserElement!: ElementRef;
   @ViewChild('fileUploaded', { static: false }) fileUploadedElement!: ElementRef;
   @ViewChild('fileInput') fileInput!: ElementRef;
+  @ViewChild('pokhModal') pokhModal!: TemplateRef<any>;
 
   private table!: Tabulator;
   private productTable!: Tabulator;
@@ -35,6 +35,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   private fileUploadedTable!: Tabulator;
   private ProductDetailTreeList!: Tabulator;
   private DetailUser!: Tabulator;
+  private modalRef: any;
 
   isEditMode: boolean = false;
   lockEvents: boolean = false;
@@ -79,6 +80,15 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     warehouseId: 1,
   };
 
+  statusOptions = [
+    { value: 0, label: 'Chưa giao, chưa thanh toán' },
+    { value: 1, label: 'Đã giao, đã thanh toán' },
+    { value: 2, label: 'Chưa giao, đã thanh toán' },
+    { value: 3, label: 'Đã giao, nhưng chưa thanh toán' },
+    { value: 4, label: 'Đã thanh toán, GH chưa xuất hóa đơn' },
+    { value: 5, label: 'Giao một phần, đã thanh toán một phần' }
+  ];
+
   ngOnInit(): void {
     const startDate = new Date('2025-02-10T12:00:00');
     this.pokhService.getPOKH('', 1, 50, 0, 0, 0, 0, 0, startDate, new Date(), 1, 0).subscribe((response) => { //warehouse = 1
@@ -89,6 +99,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       }
       this.loadFormData();
     });
+    this.initProductDetailTreeList();
+    this.initDetailTable();
+    this.initFileUploadedTable();
   }
 
   ngAfterViewInit(): void {
@@ -436,9 +449,18 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   isModalOpen: boolean = false;
   openModal() {
     this.isModalOpen = true;
+    this.modalRef = this.modalService.open(this.pokhModal, {
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false,
+      centered: true,
+      windowClass: 'custom-modal'
+    });
+
     setTimeout(() => {
       if (this.isEditMode) {
         this.loadPOKHData(this.selectedId); // Tải dữ liệu cho chế độ sửa
+        this.ProductDetailTreeList?.setData(this.POKHProduct);
       } else {
         // Chế độ thêm mới
         this.resetForm(); // Reset form và dữ liệu
@@ -462,20 +484,20 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     }, 0);
   }
   closeModal() {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
     this.isModalOpen = false;
     this.isEditMode = false;
     this.resetForm();
     if (this.ProductDetailTreeList) {
       this.ProductDetailTreeList.destroy();
-      // this.ProductDetailTreeList = undefined; 
     }
     if (this.DetailUser) {
       this.DetailUser.destroy();
-      // this.DetailUser = undefined; 
     }
     if (this.fileUploadedTable) { 
       this.fileUploadedTable.destroy();
-      // this.fileUploadedTable = undefined;
     }
   }
   resetForm() {
@@ -500,7 +522,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       warehouseId: 1,
     };
     this.selectedCustomer = null;
-    this.POKHProduct = [];
+    // this.POKHProduct = [];
     this.detailUser = [];
     this.uploadedFiles = [];
   }
@@ -535,7 +557,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           this.selectedCustomer = this.customers.find(c => c.ID === pokhData.CustomerID);
           this.isResponsibleUsersEnabled = pokhData.UserType === 1;
 
-          // Tạo các Observables cho việc tải dữ liệu phụ
+
           const POKHProducts$ = this.pokhService.getPOKHProduct(id, 0).pipe(
             map(res => (res.status === 1 ? this.convertToTreeData(res.data) : [])),
             catchError(err => {
@@ -552,7 +574,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             })
           );
 
-          let detailUser$ = of([]); // Mặc định
+          let detailUser$ = of([]); 
           if (this.isResponsibleUsersEnabled) {
             detailUser$ = this.pokhService.loadUserDetail(id, 0).pipe(
               map(res => (res.status === 1 ? res.data : [])),
@@ -567,37 +589,37 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
           forkJoin([POKHProducts$, POKHFiles$, detailUser$]).subscribe(
             ([productsData, filesData, userDetailsData]) => {
               this.POKHProduct = productsData;
-              // Chuyển đổi POKHFiles (từ server) sang định dạng của uploadedFiles
+
+
               this.uploadedFiles = filesData.map((fileFromServer: any) => ({
-                fileName: fileFromServer.OriginPath, // Điều chỉnh theo cấu trúc dữ liệu thực tế
+                fileName: fileFromServer.OriginPath, 
                 fileType: this.getFileType(fileFromServer.OriginPath || ''),
                 uploadDate: fileFromServer.UploadDate ? new Date(fileFromServer.UploadDate).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN'),
               }));
               this.detailUser = userDetailsData;
 
-              // tiến hành khởi tạo bảng và setData
+
               this.initProductDetailTreeList();
-              this.ProductDetailTreeList?.setData(this.POKHProduct);
+              this.ProductDetailTreeList.setData(this.POKHProduct);
 
               this.initFileUploadedTable();
               this.fileUploadedTable?.setData(this.uploadedFiles);
 
               if (this.isResponsibleUsersEnabled) {
-                this.initDetailTable(); // Đảm bảo users đã được load trong loadFormData
+                this.initDetailTable(); 
                 this.DetailUser?.setData(this.detailUser);
               } else {
-                // Nếu bảng DetailUser đã tồn tại, hủy nó hoặc xóa dữ liệu
                 if (this.DetailUser) {
                   this.DetailUser.destroy();
                   this.isResponsibleUsersEnabled = false;
-                  // this.DetailUser = undefined; // Hoặc gán null nếu bạn quản lý instance như vậy
+                  // this.DetailUser = undefined; 
                 }
               }
             },
             forkJoinError => {
               console.error('Lỗi khi forkJoin tải dữ liệu chi tiết POKH:', forkJoinError);
               alert('Có lỗi xảy ra khi tải chi tiết POKH.');
-              // Xử lý lỗi: có thể reset các bảng về trạng thái rỗng
+
               this.ProductDetailTreeList?.setData([]);
               this.fileUploadedTable?.setData([]);
               if (this.DetailUser) this.DetailUser.setData([]);

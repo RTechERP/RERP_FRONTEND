@@ -6,7 +6,6 @@ import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { CustomerPartService } from '../../vision-base/customer-part/customer-part/customer-part.service';
-import { error } from 'jquery';
 
 
 @Component({
