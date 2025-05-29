@@ -19,7 +19,11 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
 import { ProjectFormPriorityComponent } from './project-form-priority/project-form-priority.component';
-
+import { ProjectWorkerSyntheticComponent } from './project-worker-synthetic/project-worker-synthetic.component';
+import { Router } from '@angular/router';
+import { ProjectChangeComponent } from './project-change/project-change.component';
+import { ProjectStatusComponent } from './project-status/project-status.component';
+import * as ExcelJS from 'exceljs';
 
 @Component({
   selector: 'app-projects',
@@ -41,7 +45,6 @@ export class ProjectsComponent implements OnInit {
   tb_projects: any;
   tb_projectTypeLinks: any;
   tb_projectitems: any;
-
   selectedProjectTypeIds: number[] = [];
   selectedProjecStatusIds: string[] = [];
   selectedUser: any;
@@ -61,7 +64,8 @@ export class ProjectsComponent implements OnInit {
 
   constructor(
     private projectService: ProjectService,
-    private modalService: NgbModal
+    private modalService: NgbModal,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -85,6 +89,53 @@ export class ProjectsComponent implements OnInit {
 
   onLoadTableProject() {
     if (this.tb_projects) this.tb_projects.destroy();
+    const rowMenu = [
+      {
+        label: `<span style="font-size: 0.75rem;"><i class="fas fa-chart-bar"></i> Mức độ ưu tiên cá nhân</span>`,
+        menu: [1, 2, 3, 4, 5].map((level) => ({
+          label: `<span style="font-size: 0.75rem;">${level}</span>`,
+          action: (e: any, row: any) => {
+            this.openEditProjectPersonalPriority(level);
+          },
+        })),
+      },
+      {
+        label:
+          '<span style="font-size: 0.75rem;"><i class="fas fa-file-excel"></i> Xuất excel</span>',
+        action: (e: any, row: any) => {
+          this.exportExcel();
+        },
+      },
+      {
+        label:
+          '<span style="font-size: 0.75rem;"><i class="fas fa-chart-simple"></i> Tổng hợp nhân công</span>',
+        action: (e: any, row: any) => {
+          this.openProjectWorkerPriority();
+        },
+      },
+      {
+        label:
+          '<span style="font-size: 0.75rem;"><i class="fas fa-list-ul"></i> Danh sách báo cáo công việc</span>',
+        action: (e: any, row: any) => {
+          this.openProjectListWorkReport();
+        },
+      },
+      {
+        label:
+          '<span style="font-size: 0.75rem;"><i class="fas fa-circle-half-stroke"></i> Trạng thái dự án</span>',
+        action: (e: any, row: any) => {
+          this.openProjectStatus();
+        },
+      },
+      {
+        label:
+          '<span style="font-size: 0.75rem;"><i class="fas fa-recycle"></i> Chuyển dự án</span>',
+        action: (e: any, row: any) => {
+          this.changeProject();
+        },
+      },
+    ];
+
     this.tb_projects = new Tabulator(`#tb_projects`, {
       height: '54vh',
       layout: 'fitDataFill',
@@ -109,7 +160,7 @@ export class ProjectsComponent implements OnInit {
           last_page: 5,
         };
       },
-
+      rowContextMenu: rowMenu,
       langs: {
         vi: {
           pagination: {
@@ -125,9 +176,9 @@ export class ProjectsComponent implements OnInit {
         {
           title: 'Trạng thái',
           field: 'ProjectStatusName',
-          hozAlign: 'center',
+          hozAlign: 'left',
           formatter: function (cell, formatterParams, onRendered) {
-            let value = cell.getValue() || '';
+            let value = cell.getValue() || 'Kết thúc';
             return value;
           },
           headerHozAlign: 'center',
@@ -163,13 +214,13 @@ export class ProjectsComponent implements OnInit {
         {
           title: 'Mức độ ưu tiên',
           field: 'PriotityText',
-          hozAlign: 'center',
+          hozAlign: 'right',
           headerHozAlign: 'center',
         },
         {
           title: 'Mức độ ưu tiên cá nhân',
           field: 'PersonalPriotity',
-          hozAlign: 'center',
+          hozAlign: 'right',
           headerHozAlign: 'center',
         },
         {
@@ -208,31 +259,31 @@ export class ProjectsComponent implements OnInit {
         {
           title: 'Người phụ trách(sale)',
           field: 'FullNameSale',
-          hozAlign: 'center',
+          hozAlign: 'left',
           headerHozAlign: 'center',
         },
         {
           title: 'Người phụ trách(kỹ thuật)',
           field: 'FullNameTech',
-          hozAlign: 'center',
+          hozAlign: 'left',
           headerHozAlign: 'center',
         },
         {
           title: 'PM',
           field: 'FullNamePM',
-          hozAlign: 'center',
+          hozAlign: 'left',
           headerHozAlign: 'center',
         },
         {
           title: 'Lĩnh vực dự án',
           field: 'BussinessField',
-          hozAlign: 'center',
+          hozAlign: 'left',
           headerHozAlign: 'center',
         },
         {
           title: 'Hiện trạng',
           field: 'CurrentState',
-          hozAlign: 'center',
+          hozAlign: 'left',
           headerHozAlign: 'center',
         },
         {
@@ -293,12 +344,25 @@ export class ProjectsComponent implements OnInit {
           hozAlign: 'center',
           headerHozAlign: 'center',
         },
-        { title: 'Người tạo', field: 'Người tạo', headerHozAlign: 'center' },
-        { title: 'Người sửa', field: 'UpdatedBy', headerHozAlign: 'center' },
+        {
+          title: 'Người tạo',
+          field: 'Người tạo',
+          headerHozAlign: 'center',
+          hozAlign: 'left',
+        },
+        {
+          title: 'Người sửa',
+          field: 'UpdatedBy',
+          headerHozAlign: 'center',
+          hozAlign: 'left',
+        },
       ],
     });
 
     this.tb_projects.on('rowClick', (e: any, row: any) => {
+      this.tb_projects.deselectRow();
+      row.select();
+
       var rowData = row.getData();
       this.getProjectItems(rowData['ID']);
       this.getProjectTypeLinks(rowData['ID']);
@@ -531,7 +595,9 @@ export class ProjectsComponent implements OnInit {
     this.projectService.getProjectTypeLinks(id).subscribe({
       next: (response: any) => {
         console.log('projectlink', response.data);
-        this.tb_projectTypeLinks.setData(this.projectService.setDataTree(response.data));
+        this.tb_projectTypeLinks.setData(
+          this.projectService.setDataTree(response.data)
+        );
       },
       error: (error) => {
         console.error('Lỗi:', error);
@@ -672,42 +738,211 @@ export class ProjectsComponent implements OnInit {
     modalRef.componentInstance.projectId = selectedIDs[0];
   }
 
-  downloadExcel() {
-    var columnLayout = this.tb_projects.getColumnLayout();
-    let wscols = [];
-    for (var i = 0; i < columnLayout.length; i++) {
-      let item = columnLayout[i];
-      let isDownload = item.download ?? true;
-      if (!isDownload) continue;
-      let size = { wch: item.width * 0.2 };
-      wscols.push(size);
+  async exportExcel() {
+    const table = this.tb_projects;
+    if (!table) return;
+
+    const data = table.getData();
+    if (!data || data.length === 0) {
+      Swal.fire('Thông báo!', 'Không có dữ liệu để xuất!', 'warning');
+      return;
     }
 
-    this.tb_projects.download('xlsx', `DanhSachDuAn.xlsx`, {
-      sheetName: 'Danh sách dự án',
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Danh sách dự án');
 
-      documentProcessing: function (workbook: any) {
-        var ws_name = workbook.SheetNames[0];
-        var ws = workbook.Sheets[ws_name];
+    const columns = table.getColumns();
+    // Bỏ qua cột đầu tiên
+    const filteredColumns = columns.slice(1);
+    const headers = filteredColumns.map(
+      (col: any) => col.getDefinition().title
+    );
+    worksheet.addRow(headers);
 
-        ws['!cols'] = wscols;
-        ws['!autofilter'] = { ref: 'A1:H1' };
+    data.forEach((row: any) => {
+      const rowData = filteredColumns.map((col: any) => {
+        const field = col.getField();
+        let value = row[field];
 
-        return workbook;
+        if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+          value = new Date(value);
+        }
+
+        return value;
+      });
+
+      worksheet.addRow(rowData);
+    });
+
+    // Format cột có giá trị là Date
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) return; // bỏ qua tiêu đề
+      row.eachCell((cell, colNumber) => {
+        if (cell.value instanceof Date) {
+          cell.numFmt = 'dd/mm/yyyy'; // hoặc 'yyyy-mm-dd'
+        }
+      });
+    });
+
+    // Tự động căn chỉnh độ rộng cột
+    worksheet.columns.forEach((column: any) => {
+      let maxLength = 10;
+      column.eachCell({ includeEmpty: true }, (cell: any) => {
+        const cellValue = cell.value ? cell.value.toString() : '';
+        maxLength = Math.max(maxLength, cellValue.length + 2);
+      });
+      column.width = maxLength;
+    });
+
+    // Thêm bộ lọc cho toàn bộ cột (từ A1 đến cột cuối cùng)
+    worksheet.autoFilter = {
+      from: {
+        row: 1,
+        column: 1,
       },
+      to: {
+        row: 1,
+        column: filteredColumns.length,
+      },
+    };
+
+    // Xuất file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    const formattedDate = new Date()
+      .toISOString()
+      .slice(2, 10)
+      .split('-')
+      .reverse()
+      .join('');
+
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `DanhSachDuAn.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(link.href);
+  }
+
+  openEditProjectPersonalPriority(priority: number) {
+    let selectedRows = this.tb_projects.getSelectedRows();
+    let selectedIDs = selectedRows.map((row: any) => row.getData().ID);
+
+    if (selectedIDs.length <= 0) {
+      Swal.fire('Thông báo!', 'Vui lòng chọn dự án!', 'warning');
+      return;
+    }
+
+    const dataSave = {
+      ProjectIDs: selectedIDs,
+      UserID: this.projectService.GlobalEmployeeId,
+      Priotity: priority,
+    };
+    this.projectService.saveProjectPersonalPriority(dataSave).subscribe({
+      next: (response: any) => {
+        if (response.data == true) {
+          Swal.fire('Thông báo!', 'Đã thay đổi ưu tiên cá nhân!', 'success');
+          this.getProjects();
+        }
+      },
+      error: (error) => {
+        console.error('Lỗi:', error);
+      },
+    });
+
+    // const modalRef = this.modalService.open(ProjectPersonalPriorityComponent, {
+    //   centered: true,
+    //   size: 'sm',
+    //   backdrop: 'static',
+    //   keyboard: false,
+    // });
+
+    // modalRef.componentInstance.projectId = selectedIDs[0];
+
+    // modalRef.result.catch((reason) => {
+    //   if (reason == true) {
+    //     this.getProjects();
+    //     this.getProjectItems(0);
+    //     this.getProjectTypeLinks(0);
+    //   }
+    // });
+  }
+
+  openProjectWorkerPriority() {
+    // let selectedRows = this.tb_projects.getSelectedRows();
+    // let selectedIDs = selectedRows.map((row: any) => row.getData().ID);
+
+    // if (selectedIDs.length != 1) {
+    //   Swal.fire('Thông báo!', 'Vui lòng chọn 1 dự án!', 'warning');
+    //   return;
+    // }
+
+    this.router.navigate(['/projectWorkerSynthetic']);
+  }
+
+  openProjectListWorkReport() {
+    let selectedRows = this.tb_projects.getSelectedRows();
+    let selectedIDs = selectedRows.map((row: any) => row.getData().ID);
+
+    if (selectedIDs.length != 1) {
+      Swal.fire('Thông báo!', 'Vui lòng chọn 1 dự án!', 'warning');
+      return;
+    }
+
+    this.router.navigate(['/projectListWorkReport', selectedIDs[0]]);
+  }
+
+  changeProject() {
+    let selectedRows = this.tb_projects.getSelectedRows();
+    let selectedIDs = selectedRows.map((row: any) => row.getData().ID);
+
+    if (selectedIDs.length != 1) {
+      Swal.fire('Thông báo!', 'Vui lòng chọn 1 dự án cần chuyển!', 'warning');
+      return;
+    }
+
+    const modalRef = this.modalService.open(ProjectChangeComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.projectIdOld = selectedIDs[0];
+    modalRef.componentInstance.disable = false;
+
+    modalRef.result.catch((reason) => {
+      if (reason == true) {
+        this.getProjects();
+      }
     });
   }
 
-  exportExcel() {
-    debugger;
-    if (this.tb_projects.getDataCount() === 0) {
-      this.tb_projects.on('dataLoaded', () => {
-        this.downloadExcel();
-      });
-    }else{
-      this.downloadExcel();
+  openProjectStatus() {
+    let selectedRows = this.tb_projects.getSelectedRows();
+    let selectedIDs = selectedRows.map((row: any) => row.getData().ID);
+
+    if (selectedIDs.length != 1) {
+      Swal.fire('Thông báo!', 'Vui lòng chọn 1 dự án!', 'warning');
+      return;
     }
+
+    const modalRef = this.modalService.open(ProjectStatusComponent, {
+      centered: true,
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false,
+    });
+    debugger;
+    modalRef.componentInstance.projectId = selectedIDs[0] ?? 0;
+
+    modalRef.result.catch((reason) => {
+      if (reason == true) {
+        this.getProjects();
+      }
+    });
   }
-
-
 }

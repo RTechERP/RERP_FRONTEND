@@ -1,0 +1,128 @@
+<div class="layout-wrapper d-flex" style="height: 100%">
+  <div
+    class="offcanvas offcanvas-left custom-offcanvas border border-1"
+    tabindex="-1"
+    id="searchOffcanvas"
+    data-bs-backdrop="false"
+  >
+    <div class="offcanvas-header pt-0 mt-2 pb-0 mb-2">
+      <h5 class="offcanvas-title fs-12">Tìm kiếm</h5>
+      <button
+        type="button"
+        class="btn-close text-reset fs-12"
+        data-bs-dismiss="offcanvas"
+        aria-label="Close"
+      ></button>
+    </div>
+    <div class="offcanvas-body pt-0 pb-0">
+      <div class="row h-auto">
+        <div class="col-12 mt-2">
+          <div class="col-12 mt-2">
+            <div class="form-group">
+              <label for="" class="fs-12">Dự án</label>
+              <ng-select
+                [items]="projects"
+                bindValue="ID"
+                bindLabel="ProjectCode"
+                [searchable]="true"
+                placeholder="Chọn dự án..."
+                [clearable]="true"
+                [virtualScroll]="true"
+                [(ngModel)]="projectId"
+                class="form-control form-control-sm p-0 border border-0 fs-12"
+                (change)="getProjectWorkReport()"
+              >
+                <!-- Template hiển thị các lựa chọn trong dropdown -->
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row text-dark w-100 fs-12">
+                    <div
+                      class="col-3 ms-1"
+                      [title]="item.ProjectCode + '-' + item.ProjectName"
+                    >
+                      <span class="fs-12"
+                        >{{ item.ProjectCode }} - {{ item.ProjectName }}</span
+                      >
+                    </div>
+                  </div>
+                </ng-template>
+
+                <!-- Template hiển thị sau khi chọn -->
+                <ng-template ng-label-tmp let-item="item">
+                  <span class="fs-12">{{ item.ProjectCode }}</span>
+                </ng-template>
+              </ng-select>
+            </div>
+            <div class="col-12 mt-2">
+              <div class="form-group">
+                <label for="" class="fs-12">Từ khóa</label>
+                <input
+                  class="form-control form-control-sm fs-12"
+                  type="text"
+                  name=""
+                  id=""
+                  placeholder="Nhập từ khóa..."
+                />
+              </div>
+            </div>
+          </div>
+          <div class="col-12 mt-2">
+            <div class="form-group">
+              <button
+                class="btn btn-primary col-12 p-0 ps-2 pe-2 fs-12"
+                (click)="getProjectWorkReport()"
+              >
+                Tìm kiếm
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container-fluid project-container" id="projectParent">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="card">
+          <div class="card-header p-0">
+            <div class="justify-content-start" style="display: contents">
+              <button
+                type="button"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
+                title="Tìm kiếm"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#searchOffcanvas"
+              >
+                <i class="fas fa-search"></i> Tìm kiếm
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
+                title="Tìm kiếm"
+                (click)="exportToExcelAdvanced()"
+              >
+                <i class="fas fa-file-excel"></i> Xuất excel
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary p-0 ps-2 pe-2"
+                title="Tìm kiếm"
+                (click)="changeProject()"
+              >
+                <i class="fas fa-recycle"></i> Chuyển dự án
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="row">
+              <div class="col-12 col-sm-12 h-auto">
+                <div class="border-top">
+                  <div id="tb_projectlistworkreport"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

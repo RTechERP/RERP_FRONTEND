@@ -1,0 +1,72 @@
+<div class="modal-header bg-primary align-items-center ps-2">
+  <h6 class="text-light text-uppercase m-0">Ưu tiên dự án</h6>
+</div>
+
+<div class="modal-body p-2">
+  <div class="border border-primary">
+    <div class="" id="tb_projectPriority"></div>
+  </div>
+</div>
+
+<div
+  class="modal-footer bg-whitesmoke br p-1 d-flex align-items-center justify-content-between"
+>
+  <div class="form-group d-flex align-items-center mb-0 me-3">
+    <label for="" class="me-2 mb-0 fs-12">Tổng điểm ưu tiên</label>
+    <input
+      class="form-control form-control-sm fs-12"
+      type="text"
+      name=""
+      id=""
+      disabled
+      style="width: 150px"
+      [(ngModel)]="priority"
+    />
+  </div>
+
+  <div class="d-flex align-items-center flex-wrap gap-1">
+    <button
+      type="button"
+      class="btn btn-sm btn-close-modal btn-outline-danger fs-12"
+      (click)="activeModal.dismiss()"
+    >
+      Đóng
+    </button>
+    <button
+      type="button"
+      class="btn-sm btn btn-primary fs-12"
+      title="Thêm mới"
+      (click)="openProjectPriorityDetailModal(0)"
+    >
+      <i class="fas fa-plus"></i>
+      Thêm
+    </button>
+    <button
+      type="button"
+      class="btn-sm btn btn-success fs-12"
+      title="Sửa"
+      (click)="openProjectPriorityDetailModal(1)"
+    >
+      <i class="fas fa-pen"></i>
+      Sửa
+    </button>
+    <button
+      type="button"
+      (click)="deletedProjectPriority()"
+      class="btn-sm btn btn-danger fs-12"
+      title="Xóa"
+    >
+      <i class="fas fa-trash"></i>
+      Xóa
+    </button>
+    <button
+      type="button"
+      style="background-color: limegreen"
+      class="btn btn-sm text-light fs-12"
+      (click)="savePriority()"
+    >
+      <i class="fas fa-sd-card"></i>
+      Lưu
+    </button>
+  </div>
+</div>

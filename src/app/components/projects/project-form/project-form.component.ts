@@ -10,6 +10,7 @@ import 'tabulator-tables/dist/css/tabulator_simple.min.css';
 import Swal from 'sweetalert2';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ProjectFormAddStatusComponent } from '../project-form-add-status/project-form-add-status.component';
+import { ProjectFormPriorityComponent } from '../project-form-priority/project-form-priority.component';
 
 @Component({
   selector: 'app-project-form',
@@ -78,6 +79,19 @@ export class ProjectFormComponent implements OnInit {
 
   dateChangeStatus: any;
 
+  // Khai báo cho cập nhật leader
+  tb_projectTypeLinksMd: any;
+  projectUserTeams: any[] = [];
+  projectStatus: any;
+  projects: any;
+
+  selectProject: any;
+  selectProjectStatus: any;
+  situlator: any;
+  // ------------------------------
+
+  currentTab: string = 'tab1';
+
   constructor(
     public activeModal: NgbActiveModal,
     private projectService: ProjectService,
@@ -88,7 +102,7 @@ export class ProjectFormComponent implements OnInit {
     this.getProject();
     this.getFollowProjectBase();
     this.onLoadTableProjectUser();
-    this.getProjectUserModal();
+    // this.getProjectUserModal();
     this.onLoadTableProjectTypeLinks();
     this.getProjectTypeLinkModal();
     this.getCustomersModal();
@@ -97,6 +111,17 @@ export class ProjectFormComponent implements OnInit {
     this.getPmsModal();
     this.getFirmBaseModal();
     this.getProjectTypeBaseModal();
+
+    this.onLoadTableProjectTypeLinksMd();
+    this.getProjectModal();
+    this.getProjectStatus();
+    this.getUserTeams();
+    this.loadProject();
+    this.getProjectCurrentSituation();
+  }
+
+  onTabChange(tab: string) {
+    this.currentTab = tab;
   }
 
   getCustomersModal() {
@@ -169,7 +194,7 @@ export class ProjectFormComponent implements OnInit {
     debugger;
     if (this.tb_projectTypeLinks) this.tb_projectTypeLinks.destroy();
     this.tb_projectTypeLinks = new Tabulator(`#tb_projectTypeLinksModal`, {
-      height: '262px',
+      height: '26.8vh',
       dataTree: true,
       dataTreeStartExpanded: true,
       layout: 'fitColumns',
@@ -184,6 +209,15 @@ export class ProjectFormComponent implements OnInit {
           },
           cellClick: function (e, cell) {
             const newValue = !cell.getValue();
+            const row = cell.getRow();
+            if (row.getTreeChildren && row.getTreeChildren().length > 0) {
+              const children = row.getTreeChildren();
+
+              children.forEach((childRow) => {
+                const childData = childRow.getData();
+                childRow.update({ Selected: newValue });
+              });
+            }
             cell.setValue(newValue);
           },
           hozAlign: 'center',
@@ -218,23 +252,27 @@ export class ProjectFormComponent implements OnInit {
     });
   }
 
-  getProjectUserModal() {
-    console.log(this.projectId);
-    this.projectService.getProjectUsers(this.projectId).subscribe({
-      next: (response: any) => {
-        this.tb_ProjectUser.setData(this.setDataTree(response.data));
-      },
-      error: (error) => {
-        console.error('Lỗi:', error);
-      },
-    });
-  }
+  // getProjectUserModal() {
+  //   console.log(this.projectId);
+  //   this.projectService.getProjectUsers(this.projectId).subscribe({
+  //     next: (response: any) => {
+  //       this.tb_ProjectUser.setData(
+  //         this.projectService.setDataTree(response.data)
+  //       );
+  //     },
+  //     error: (error) => {
+  //       console.error('Lỗi:', error);
+  //     },
+  //   });
+  // }
 
   getProjectTypeLinkModal() {
     console.log(this.projectId);
     this.projectService.getProjectTypeLinks(this.projectId).subscribe({
       next: (response: any) => {
-        this.tb_projectTypeLinks.setData(this.setDataTree(response.data));
+        this.tb_projectTypeLinks.setData(
+          this.projectService.setDataTree(response.data)
+        );
       },
       error: (error) => {
         console.error('Lỗi:', error);
@@ -315,31 +353,6 @@ export class ProjectFormComponent implements OnInit {
     }
   }
 
-  setDataTree(flatData: any[]): any[] {
-    const map = new Map<number, any>();
-    const tree: any[] = [];
-
-    // Bước 1: Map từng item theo ID
-    flatData.forEach((item) => {
-      map.set(item.ID, { ...item, _children: [] });
-    });
-
-    // Bước 2: Gắn item vào parent hoặc top-level
-    flatData.forEach((item) => {
-      const current = map.get(item.ID);
-      if (item.ParentID && item.ParentID !== 0) {
-        const parent = map.get(item.ParentID);
-        if (parent) {
-          parent._children.push(current);
-        }
-      } else {
-        tree.push(current);
-      }
-    });
-
-    return tree;
-  }
-
   getProjectCode() {
     debugger;
     if (this.customers.length < 0) return;
@@ -409,7 +422,8 @@ export class ProjectFormComponent implements OnInit {
     debugger;
     const allData = this.tb_projectTypeLinks.getData();
     const projectUser = this.tb_ProjectUser.getData();
-    const projectTypeLinks = this.getSelectedRowsRecursive(allData);
+    const projectTypeLinks =
+      this.projectService.getSelectedRowsRecursive(allData);
 
     if (this.projectId > 0) {
       this.projectService
@@ -555,7 +569,7 @@ export class ProjectFormComponent implements OnInit {
       GlobalEmployee: this.projectService.GlobalEmployeeId, // ID người đăng nhập
       DateStatusLog: this.dateChangeStatus, // Ngày thay đổi trạng thái
       projectTypeLinks: projectTypeLinks, // Danh sách người chọn dự án
-      
+
       projectUser: projectUser, // Danh sách người tham gia
       listPriorities: this.listPriorities, // Làm sau danh sách dự án ưu tiên
     };
@@ -573,27 +587,9 @@ export class ProjectFormComponent implements OnInit {
     });
   }
 
-  getSelectedRowsRecursive(data: any[]): any[] {
-    let selected: any[] = [];
-
-    data.forEach((row) => {
-      if (true) {
-        // rowselect
-        selected.push(row);
-      }
-
-      if (row._children && Array.isArray(row._children)) {
-        selected = selected.concat(
-          this.getSelectedRowsRecursive(row._children)
-        );
-      }
-    });
-
-    return selected;
-  }
-
   openAddProjectStatusModal() {
     const modalRef = this.modalService.open(ProjectFormAddStatusComponent, {
+      centered: true,
       backdrop: 'static',
       keyboard: false,
     });
@@ -604,8 +600,244 @@ export class ProjectFormComponent implements OnInit {
           this.getStatusesModal();
         }
       },
-      (reason) => {
-      }
+      (reason) => {}
     );
+  }
+
+  // openAddProjectTypeLinkModal() {
+  //   const modalRef = this.modalService.open(ProjectFormTypeLinkComponent, {
+  //     backdrop: 'static',
+  //     keyboard: false,
+  //   });
+
+  //   modalRef.componentInstance.projectId = this.projectId;
+  //   modalRef.result.catch((reason) => {
+  //     if (reason == true) {
+  //       this.getProjectTypeLinkModal();
+  //     }
+  //   });
+  // }
+
+  openProjectPriorityModal() {
+    const modalRef = this.modalService.open(ProjectFormPriorityComponent, {
+      centered: true,
+      size: 'xl',
+      backdrop: 'static',
+      keyboard: false,
+    });
+
+    modalRef.componentInstance.projectId = this.projectId;
+
+    modalRef.result.catch((reason) => {
+      if (reason !== undefined) {
+        this.selectedPrio = reason;
+      }
+    });
+  }
+
+  // Code cho cập nhật leader
+  onLoadTableProjectTypeLinksMd() {
+    debugger;
+    if (this.tb_projectTypeLinksMd) this.tb_projectTypeLinksMd.destroy();
+
+    this.tb_projectTypeLinksMd = new Tabulator(`#tb_projectTypeLinksMd`, {
+      height: '296px',
+      dataTree: true,
+      dataTreeStartExpanded: true,
+      layout: 'fitDataStretch',
+      locale: 'vi',
+      columns: [
+        {
+          title: 'Chọn',
+          field: 'Selected',
+          formatter: function (cell, formatterParams, onRendered) {
+            const checked = cell.getValue() ? 'checked' : '';
+            return `<input type='checkbox' ${checked} />`;
+          },
+          cellClick: function (e, cell) {
+            const newValue = !cell.getValue();
+            const row = cell.getRow();
+            if (row.getTreeChildren && row.getTreeChildren().length > 0) {
+              const children = row.getTreeChildren();
+
+              children.forEach((childRow) => {
+                const childData = childRow.getData();
+                childRow.update({ Selected: newValue });
+              });
+            }
+            cell.setValue(newValue);
+          },
+          hozAlign: 'center',
+          headerHozAlign: 'center',
+        },
+        {
+          title: 'Kiểu dự án',
+          field: 'ProjectTypeName',
+          headerHozAlign: 'center',
+        },
+        {
+          title: 'Leader',
+          field: 'FullName',
+          headerHozAlign: 'center',
+          editor: 'list',
+          editorParams: {
+            values: this.projectUserTeams.reduce((acc: any, sup: any) => {
+              acc[sup.FullName] = sup.FullName;
+              return acc;
+            }, {}),
+            autocomplete: true,
+          },
+          cellEdited: (cell: any) => {
+            debugger
+            const fullName = cell.getValue();
+            const employee = this.projectUserTeams.find(
+              (e: any) => e.FullName === fullName
+            );
+            if (employee) {
+              const row = cell.getRow();
+              row.update({ LeaderID: employee.EmployeeID });
+            }
+          },
+        },
+      ],
+    });
+  }
+
+  getProjectTypeLinks() {
+    this.projectService.getProjectTypeLinks(this.projectId).subscribe({
+      next: (response: any) => {
+        this.tb_projectTypeLinksMd.setData(
+          this.projectService.setDataTree(response.data)
+        );
+      },
+      error: (error) => {
+        console.error('Lỗi:', error);
+      },
+    });
+  }
+
+  getProjectModal() {
+    this.projectService.getProjectModal().subscribe({
+      next: (response: any) => {
+        this.projects = response.data;
+      },
+      error: (error) => {
+        console.error('Lỗi:', error);
+      },
+    });
+  }
+
+  getProjectStatus() {
+    this.projectService.getProjectStatus().subscribe({
+      next: (response: any) => {
+        this.projectStatus = response.data;
+      },
+      error: (error) => {
+        console.error('Lỗi:', error);
+      },
+    });
+  }
+
+  getProjectCurrentSituation() {
+    this.projectService
+      .getProjectCurrentSituation(
+        this.projectId,
+        this.projectService.GlobalEmployeeId
+      )
+      .subscribe({
+        next: (response: any) => {
+          this.situlator = response.data;
+        },
+        error: (error) => {
+          console.error('Lỗi:', error);
+        },
+      });
+  }
+
+  getUserTeams() {
+    this.projectService.getUserTeams().subscribe({
+      next: (response: any) => {
+        debugger;
+        this.projectUserTeams = response.data;
+        this.onLoadTableProjectTypeLinksMd();
+        this.getProjectTypeLinks();
+      },
+      error: (error) => {
+        console.error('Lỗi:', error);
+      },
+    });
+  }
+
+  loadProject() {
+    if (this.projectId > 0) {
+      this.projectService.getProject(this.projectId).subscribe({
+        next: (response: any) => {
+          if (response.data) {
+            this.selectProject = this.projectId;
+            this.selectProjectStatus = response.data.ProjectStatus;
+          }
+        },
+        error: (error) => {
+          console.error('Lỗi:', error);
+        },
+      });
+    }
+  }
+
+  saveProjectTypeLink() {
+    debugger;
+    if (this.projectId <= 0) {
+      Swal.fire('Thông báo!', `Vui lòng chọn dự án!`, 'warning');
+      return;
+    }
+
+    if (this.selectProjectStatus <= 0) {
+      Swal.fire('Thông báo!', `Vui lòng trạng thái dự án!`, 'warning');
+      return;
+    }
+
+    const prjTypeLinks = this.projectService.getSelectedRowsRecursive(
+      this.tb_projectTypeLinksMd.getData()
+    );
+
+    const dataSave = {
+      ProjectID: this.projectId,
+      ProjectStatus: this.selectProjectStatus,
+      GlobalEmployeeId: this.projectService.GlobalEmployeeId,
+      prjTypeLinks: prjTypeLinks,
+      Situlator: this.situlator ?? '',
+    };
+
+    this.projectService.saveProjectTypeLink(dataSave).subscribe({
+      next: (response: any) => {
+        if (response.status == 1) {
+          Swal.fire('Thông báo!', `Đã cập nhật Leader!`, 'success');
+          this.getProjectTypeLinkModal();
+        }
+      },
+      error: (error) => {
+        console.error('Lỗi:', error);
+      },
+    });
+  }
+
+  loadAll() {
+    if (this.selectProject != this.projectId)
+      this.projectId = this.selectProject;
+    this.loadProject();
+    this.getProjectTypeLinks();
+    this.getProjectCurrentSituation();
+  }
+
+  //----------------------------------------------------------
+
+  saveData() {
+    if (this.currentTab === 'tab1') {
+      console.log(1);
+      this.saveDataProject();
+    } else if (this.currentTab === 'tab2') {
+      console.log(2);
+      this.saveProjectTypeLink();
+    }
   }
 }

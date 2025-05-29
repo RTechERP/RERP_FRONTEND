@@ -1,7 +1,3 @@
-.reset {
-    all: revert;
-}
-
 .tabulator {
   font-size: 0.75rem;
 }
