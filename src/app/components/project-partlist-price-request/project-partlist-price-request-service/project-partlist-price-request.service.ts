@@ -76,4 +76,14 @@ getAPIPricerequest(){
   saveChangedData(data:any[]){
     return this.http.post(`${this.baseUrl}/saveData`,data);
   }
+downloadFile(payload: {
+  projectId: number;
+  partListId: number;
+  productCode: string;
+}): Observable<Blob> {
+  return this.http.post(`${this.baseUrl}/download`, payload, {
+    responseType: 'blob',
+  });
+}
+
 }

@@ -65,8 +65,8 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
 
   ngOnInit() {
     this.filters = {
-      dateStart: this.formatDateForInput(new Date(2025, 0, 1)),
-      dateEnd: this.formatDateForInput(new Date(2025, 4, 3)),
+      dateStart: moment(new Date(2025, 0, 1)).format('YYYY-MM-DD'),
+      dateEnd: moment(new Date(2025, 5, 31)).format('YYYY-MM-DD'),
       statusRequest: 1,
       projectId: 0,
       keyword: '',
@@ -75,23 +75,23 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       poKHID: 0,
       isCommercialProd: -1,
     };
-    this.getCurrency();
-    this.getSupplierSale();
-    this.loadProjectTypes();
-    this.loadPriceRequests();
-    this.getallProject();
-    this.getAllPOKH();
+    this.GetCurrency();
+    this.GetSupplierSale();
+    this.LoadProjectTypes();
+    this.LoadPriceRequests();
+    this.GetallProject();
+    this.GetAllPOKH();
   }
-  onFormSubmit(): void {
-    this.loadPriceRequests();
+  OnFormSubmit(): void {
+    this.LoadPriceRequests();
     this.showDetailModal = false;
   }
-  onAddClick() {
+  OnAddClick() {
     this.modalData = [];
     this.showDetailModal = true;
   }
 
-  onEditClick() {
+  OnEditClick() {
     const lstTypeAccept = [-1, -2];
     const table = this.tables.get(this.activeTabId);
 
@@ -142,7 +142,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     this.showDetailModal = true;
   }
 
-  onDeleteClick() {
+  OnDeleteClick() {
     const table = this.tables.get(this.activeTabId);
     if (!table) return;
 
@@ -179,17 +179,11 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       });
 
       // Gửi về server qua hàm save chung
-      this.saveDataCommon(updateData, 'Xóa dữ yêu cầu thành công');
+      this.SaveDataCommon(updateData, 'Xóa dữ yêu cầu thành công');
     });
   }
 
-  private formatDateForInput(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-  private getSupplierSale() {
+  private GetSupplierSale() {
     this.PriceRequetsService.getSuplierSale()
       // .pipe(take(50))
       .subscribe((response) => {
@@ -197,7 +191,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
         console.log('dtsuppliersale: ', this.dtSupplierSale);
       });
   }
-  private loadProjectTypes(): void {
+  private LoadProjectTypes(): void {
     const employeeID = 0;
     this.PriceRequetsService.getTypes(employeeID).subscribe((response) => {
       this.projectTypes = response.data.dtType;
@@ -205,30 +199,30 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
 
       setTimeout(() => {
         this.projectTypes.forEach((type) => {
-          this.createTableForType(type.ProjectTypeID);
+          this.CreateTableForType(type.ProjectTypeID);
         });
       }, 100);
     });
   }
-  private getallProject() {
+  private GetallProject() {
     this.PriceRequetsService.getProject().subscribe((response) => {
       this.dtproject = response.data;
       console.log('PriceRequests:', this.dtproject);
     });
   }
-  private getCurrency() {
+  private GetCurrency() {
     this.PriceRequetsService.getCurrency().subscribe((response) => {
       this.dtcurrency = response.data;
       console.log('dtcurrentcy: ', this.dtcurrency);
     });
   }
-  private getAllPOKH() {
+  private GetAllPOKH() {
     this.PriceRequetsService.getPOKH().subscribe((response) => {
       this.dtPOKH = response.data;
       console.log('POKH:', this.dtPOKH);
     });
   }
-  private loadPriceRequests(): void {
+  private LoadPriceRequests(): void {
     // const dateStartFormatted = this.formatDateForApi(this.filters.dateStart);
     // const dateEndFormatted = this.formatDateForApi(this.filters.dateEnd);
     // if (this.filters.projectTypeID === -1) {
@@ -257,15 +251,8 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       table.setData();
     }
   }
-  private formatDateForApi(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} ${
-      date.getHours() === 0 ? '12:00:00 AM' : '11:59:59 PM'
-    }`;
-  }
 
-  public applyFilters(): void {
+  public ApplyFilters(): void {
     console.log(this.filters.poKHID);
     const table = this.tables.get(this.activeTabId);
     if (table) {
@@ -276,10 +263,10 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     }
   }
 
-  public resetFilters(): void {
+  public ResetFilters(): void {
     this.filters = {
-      dateStart: this.formatDateForInput(new Date(2025, 0, 1)),
-      dateEnd: this.formatDateForInput(new Date()),
+      dateStart: moment('2025-01-01').format('YYYY-MM-DD'),
+      dateEnd: moment().format('YYYY-MM-DD'),
       statusRequest: 1,
       projectId: 0,
       keyword: '',
@@ -298,13 +285,13 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     }
   }
 
-  public selectProjectType(typeId: number): void {
+  public SelectProjectType(typeId: number): void {
     this.activeTabId = typeId;
     this.filters.projectTypeID = typeId;
 
     // Kiểm tra nếu bảng đã tồn tại
     if (!this.tables.has(typeId)) {
-      this.createTableForType(typeId);
+      this.CreateTableForType(typeId);
     }
 
     const table = this.tables.get(typeId);
@@ -316,7 +303,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     }
   }
 
-  private createTableForType(typeId: number): void {
+  private CreateTableForType(typeId: number): void {
     const tableId = `datatable-${typeId}`;
     const element = document.getElementById(tableId);
 
@@ -325,14 +312,14 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       return;
     }
 
-    const table = new Tabulator(`#${tableId}`, this.getTableConfig());
+    const table = new Tabulator(`#${tableId}`, this.GetTableConfig());
     this.tables.set(typeId, table);
   }
 
-  private updateActiveTable(): void {
+  private UpdateActiveTable(): void {
     const tableId = this.activeTabId;
     if (!this.tables.has(tableId)) {
-      this.createTableForType(tableId);
+      this.CreateTableForType(tableId);
     }
 
     const table = this.tables.get(tableId);
@@ -340,17 +327,17 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       table.setData(this.dtprojectPartlistPriceRequest);
     }
   }
-  calculateTotalPriceExchange(rowData: any, currencyRate: number): number {
+  CalculateTotalPriceExchange(rowData: any, currencyRate: number): number {
     const totalMoney = Number(rowData.TotalPrice) || 0;
     return totalMoney * currencyRate;
   }
-  getDataChanged() {
+  GetDataChanged() {
     const tableId = this.activeTabId;
     const table = this.tables.get(tableId);
     if (!table) return;
     table.on('dataChanged', function (data) {});
   }
-  private saveDataCommon(
+  private SaveDataCommon(
     data: any[],
     successMessage: string = 'Dữ liệu đã được lưu.'
   ): void {
@@ -362,7 +349,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     this.PriceRequetsService.saveChangedData(data).subscribe({
       next: (response) => {
         if ((response as any).status === 1) {
-          this.loadPriceRequests();
+          this.LoadPriceRequests();
           Swal.fire(
             'Thành công',
             (response as any).message || successMessage,
@@ -383,7 +370,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     });
   }
 
-  onSaveData(): void {
+  OnSaveData(): void {
     const table = this.tables.get(this.activeTabId);
     if (!table) return;
 
@@ -441,10 +428,10 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
 
     console.log('Dữ liệu đã lọc:', filteredData);
 
-    this.saveDataCommon(filteredData, 'Dữ liệu đã được lưu.');
+    this.SaveDataCommon(filteredData, 'Dữ liệu đã được lưu.');
   }
 
-  addWeekdays(date: Date, days: number): Date {
+  AddWeekdays(date: Date, days: number): Date {
     let count = 0;
     let result = new Date(date.getTime());
 
@@ -459,7 +446,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
 
     return result; // Return the modified date
   }
-  updateValue(rowData: any): void {
+  UpdateValue(rowData: any): void {
     const quantity = Number(rowData.Quantity) || 0;
     const unitPrice = Number(rowData.UnitPrice) || 0;
     const unitImportPrice = Number(rowData.UnitImportPrice) || 0;
@@ -472,7 +459,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     rowData.TotalPrice = totalPrice;
 
     // Thành tiền quy đổi (VNĐ)
-    rowData.TotalPriceExchange = this.calculateTotalPriceExchange(
+    rowData.TotalPriceExchange = this.CalculateTotalPriceExchange(
       rowData,
       currencyRate
     );
@@ -487,11 +474,11 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
 
     // Tính ngày về dự kiến
     if (rowData.TotalDayLeadTime !== undefined) {
-      rowData.DateExpected = this.addWeekdays(moment().toDate(), leadTime);
+      rowData.DateExpected = this.AddWeekdays(moment().toDate(), leadTime);
     }
   }
 
-  handleCellEdited(cell: any) {
+  HandleCellEdited(cell: any) {
     const row = cell.getRow();
     const data = row.getData();
 
@@ -509,7 +496,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     const totalPriceExchange = totalPrice * currencyRate;
 
     const leadtime = Number(data.TotalDayLeadTime);
-    const dateexpect = this.addWeekdays(moment().toDate(), leadtime);
+    const dateexpect = this.AddWeekdays(moment().toDate(), leadtime);
 
     // Cập nhật lại các cột liên quan
     row.update({
@@ -520,7 +507,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       TotalPriceExchange: totalPriceExchange,
     });
   }
-  onCurrencyChanged(cell: any) {
+  OnCurrencyChanged(cell: any) {
     const code = Number(cell.getValue());
     const currency = this.dtcurrency.find((p: { ID: number }) => p.ID === code);
     if (currency) {
@@ -528,7 +515,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       // const finalRate = rate; // xử lý expired nếu cần
 
       const rowData = cell.getRow().getData();
-      const totalPrice = this.calculateTotalPriceExchange(rowData, rate);
+      const totalPrice = this.CalculateTotalPriceExchange(rowData, rate);
 
       cell.getRow().update({
         CurrencyID: currency.ID,
@@ -537,7 +524,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       });
     }
   }
-  onSupplierSaleChanged(cell: any) {
+  OnSupplierSaleChanged(cell: any) {
     const supplierId = cell.getValue();
     const supplier = this.dtSupplierSale.find(
       (p: { ID: number }) => p.ID === supplierId
@@ -548,119 +535,124 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
       row.update({ CodeNCC: supplier.CodeNCC });
     }
   }
-QuotePrice(status: number = 2): void {
-  const table = this.tables.get(this.activeTabId);
-  if (!table) return;
+  QuotePrice(status: number = 2): void {
+    const table = this.tables.get(this.activeTabId);
+    if (!table) return;
 
-  // Map trạng thái
-  const STATUS_TEXT: { [key: number]: string } = {
-    0: 'Hủy hoàn thành',
-    1: 'Hủy báo giá', 
-    2: 'Báo giá',
-    3: 'Hoàn thành'
-  };
-  
-  const statusText = STATUS_TEXT[status] || '';
-  const selectedRows = table.getSelectedRows();
-  
-  // Validate chọn dòng
-  if (selectedRows.length === 0) {
+    // Map trạng thái
+    const STATUS_TEXT: { [key: number]: string } = {
+      0: 'Hủy hoàn thành',
+      1: 'Hủy báo giá',
+      2: 'Báo giá',
+      3: 'Hoàn thành',
+    };
+
+    const statusText = STATUS_TEXT[status] || '';
+    const selectedRows = table.getSelectedRows();
+
+    // Validate chọn dòng
+    if (selectedRows.length === 0) {
+      Swal.fire({
+        title: 'Thông báo',
+        text: `Vui lòng chọn sản phẩm muốn ${statusText}!`,
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
+
+    // Xử lý dữ liệu
+    const updateData: any[] = [];
+    const shouldValidate = ![1, 3].includes(status);
+
+    for (const row of selectedRows) {
+      const rowData = row.getData();
+      const id = Number(rowData['ID']);
+
+      // Bỏ qua các dòng không hợp lệ
+      if (id <= 0) continue;
+
+      // Validate cho các trường hợp cần kiểm tra
+      if (shouldValidate) {
+        const productCode = rowData['ProductCode'] || '';
+        const currencyId = Number(rowData['CurrencyID']);
+        const currencyCode = rowData['CurrencyCode'] || '';
+        const currencyRate = Number(rowData['CurrencyRate']);
+        const unitPrice = Number(rowData['UnitPrice']);
+        const supplierSaleId = Number(rowData['SupplierSaleID']);
+
+        if (currencyId <= 0) {
+          Swal.fire({
+            title: 'Thông báo',
+            text: `Vui lòng nhập Loại tiền mã sản phẩm [${productCode}]!`,
+            icon: 'warning',
+            confirmButtonText: 'OK',
+          });
+          return;
+        }
+
+        if (currencyRate <= 0) {
+          Swal.fire({
+            title: 'Thông báo',
+            text: `Tỷ giá của [${currencyCode}] phải > 0.\nVui lòng kiểm tra lại Ngày hết hạn!`,
+            icon: 'warning',
+            confirmButtonText: 'OK',
+          });
+          return;
+        }
+
+        if (unitPrice <= 0) {
+          Swal.fire({
+            title: 'Thông báo',
+            text: `Vui lòng nhập Đơn giá mã sản phẩm [${productCode}]!`,
+            icon: 'warning',
+            confirmButtonText: 'OK',
+          });
+          return;
+        }
+
+        if (supplierSaleId <= 0) {
+          Swal.fire({
+            title: 'Thông báo',
+            text: `Vui lòng nhập Nhà cung cấp mã sản phẩm [${productCode}]!`,
+            icon: 'warning',
+            confirmButtonText: 'OK',
+          });
+          return;
+        }
+      }
+
+      // Cập nhật dữ liệu
+      Object.assign(rowData, {
+        StatusRequest: status,
+        UpdatedBy: USER_NAME,
+        UpdatedDate: new Date(),
+        QuoteEmployeeID: !ISADMIN ? EMPLOYEE_ID : rowData['QuoteEmployeeID'],
+        DatePriceQuote:
+          status === 2
+            ? new Date()
+            : status === 1
+            ? null
+            : rowData['DatePriceQuote'],
+      });
+
+      updateData.push(rowData);
+    }
+
+    // Xác nhận thao tác
     Swal.fire({
       title: 'Thông báo',
-      text: `Vui lòng chọn sản phẩm muốn ${statusText}!`,
-      icon: 'warning',
-      confirmButtonText: 'OK',
+      text: `Bạn có chắc muốn ${statusText} danh sách sản phẩm đã chọn không?\nNhững sản phẩm NV mua không phải bạn sẽ tự động được bỏ qua!`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.SaveDataCommon(updateData, `${statusText} thành công`);
+      }
     });
-    return;
   }
-
-  // Xử lý dữ liệu
-  const updateData:any[] = [];
-  const shouldValidate = ![1, 3].includes(status);
-  
-  for (const row of selectedRows) {
-    const rowData = row.getData();
-    const id = Number(rowData['ID']);
-    
-    // Bỏ qua các dòng không hợp lệ
-    if (id <= 0) continue;
-
-    // Validate cho các trường hợp cần kiểm tra
-    if (shouldValidate) {
-      const productCode = rowData['ProductCode'] || '';
-      const currencyId = Number(rowData['CurrencyID']);
-      const currencyCode = rowData['CurrencyCode'] || '';
-      const currencyRate = Number(rowData['CurrencyRate']);
-      const unitPrice = Number(rowData['UnitPrice']);
-      const supplierSaleId = Number(rowData['SupplierSaleID']);
-
-      if (currencyId <= 0) {
-        Swal.fire({
-          title: 'Thông báo',
-          text: `Vui lòng nhập Loại tiền mã sản phẩm [${productCode}]!`,
-          icon: 'warning',
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
-
-      if (currencyRate <= 0) {
-        Swal.fire({
-          title: 'Thông báo',
-          text: `Tỷ giá của [${currencyCode}] phải > 0.\nVui lòng kiểm tra lại Ngày hết hạn!`,
-          icon: 'warning',
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
-
-      if (unitPrice <= 0) {
-        Swal.fire({
-          title: 'Thông báo',
-          text: `Vui lòng nhập Đơn giá mã sản phẩm [${productCode}]!`,
-          icon: 'warning',
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
-
-      if (supplierSaleId <= 0) {
-        Swal.fire({
-          title: 'Thông báo',
-          text: `Vui lòng nhập Nhà cung cấp mã sản phẩm [${productCode}]!`,
-          icon: 'warning',
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
-    }
-
-    // Cập nhật dữ liệu
-    Object.assign(rowData, {
-      StatusRequest: status,
-      UpdatedBy: USER_NAME,
-      UpdatedDate: new Date(),
-      QuoteEmployeeID: !ISADMIN ? EMPLOYEE_ID : rowData['QuoteEmployeeID'],
-      DatePriceQuote: status === 2 ? new Date() : status === 1 ? null : rowData['DatePriceQuote']
-    });
-
-    updateData.push(rowData);
-  }
-
-  // Xác nhận thao tác
-  Swal.fire({
-    title: 'Thông báo',
-    text: `Bạn có chắc muốn ${statusText} danh sách sản phẩm đã chọn không?\nNhững sản phẩm NV mua không phải bạn sẽ tự động được bỏ qua!`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Đồng ý',
-    cancelButtonText: 'Hủy',
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.saveDataCommon(updateData, `${statusText} thành công`);
-    }
-  });
-}
 
   // Cập nhật phương thức CheckPrice để sử dụng hàm chung
   CheckPrice(isCheckPrice: boolean): void {
@@ -702,11 +694,11 @@ QuotePrice(status: number = 2): void {
         });
 
         // Sử dụng hàm chung để lưu dữ liệu
-        this.saveDataCommon(updateData, `${isCheckText} thành công`);
+        this.SaveDataCommon(updateData, `${isCheckText} thành công`);
       }
     });
   }
-  async exportToExcelAdvanced() {
+  async ExportToExcelAdvanced() {
     const table = this.tables.get(this.activeTabId);
     if (!table) return;
 
@@ -857,7 +849,124 @@ QuotePrice(status: number = 2): void {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(link.href);
   }
-  private getTableConfig(): any {
+  // DownloadFile() {
+  //   const table = this.tables.get(this.activeTabId);
+  //   if (!table) return;
+
+  //   const selectedRows = table.getSelectedData();
+  //   if (selectedRows.length <= 0) {
+  //     Swal.fire({
+  //       title: 'Thông báo',
+  //       text: `Vui lòng chọn 1 sản phẩm muốn tải!`,
+  //       icon: 'warning',
+  //       confirmButtonText: 'OK',
+  //     });
+  //     return;
+  //   }
+
+  //   selectedRows.forEach((row) => {
+  //     const projectId = row['ProjectID'];
+  //     const partListId = row['ProjectPartListID'];
+  //     const productCode = row['ProductCode'];
+  //     if (!productCode) return;
+
+  //     const requestPayload = {
+  //       projectId,
+  //       partListId,
+  //       productCode,
+  //     };
+
+  //     this.PriceRequetsService.downloadFile(requestPayload).subscribe(
+  //       (blob) => {
+  //         const fileName = `${productCode}.pdf`;
+  //         const url = window.URL.createObjectURL(blob);
+  //         const a = document.createElement('a');
+  //         a.href = url;
+  //         a.download = fileName;
+  //         a.click();
+  //         window.URL.revokeObjectURL(url);
+  //       },
+  //       (error) => {
+  //         Swal.fire({
+  //           title: 'Thông báo',
+  //           text: `Không thể tải file: ${error?.error || error.message}`,
+  //           icon: 'error',
+  //           confirmButtonText: 'OK',
+  //         });
+  //       }
+  //     );
+  //   });
+  // }
+DownloadFile() {
+  const table = this.tables.get(this.activeTabId);
+  if (!table) return;
+
+  const selectedRows = table.getSelectedData();
+  if (selectedRows.length <= 0) {
+    Swal.fire({
+      title: 'Thông báo',
+      text: `Vui lòng chọn 1 sản phẩm muốn tải!`,
+      icon: 'warning',
+      confirmButtonText: 'OK',
+    });
+    return;
+  }
+
+  selectedRows.forEach((row) => {
+    const projectId = row['ProjectID'];
+    const partListId = row['ProjectPartListID'];
+    const productCode = row['ProductCode'];
+    if (!productCode) return;
+
+    const requestPayload = {
+      projectId,
+      partListId,
+      productCode,
+    };
+
+    this.PriceRequetsService.downloadFile(requestPayload).subscribe({
+      next: (blob: Blob) => {
+        // Kiểm tra nếu blob thực ra chứa lỗi dạng JSON thay vì PDF
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const json = JSON.parse(reader.result as string);
+            if (json?.status === 0) {
+              Swal.fire({
+                title: 'Thông báo',
+                text: json.message || 'Lỗi không xác định!',
+                icon: 'error',
+                confirmButtonText: 'OK',
+              });
+              return;
+            }
+          } catch {
+            // Không phải JSON → hợp lệ là file PDF
+            const fileName = `${productCode}.pdf`;
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            window.URL.revokeObjectURL(url);
+          }
+        };
+        reader.readAsText(blob);
+      },
+      error: (error) => {
+        const errMsg = error?.error?.message || error?.message || 'Đã xảy ra lỗi!';
+        Swal.fire({
+          title: 'Thông báo',
+          text: errMsg,
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    });
+  });
+}
+
+  private GetTableConfig(): any {
     return {
       // data: this.dtprojectPartlistPriceRequest,
       layout: 'fitDataFill',
@@ -889,8 +998,8 @@ QuotePrice(status: number = 2): void {
         let poKHID = filters.projectTypeID >= 0 ? 0 : filters.poKHID;
 
         return {
-          dateStart: this.formatDateForApi(filters.dateStart),
-          dateEnd: this.formatDateForApi(filters.dateEnd),
+          dateStart: moment(filters.dateStart).format('YYYY-MM-DD'),
+          dateEnd: moment(filters.dateEnd).format('YYYY-MM-DD'),
           statusRequest: statusRequest,
           projectId: filters.projectId,
           keyword: filters.keyword,
@@ -941,6 +1050,10 @@ QuotePrice(status: number = 2): void {
         },
       },
       locale: 'vi',
+      groupBy: 'ProjectFullName',
+      groupHeader: function (value: any, count: number, data: any) {
+        return `${value} <span>(${count})</span>`;
+      },
       columnDefaults: {
         headerContextMenu: [
           {
@@ -955,7 +1068,7 @@ QuotePrice(status: number = 2): void {
         {
           label: 'Xem chi tiết',
           action: (e: MouseEvent, row: RowComponent) => {
-            this.onEditClick();
+            this.OnEditClick();
           },
         },
         { separator: true },
@@ -983,6 +1096,12 @@ QuotePrice(status: number = 2): void {
           },
           frozen: true,
         },
+        // {
+        //   title: ' ',
+        //   field: 'ProjectFullName',
+        //   hozAlign: 'center',
+        //   headerSort: false,
+        // },
         {
           title: 'Mã dự án',
           field: 'ProjectCode',
@@ -1048,7 +1167,15 @@ QuotePrice(status: number = 2): void {
             return value ? moment(value).format('DD/MM/YYYY') : '';
           },
         },
-        { title: 'Deadline', field: 'Deadline', headerHozAlign: 'center' },
+        {
+          title: 'Deadline',
+          field: 'Deadline',
+          headerHozAlign: 'center',
+          formatter: function (cell: any) {
+            const value = cell.getValue();
+            return value ? moment(value).format('DD/MM/YYYY') : '';
+          },
+        },
         {
           title: 'Ngày báo giá',
           field: 'DatePriceQuote',
@@ -1075,7 +1202,7 @@ QuotePrice(status: number = 2): void {
 
             autocomplete: true,
           },
-          cellEdited: (cell: any) => this.onCurrencyChanged(cell),
+          cellEdited: (cell: any) => this.OnCurrencyChanged(cell),
         },
 
         { title: 'Tỷ giá', field: 'CurrencyRate', headerHozAlign: 'center' },
@@ -1084,13 +1211,36 @@ QuotePrice(status: number = 2): void {
           field: 'UnitPrice',
           headerHozAlign: 'center',
           editor: 'input',
-          cellEdited: (cell: any) => this.handleCellEdited(cell),
+          formatterParams: {
+            thousand: ',',
+            precision: 0, // không có số lẻ
+          },
+          cellEdited: (cell: any) => this.HandleCellEdited(cell),
         },
         {
           title: 'Giá lịch sử',
           field: 'HistoryPrice',
           headerHozAlign: 'center',
           editor: 'input',
+          formatterParams: {
+            thousand: ',',
+            precision: 0, // không có số lẻ
+          },
+        },
+        {
+          title: 'Thành tiền chưa VAT',
+          field: 'TotalPrice',
+          headerHozAlign: 'center',
+          formatterParams: {
+            thousand: ',',
+            precision: 0, // không có số lẻ
+          },
+          bottomCalc: 'sum',
+          bottomCalcFormatter: 'money',
+          bottomCalcFormatterParams: {
+            thousand: ',',
+            precision: 0,
+          },
         },
         {
           title: 'Thành tiền quy đổi (VNĐ)',
@@ -1102,13 +1252,17 @@ QuotePrice(status: number = 2): void {
           field: 'VAT',
           headerHozAlign: 'center',
           editor: 'input',
-          cellEdited: (cell: any) => this.handleCellEdited(cell),
+          cellEdited: (cell: any) => this.HandleCellEdited(cell),
         },
         {
           title: 'Thành tiền có VAT',
           field: 'TotaMoneyVAT',
           headerHozAlign: 'center',
           editor: 'input',
+          formatterParams: {
+            thousand: ',',
+            precision: 0, // không có số lẻ
+          },
         },
         {
           title: 'Mã NCC',
@@ -1141,16 +1295,20 @@ QuotePrice(status: number = 2): void {
             })),
             autocomplete: true,
           },
-          cellEdited: (cell: any) => this.onSupplierSaleChanged(cell),
+          cellEdited: (cell: any) => this.OnSupplierSaleChanged(cell),
         },
 
         {
           title: 'Lead Time (Ngày làm việc)',
           field: 'TotalDayLeadTime',
           headerHozAlign: 'center',
-
+          bottomCalc: 'sum',
           editor: 'input',
-          cellEdited: (cell: any) => this.handleCellEdited(cell),
+          formatter: function (cell: any) {
+            const value = cell.getValue();
+            return value ? moment(value).format('DD/MM/YYYY') : '';
+          },
+          cellEdited: (cell: any) => this.HandleCellEdited(cell),
         },
         {
           title: 'Ngày dự kiến hàng về',
@@ -1178,11 +1336,19 @@ QuotePrice(status: number = 2): void {
           field: 'UnitFactoryExportPrice',
           editor: 'input',
           headerHozAlign: 'center',
+          formatterParams: {
+            thousand: ',',
+            precision: 0, // không có số lẻ
+          },
         },
         {
           title: 'Đơn giá nhập khẩu',
           field: 'UnitImportPrice',
           headerHozAlign: 'center',
+          formatterParams: {
+            thousand: ',',
+            precision: 0, // không có số lẻ
+          },
           formatter: function (
             cell: any,
             formatterParams: any,
@@ -1191,7 +1357,7 @@ QuotePrice(status: number = 2): void {
             let value = cell.getValue() || '';
             return value;
           },
-          cellEdited: (cell: any) => this.handleCellEdited(cell),
+          cellEdited: (cell: any) => this.HandleCellEdited(cell),
         },
         {
           title: 'Thành tiền nhập khẩu',
@@ -1204,6 +1370,10 @@ QuotePrice(status: number = 2): void {
           ) {
             let value = cell.getValue() || '';
             return value;
+          },
+          formatterParams: {
+            thousand: ',',
+            precision: 0, // không có số lẻ
           },
         },
         {

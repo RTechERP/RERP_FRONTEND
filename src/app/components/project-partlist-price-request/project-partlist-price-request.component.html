@@ -104,7 +104,7 @@
         </ng-select>
       </div>
 
-      <button class="btn btn-primary col-12 pb-1" (click)="applyFilters()">
+      <button class="btn btn-primary col-12 pb-1" (click)="ApplyFilters()">
         Áp dụng
       </button>
     </div>
@@ -112,7 +112,7 @@
   <app-project-partlist-price-request-form
     *ngIf="showDetailModal"
     [dataInput]="modalData"
-    (formSubmitted)="onFormSubmit()"
+    (formSubmitted)="OnFormSubmit()"
     (closeModal)="showDetailModal = false"
   >
   </app-project-partlist-price-request-form>
@@ -132,42 +132,45 @@
           </button>
           <button
             class="btn btn-outline-secondary p-0 ps-2 pe-2"
-            (click)="onAddClick()"
+            (click)="OnAddClick()"
           >
-            <i class="fa-regular fa-plus"></i>Thêm
+            <i class="fa-regular fa-plus me-2"></i>Thêm
           </button>
           <button
             class="btn btn-outline-secondary p-0 ps-2 pe-2"
-            (click)="onEditClick()"
+            (click)="OnEditClick()"
           >
-            <i class="fa-solid fa-pen-to-square"></i>Sửa
+            <i class="fa-solid fa-pen-to-square me-2"></i>Sửa
           </button>
-          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="onSaveData()">
-            <i class="fa-solid fa-floppy-disk"></i>Lưu dữ liệu
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="OnSaveData()">
+            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu dữ liệu
           </button>
           <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="CheckPrice(true)">
-            <i class="fa-solid fa-list-check"></i> Check giá
+            <i class="fa-solid fa-list-check me-2"></i> Check giá
           </button>
           <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice()">
-            <i class="fa-solid fa-hand-holding-dollar"></i>báo giá
+            <i class="fa-solid fa-hand-holding-dollar me-2"></i>báo giá
           </button>
           <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice(1)">
-            <i class="fa-solid fa-text-slash"></i>Hủy báo giá
+            <i class="fa-solid fa-text-slash me-2"></i>Hủy báo giá
           </button>
           <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice(3)">
-            <i class="fa-solid fa-circle-check"></i>Hoàn thành
+            <i class="fa-solid fa-circle-check me-2"></i>Hoàn thành
           </button>
           <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice(0)">
-            <i class="fa-solid fa-circle-exclamation"></i>Hủy hoàn thành
+            <i class="fa-solid fa-circle-exclamation me-2"></i>Hủy hoàn thành
           </button>
-          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="onDeleteClick()">
-            <i class="fa-solid fa-trash"></i>Xóa
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="OnDeleteClick()">
+            <i class="fa-solid fa-trash me-2"></i>Xóa
+          </button>
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="DownloadFile()">
+            <i class="fa-solid fa-download me-2"></i>Tải xuống
           </button>
           <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="QuotePrice()">
-            <i class="fa-solid fa-boxes-packing"></i>Thêm nhà cung cấp
+            <i class="fa-solid fa-boxes-packing me-2"></i>Thêm nhà cung cấp
           </button>
-          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="exportToExcelAdvanced()">
-            <i class="fa-solid fa-table"></i>Xuất excel
+          <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="ExportToExcelAdvanced()">
+            <i class="fa-solid fa-table me-2"></i>Xuất excel
           </button>
       </div>
       <div class="card-body">
@@ -187,14 +190,14 @@
                 role="tab"
                 [attr.aria-controls]="'pane-' + type.ProjectTypeID"
                 [attr.aria-selected]="activeTabId === type.ProjectTypeID"
-                (click)="selectProjectType(type.ProjectTypeID)"
+                (click)="SelectProjectType(type.ProjectTypeID)"
               >
                 {{ type.ProjectTypeName }}
               </a>
             </li>
           </ul>
 
-          <div class="tab-content" id="customTabContent">
+          <div class="tab-content p-0" id="customTabContent">
             <div
               class="tab-pane fade"
               *ngFor="let type of projectTypes"
@@ -204,7 +207,7 @@
               role="tabpanel"
               [attr.aria-labelledby]="'tab-' + type.ProjectTypeID"
             >
-              <div class="p-3">
+              <div class="p-1">
                 <div
                   [id]="'datatable-' + type.ProjectTypeID"
                   class="tabulator-container"
