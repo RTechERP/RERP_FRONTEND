@@ -220,7 +220,7 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     this.PriceRequetsService.getPOKH().subscribe((response) => {
       this.dtPOKH = response.data;
       console.log('POKH:', this.dtPOKH);
-    });
+      });
   }
   private LoadPriceRequests(): void {
     // const dateStartFormatted = this.formatDateForApi(this.filters.dateStart);
@@ -1007,7 +1007,7 @@ DownloadFile() {
           projectTypeID: filters.projectTypeID,
           poKHID: poKHID,
           isCommercialProduct: isCommercialProduct,
-          page: 1, // thêm tham số phân trang nếu cần
+          page: 1, 
           size: 25,
         };
       },
