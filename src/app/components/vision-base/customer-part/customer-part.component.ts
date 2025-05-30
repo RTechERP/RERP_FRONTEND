@@ -7,9 +7,9 @@ import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { CustomerPartService } from '../../vision-base/customer-part/customer-part/customer-part.service';
 
-
 @Component({
   selector: 'app-customer-part',
+  standalone: true,
   imports: [CommonModule, FormsModule, NgSelectModule],
   templateUrl: './customer-part.component.html',
   styleUrl: './customer-part.component.css'
