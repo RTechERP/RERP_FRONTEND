@@ -1,0 +1,32 @@
+<div class="modal-header bg-primary align-items-center ps-2">
+  <h6 class="text-light text-uppercase m-0">Trạng thái dự án</h6>
+</div>
+
+<div class="modal-body pt-0 pb-0">
+  <div class="row">
+    <div class="col-12 col-sm-12 h-auto p-0 m-0">
+      <div class="border ps-0 pe-0">
+        <div id="tb_projectStatus"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer bg-whitesmoke br p-0">
+  <button
+    type="button"
+    class="btn btn-sm btn-close-modal btn-outline-danger fs-12"
+    (click)="activeModal.dismiss()"
+  >
+    Đóng
+  </button>
+  <button
+    type="button"
+    style="background-color: limegreen"
+    class="btn btn-sm text-light fs-12"
+    (click)="saveData()"
+  >
+    <i class="fas fa-sd-card"></i>
+    Lưu
+  </button>
+</div>

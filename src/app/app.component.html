@@ -1,177 +1,225 @@
 <div class="page-wrapper">
+  <!-- Main container start -->
+  <div class="main-container">
+    <!-- Sidebar wrapper start -->
+    <nav id="sidebar" class="sidebar-wrapper">
+      <!-- App brand starts -->
+      <div class="app-brand px-3 py-2 d-flex align-items-center">
+        <a href="index.html">
+          <img
+            src="assets/images/logo.svg"
+            class="logo"
+            alt="Bootstrap Gallery"
+          />
+        </a>
+      </div>
+      <!-- App brand ends -->
 
-    <!-- Main container start -->
-    <div class="main-container">
+      <!-- Sidebar menu starts -->
+      <div class="sidebarMenuScroll">
+        <ul class="sidebar-menu">
+          <li>
+            <a href="/project">prj</a>
+          </li>
+          @for (item of menus; track item.ID) {
+          <li>
+            <a href="#" (click)="addComponent('p')">
+              <i class="bi bi-pie-chart"></i>
+              <span class="menu-text">{{ item.MenuName }}</span>
+            </a>
+          </li>
+          }
+        </ul>
+      </div>
+      <!-- Sidebar menu ends -->
+    </nav>
+    <!-- Sidebar wrapper end -->
 
-        <!-- Sidebar wrapper start -->
-        <nav id="sidebar" class="sidebar-wrapper">
-
-            <!-- App brand starts -->
-            <div class="app-brand px-3 py-2 d-flex align-items-center">
-                <a href="index.html">
-                    <img src="assets/images/logo.svg" class="logo" alt="Bootstrap Gallery" />
-                </a>
-            </div>
-            <!-- App brand ends -->
-
-            <!-- Sidebar menu starts -->
-            <div class="sidebarMenuScroll">
-                <ul class="sidebar-menu">
-                    @for (item of menus; track item.ID) {
-                    <li>
-                        <a href="#" (click)="addComponent('a')">
-                            <i class="bi bi-pie-chart"></i>
-                            <span class="menu-text">{{item.MenuName}}</span>
-                        </a>
-                    </li>
-                    }
-
-                </ul>
-            </div>
-            <!-- Sidebar menu ends -->
-
-        </nav>
-        <!-- Sidebar wrapper end -->
-
-        <!-- App container starts -->
-        <div class="app-container">
-
-            <!-- App header starts -->
-            <div class="app-header d-flex align-items-center">
-
-                <!-- Toggle buttons start -->
-                <div class="d-flex">
-                    <button class="btn btn-outline-primary me-2 toggle-sidebar" id="toggle-sidebar">
-                        <i class="bi bi-text-indent-left fs-5"></i>
-                    </button>
-                    <button class="btn btn-outline-primary me-2 pin-sidebar" id="pin-sidebar">
-                        <i class="bi bi-text-indent-left fs-5"></i>
-                    </button>
-                </div>
-                <!-- Toggle buttons end -->
-
-                <!-- App brand sm start -->
-                <div class="app-brand-sm d-md-none d-sm-block">
-                    <a href="index.html">
-                        <img src="assets/images/logo-sm.svg" class="logo" alt="Bootstrap Gallery">
-                    </a>
-                </div>
-                <!-- App brand sm end -->
-
-                <!-- Breadcrumb start -->
-                <ul class="nav nav-tabs" id="customTab2" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active"data-bs-toggle="tab" href="#menu_1" role="tab"
-                            aria-controls="oneA" aria-selected="true">Tab One
-                            <span class="badge rounded-pill bg-danger ms-2" (click)="removeComponent()">x</span></a>
-                    </li>
-                    
-                </ul>
-                <!-- Breadcrumb end -->
-
-                <!-- App header actions start -->
-                <div class="header-actions">
-
-                    <div class="dropdown border-start">
-                        <a class="dropdown-toggle d-flex px-3 py-4 position-relative" href="#!" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-envelope-open fs-4 lh-1 text-secondary"></i>
-                            <span class="count-label"></span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-md shadow-sm">
-                            <a href="javascript:void(0)" class="dropdown-item">
-                                <div class="d-flex py-2">
-                                    <img src="assets/images/user.png" class="img-3x me-3 rounded-3" alt="Admin Theme" />
-                                    <div class="m-0">
-                                        <h5 class="mb-1">Sophie Michiels</h5>
-                                        <p class="mb-1 text-secondary">
-                                            Membership has been ended.
-                                        </p>
-                                        <p class="small m-0 text-secondary">Today, 07:30pm</p>
-                                    </div>
-                                </div>
-                            </a>
-                            <a href="javascript:void(0)" class="dropdown-item">
-                                <div class="d-flex py-2">
-                                    <img src="assets/images/user2.png" class="img-3x me-3 rounded-3"
-                                        alt="Admin Theme" />
-                                    <div class="m-0">
-                                        <h5 class="mb-1">Maxwell Hill</h5>
-                                        <p class="mb-1 text-secondary">
-                                            Congratulate, James for new job.
-                                        </p>
-                                        <p class="small m-0 text-secondary">Today, 08:00pm</p>
-                                    </div>
-                                </div>
-                            </a>
-                            <a href="javascript:void(0)" class="dropdown-item">
-                                <div class="d-flex py-2">
-                                    <img src="assets/images/user1.png" class="img-3x me-3 rounded-3"
-                                        alt="Admin Theme" />
-                                    <div class="m-0">
-                                        <h5 class="mb-1">Garrett Manning</h5>
-                                        <p class="mb-1 text-secondary">
-                                            Lewis added new schedule release.
-                                        </p>
-                                        <p class="small m-0 text-secondary">Today, 09:30pm</p>
-                                    </div>
-                                </div>
-                            </a>
-                            <div class="d-grid mx-3 my-3">
-                                <a href="javascript:void(0)" class="btn btn-primary">View all</a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="dropdown ms-2">
-                        <a id="userSettings" class="dropdown-toggle d-flex py-2 align-items-center text-decoration-none"
-                            href="#!" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="assets/images/user.png" class="rounded-2 img-3x" alt="Bootstrap Gallery" />
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end shadow-sm">
-                            <div class="p-3 border-bottom mb-2">
-                                <h6 class="mb-1">Ella Lindsey</h6>
-                                <p class="m-0 small opacity-50">adminbootstrap.gallery</p>
-                            </div>
-                            <a class="dropdown-item d-flex align-items-center" href="profile.html"><i
-                                    class="bi bi-person fs-4 me-2"></i>Profile</a>
-                            <a class="dropdown-item d-flex align-items-center" href="settings.html"><i
-                                    class="bi bi-gear fs-4 me-2"></i>Settings</a>
-                            <div class="d-grid p-3 py-2">
-                                <a class="btn btn-danger" href="login.html">Logout</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- App header actions end -->
-
-            </div>
-            <!-- App header ends -->
-
-            <!-- App body starts -->
-            <div class="app-body">
-
-                <!-- Container starts -->
-                <div class="container-fluid">
-                    <ng-template #viewcomponent></ng-template>
-                    
-
-                </div>
-                <!-- Container ends -->
-
-            </div>
-            <!-- App body ends -->
-
-            <!-- App footer start -->
-            <div class="app-footer">
-                <span>© Bootstrap Gallery 2023</span>
-            </div>
-            <!-- App footer end -->
-
+    <!-- App container starts -->
+    <div class="app-container">
+      <!-- App header starts -->
+      <div class="app-header d-flex align-items-center">
+        <!-- Toggle buttons start -->
+        <div class="d-flex">
+          <button
+            class="btn btn-outline-primary me-2 toggle-sidebar"
+            id="toggle-sidebar"
+          >
+            <i class="bi bi-text-indent-left fs-5"></i>
+          </button>
+          <button
+            class="btn btn-outline-primary me-2 pin-sidebar"
+            id="pin-sidebar"
+          >
+            <i class="bi bi-text-indent-left fs-5"></i>
+          </button>
         </div>
-        <!-- App container ends -->
+        <!-- Toggle buttons end -->
 
+        <!-- App brand sm start -->
+        <div class="app-brand-sm d-md-none d-sm-block">
+          <a href="index.html">
+            <img
+              src="assets/images/logo-sm.svg"
+              class="logo"
+              alt="Bootstrap Gallery"
+            />
+          </a>
+        </div>
+        <!-- App brand sm end -->
+
+        <!-- Breadcrumb start -->
+        <ul class="nav nav-tabs" id="customTab2" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a
+              class="nav-link active"
+              data-bs-toggle="tab"
+              href="#menu_1"
+              role="tab"
+              aria-controls="oneA"
+              aria-selected="true"
+              >Tab One
+              <span
+                class="badge rounded-pill bg-danger ms-2"
+                (click)="removeComponent()"
+                >x</span
+              ></a
+            >
+          </li>
+        </ul>
+        <!-- Breadcrumb end -->
+
+        <!-- App header actions start -->
+        <div class="header-actions">
+          <div class="dropdown border-start">
+            <a
+              class="dropdown-toggle d-flex px-3 py-4 position-relative"
+              href="#!"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="bi bi-envelope-open fs-4 lh-1 text-secondary"></i>
+              <span class="count-label"></span>
+            </a>
+            <div
+              class="dropdown-menu dropdown-menu-end dropdown-menu-md shadow-sm"
+            >
+              <a href="javascript:void(0)" class="dropdown-item">
+                <div class="d-flex py-2">
+                  <img
+                    src="assets/images/user.png"
+                    class="img-3x me-3 rounded-3"
+                    alt="Admin Theme"
+                  />
+                  <div class="m-0">
+                    <h5 class="mb-1">Sophie Michiels</h5>
+                    <p class="mb-1 text-secondary">
+                      Membership has been ended.
+                    </p>
+                    <p class="small m-0 text-secondary">Today, 07:30pm</p>
+                  </div>
+                </div>
+              </a>
+              <a href="javascript:void(0)" class="dropdown-item">
+                <div class="d-flex py-2">
+                  <img
+                    src="assets/images/user2.png"
+                    class="img-3x me-3 rounded-3"
+                    alt="Admin Theme"
+                  />
+                  <div class="m-0">
+                    <h5 class="mb-1">Maxwell Hill</h5>
+                    <p class="mb-1 text-secondary">
+                      Congratulate, James for new job.
+                    </p>
+                    <p class="small m-0 text-secondary">Today, 08:00pm</p>
+                  </div>
+                </div>
+              </a>
+              <a href="javascript:void(0)" class="dropdown-item">
+                <div class="d-flex py-2">
+                  <img
+                    src="assets/images/user1.png"
+                    class="img-3x me-3 rounded-3"
+                    alt="Admin Theme"
+                  />
+                  <div class="m-0">
+                    <h5 class="mb-1">Garrett Manning</h5>
+                    <p class="mb-1 text-secondary">
+                      Lewis added new schedule release.
+                    </p>
+                    <p class="small m-0 text-secondary">Today, 09:30pm</p>
+                  </div>
+                </div>
+              </a>
+              <div class="d-grid mx-3 my-3">
+                <a href="javascript:void(0)" class="btn btn-primary"
+                  >View all</a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="dropdown ms-2">
+            <a
+              id="userSettings"
+              class="dropdown-toggle d-flex py-2 align-items-center text-decoration-none"
+              href="#!"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <img
+                src="assets/images/user.png"
+                class="rounded-2 img-3x"
+                alt="Bootstrap Gallery"
+              />
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow-sm">
+              <div class="p-3 border-bottom mb-2">
+                <h6 class="mb-1">Ella Lindsey</h6>
+                <p class="m-0 small opacity-50">adminbootstrap.gallery</p>
+              </div>
+              <a
+                class="dropdown-item d-flex align-items-center"
+                href="profile.html"
+                ><i class="bi bi-person fs-4 me-2"></i>Profile</a
+              >
+              <a
+                class="dropdown-item d-flex align-items-center"
+                href="settings.html"
+                ><i class="bi bi-gear fs-4 me-2"></i>Settings</a
+              >
+              <div class="d-grid p-3 py-2">
+                <a class="btn btn-danger" href="login.html">Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- App header actions end -->
+      </div>
+      <!-- App header ends -->
+
+      <!-- App body starts -->
+      <div class="app-body">
+        <router-outlet></router-outlet>
+        <!-- Container starts -->
+        <!-- <div class="container-fluid">
+                    <ng-template #viewcomponent></ng-template>
+
+
+                </div> -->
+        <!-- Container ends -->
+      </div>
+      <!-- App body ends -->
+
+      <!-- App footer start -->
+      <div class="app-footer">
+        <span>© Phút tơ này của Lương</span>
+      </div>
+      <!-- App footer end -->
     </div>
-    <!-- Main container end -->
-
+    <!-- App container ends -->
+  </div>
+  <!-- Main container end -->
 </div>
-<router-outlet />

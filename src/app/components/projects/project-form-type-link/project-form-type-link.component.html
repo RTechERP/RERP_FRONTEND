@@ -1,0 +1,81 @@
+<div class="modal-header bg-primary align-items-center ps-2">
+  <h6 class="text-light text-uppercase m-0">Chi tiết leader kiểu dự án</h6>
+</div>
+
+<div class="modal-body pt-0 pb-0">
+  <div class="row">
+    <div class="col-12 mt-2">
+      <div class="form-group mb-2">
+        <label for="">Dự án <span style="color: red">(*)</span></label>
+        <ng-select
+          [items]="projects"
+          bindLabel="ProjectCode"
+          bindValue="ID"
+          placeholder="Dự án..."
+          [(ngModel)]="selectProject"
+          (change)="loadAll()"
+          class="form-control form-control-sm p-0 border border-0"
+        >
+          <ng-template ng-option-tmp let-item="item">
+            <div class="row text-dark w-100">
+              <div class="col-3 ms-1">
+                {{ item.ProjectCode }} - {{ item.ProjectName }}
+              </div>
+            </div>
+          </ng-template>
+        </ng-select>
+      </div>
+      <div class="form-group mb-2">
+        <label for="">Trạng thái <span style="color: red">(*)</span></label>
+        <ng-select
+          [items]="projectStatus"
+          bindLabel="StatusName"
+          bindValue="ID"
+          [(ngModel)]="selectProjectStatus"
+          placeholder="Trạng thái..."
+          class="form-control form-control-sm p-0 border border-0"
+        >
+          <ng-template ng-option-tmp let-item="item">
+            <div class="row text-dark w-100">
+              <div class="col-3 ms-1">
+                {{ item.StatusName }}
+              </div>
+            </div>
+          </ng-template>
+        </ng-select>
+      </div>
+      <div class="form-group mb-2">
+        <label for="status">Hiện trạng</label>
+        <textarea
+          id="status"
+          class="form-control form-control-sm"
+          rows="5"
+          placeholder="Nhập hiện trạng..."
+          [(ngModel)]="situlator"
+        ></textarea>
+      </div>
+      <div class="form-group mb-2">
+        <div id="tb_projectTypeLinksMd" class="border border-primary"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-footer bg-whitesmoke br p-0">
+  <button
+    type="button"
+    style="background-color: limegreen"
+    class="btn btn-sm text-light"
+    (click)="saveProjectTypeLink()"
+  >
+    Lưu
+  </button>
+  <button
+    type="button"
+    class="btn btn-sm text-light btn-close-modal"
+    style="background-color: red"
+    (click)="activeModal.dismiss()"
+  >
+    Đóng
+  </button>
+</div>
