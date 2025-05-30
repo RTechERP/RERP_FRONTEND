@@ -717,6 +717,13 @@ export class ProjectsComponent implements OnInit {
     });
 
     modalRef.componentInstance.projectId = 0;
+
+    modalRef.result.catch((reason) => {
+      if (reason == true) {
+        Swal.fire('Thông báo!', 'Thêm dự án thành công!', 'warning');
+        this.getProjects();
+      }
+    });
   }
 
   openEditProjectModal() {
@@ -736,6 +743,13 @@ export class ProjectsComponent implements OnInit {
     });
 
     modalRef.componentInstance.projectId = selectedIDs[0];
+
+    modalRef.result.catch((reason) => {
+      if (reason == true) {
+        Swal.fire('Thông báo!', 'Đã sửa dự án!', 'warning');
+        this.getProjects();
+      }
+    });
   }
 
   async exportExcel() {

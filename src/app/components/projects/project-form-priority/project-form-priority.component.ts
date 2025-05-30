@@ -23,6 +23,7 @@ export class ProjectFormPriorityComponent implements OnInit {
   priorityId: any;
   selectedRow: any;
   priority: any;
+  listPriorities: any[] = [];
   constructor(
     public activeModal: NgbActiveModal,
     private projectService: ProjectService,
@@ -155,7 +156,19 @@ export class ProjectFormPriorityComponent implements OnInit {
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        this.activeModal.dismiss(this.priority);
+        const allData = this.projectService.getSelectedRowsRecursive(
+          this.tb_projectPriority.getData()
+        );
+
+        allData.forEach((row: any) => {
+          if (row['Selected']) {
+            this.listPriorities.push(row);
+          }
+        });
+        this.activeModal.dismiss({
+          priority: this.priority,
+          listPriorities: this.listPriorities,
+        });
       }
     });
   }

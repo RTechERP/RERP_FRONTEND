@@ -199,8 +199,8 @@ export class ProjectService {
   }
 
   // Lưu dữ liệu dự án
-  saveProject(project: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl + `saveproject`, project);
+  saveProject(prj: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl + `saveproject`, prj);
   }
 
   // Chuyển dự án

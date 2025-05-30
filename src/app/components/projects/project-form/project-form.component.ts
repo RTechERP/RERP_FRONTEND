@@ -20,7 +20,7 @@ import { ProjectFormPriorityComponent } from '../project-form-priority/project-f
 })
 export class ProjectFormComponent implements OnInit {
   @Input() projectId: any;
-
+  projectIdSet: any;
   customers = [];
   users = [];
   statuses = [];
@@ -122,6 +122,11 @@ export class ProjectFormComponent implements OnInit {
 
   onTabChange(tab: string) {
     this.currentTab = tab;
+    if (tab == 'tab2') {
+      this.projectIdSet = this.projectId;
+    } else {
+      this.projectId = this.projectIdSet;
+    }
   }
 
   getCustomersModal() {
@@ -315,36 +320,51 @@ export class ProjectFormComponent implements OnInit {
     if (this.projectId > 0) {
       this.projectService.getFollowProjectBases(this.projectId).subscribe({
         next: (res: any) => {
-          console.log('fb', res.data);
           this.selectedFirmBase = res.data.FirmBaseID;
           this.selectedPrjTypeBase = res.data.ProjectTypeBaseID;
           this.projectContactName = res.data.ProjectContactName;
 
-          this.expectedPlanDate = moment(res.data.ExpectedPlanDate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
-          this.expectedQuotationDate = moment(res.data.ExpectedQuotationDate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
-          this.expectedPODate = moment(res.data.ExpectedPODate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
-          this.expectedProjectEndDate = moment(res.data.ExpectedProjectEndDate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
+          this.expectedPlanDate = res.data.ExpectedPlanDate
+            ? moment(res.data.ExpectedPlanDate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
+          this.expectedQuotationDate = res.data.ExpectedQuotationDate
+            ? moment(res.data.ExpectedQuotationDate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
+          this.expectedPODate = res.data.ExpectedPODate
+            ? moment(res.data.ExpectedPODate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
+          this.expectedProjectEndDate = res.data.ExpectedProjectEndDate
+            ? moment(res.data.ExpectedProjectEndDate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
 
-          this.realityPlanDate = moment(res.data.RealityPlanDate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
-          this.realityQuotationDate = moment(res.data.RealityQuotationDate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
-          this.realityPODate = moment(res.data.RealityPODate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
-          this.realityProjectEndDate = moment(res.data.RealityProjectEndDate)
-            .set({ hour: 0, minute: 0, second: 0 })
-            .format('YYYY-MM-DD');
+          this.realityPlanDate = res.data.RealityPlanDate
+            ? moment(res.data.RealityPlanDate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
+          this.realityQuotationDate = res.data.RealityQuotationDate
+            ? moment(res.data.RealityQuotationDate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
+          this.realityPODate = res.data.RealityPODate
+            ? moment(res.data.RealityPODate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
+          this.realityProjectEndDate = res.data.RealityProjectEndDate
+            ? moment(res.data.RealityProjectEndDate)
+                .set({ hour: 0, minute: 0, second: 0 })
+                .format('YYYY-MM-DD')
+            : null;
         },
         error: (error) => {
           console.log('Lỗi', error);
@@ -420,11 +440,6 @@ export class ProjectFormComponent implements OnInit {
 
   saveDataProject() {
     debugger;
-    const allData = this.tb_projectTypeLinks.getData();
-    const projectUser = this.tb_ProjectUser.getData();
-    const projectTypeLinks =
-      this.projectService.getSelectedRowsRecursive(allData);
-
     if (this.projectId > 0) {
       this.projectService
         .checkProjectCode(this.projectId, this.projectCode)
@@ -433,18 +448,28 @@ export class ProjectFormComponent implements OnInit {
             if (response.data == 0) {
               Swal.fire(
                 'Thông báo!',
-                `Mã dự án đã ${this.projectCode} tồn tại. Vui lòng kiêm tra lại!`,
+                `Mã dự án đã ${this.projectCode} tồn tại. Vui lòng kiểm tra lại!`,
                 'warning'
               );
               return;
+            } else {
+              this.save();
             }
           },
           error: (error) => {
             console.error('Lỗi:', error);
           },
         });
+    } else {
+      this.save();
     }
+  }
 
+  save() {
+    const allData = this.tb_projectTypeLinks.getData();
+    const projectUser = this.tb_ProjectUser.getData();
+    const projectTypeLinks =
+      this.projectService.getSelectedRowsRecursive(allData);
     if (!this.projectCode) {
       Swal.fire('Thông báo!', `Vui lòng nhập mã dự án!`, 'warning');
       return;
@@ -536,49 +561,93 @@ export class ProjectFormComponent implements OnInit {
     }
 
     const dataSave: any = {
-      ID: this.projectId,
-      ProjectCode: this.projectCode,
-      ProjectName: this.projectName,
-      ProjectStatus: this.selectedStatus,
-      Note: this.note,
-      CustomerID: this.selectedCustomer,
-      UserID: this.selectedUserSale,
-      UserTechnicalID: this.selectedUserTech,
-      CreatedDate: this.createDate,
-      ProjectManager: this.selectedPm,
-      CurrentState: this.currentState,
-      EndUser: this.selectedEndUser,
-      Priotity: this.selectedPrio,
-      TypeProject: this.selectedProjectType,
+      projectStatusOld: this.editStatus ?? 0,
+      project: {
+        ID: this.projectId,
+        ProjectCode: this.projectCode ?? '',
+        ProjectName: this.projectName ?? '',
+        ProjectStatus: this.selectedStatus ?? 0,
+        Note: this.note ?? '',
+        CustomerID: this.selectedCustomer ?? 0,
+        UserID: this.selectedUserSale ?? 0,
+        UserTechnicalID: this.selectedUserTech ?? 0,
+        CreatedDate: this.createDate
+          ? moment(this.createDate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
+        ProjectManager: this.selectedPm ?? 0,
+        CurrentState: this.currentState ?? '',
+        EndUser: this.selectedEndUser ?? 0,
+        Priotity: this.selectedPrio ?? 0,
+        TypeProject: this.selectedProjectType ?? 0,
+      },
+      projectStatusLog: {
+        EmployeeID: this.projectService.GlobalEmployeeId ?? 0, // ID người đăng nhập
+        DateLog: this.dateChangeStatus
+          ? moment(this.dateChangeStatus)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : undefined,
+        CreatedBy: '',
+        UpdatedBy: '',
+      },
+      followProjectBase: {
+        ExpectedPlanDate: this.expectedPlanDate
+          ? moment(this.expectedPlanDate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
+        ExpectedQuotationDate: this.expectedQuotationDate
+          ? moment(this.expectedQuotationDate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
+        ExpectedPODate: this.expectedPODate
+          ? moment(this.expectedPODate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
+        ExpectedProjectEndDate: this.expectedProjectEndDate
+          ? moment(this.expectedProjectEndDate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
 
-      projectStatusOld: this.editStatus,
+        RealityPlanDate: this.realityPlanDate
+          ? moment(this.realityPlanDate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
+        RealityQuotationDate: this.realityQuotationDate
+          ? moment(this.realityQuotationDate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
+        RealityPODate: this.realityPODate
+          ? moment(this.realityPODate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
+        RealityProjectEndDate: this.realityProjectEndDate
+          ? moment(this.realityProjectEndDate)
+              .set({ hour: 0, minute: 0, second: 0 })
+              .format('YYYY-MM-DD')
+          : null,
 
-      ExpectedPlanDate: this.expectedPlanDate,
-      ExpectedQuotationDate: this.expectedQuotationDate,
-      ExpectedPODate: this.expectedPODate,
-      ExpectedProjectEndDate: this.expectedProjectEndDate,
-
-      RealityPlanDate: this.realityPlanDate,
-      RealityQuotationDate: this.realityQuotationDate,
-      RealityPODate: this.realityPODate,
-      RealityProjectEndDate: this.realityProjectEndDate,
-
-      FirmBaseID: this.selectedFirmBase,
-      ProjectTypeBaseID: this.selectedPrjTypeBase,
-      ProjectContactName: this.projectContactName,
-      GlobalEmployee: this.projectService.GlobalEmployeeId, // ID người đăng nhập
-      DateStatusLog: this.dateChangeStatus, // Ngày thay đổi trạng thái
-      projectTypeLinks: projectTypeLinks, // Danh sách người chọn dự án
-
-      projectUser: projectUser, // Danh sách người tham gia
-      listPriorities: this.listPriorities, // Làm sau danh sách dự án ưu tiên
+        FirmBaseID: this.selectedFirmBase ?? 0,
+        ProjectTypeBaseID: this.selectedPrjTypeBase ?? 0,
+        ProjectContactName: this.projectContactName ?? '',
+      },
+      projectTypeLinks: projectTypeLinks ?? [], //projectTypeLinks ??
+      projectUsers: projectUser ?? [], //
+      listPriorities: this.listPriorities ?? [], //
     };
-
+    console.log(dataSave);
     this.projectService.saveProject(dataSave).subscribe({
       next: (response: any) => {
         if (response.status == 1) {
-          Swal.fire('Thông báo!', `Dự án đã được thêm mới!`, 'success');
-          this.activeModal.dismiss();
+          this.activeModal.dismiss(true);
         }
       },
       error: (error) => {
@@ -630,7 +699,9 @@ export class ProjectFormComponent implements OnInit {
 
     modalRef.result.catch((reason) => {
       if (reason !== undefined) {
-        this.selectedPrio = reason;
+        debugger;
+        this.selectedPrio = reason.priority;
+        this.listPriorities = reason.listPriorities;
       }
     });
   }
@@ -688,7 +759,7 @@ export class ProjectFormComponent implements OnInit {
             autocomplete: true,
           },
           cellEdited: (cell: any) => {
-            debugger
+            debugger;
             const fullName = cell.getValue();
             const employee = this.projectUserTeams.find(
               (e: any) => e.FullName === fullName
@@ -823,7 +894,8 @@ export class ProjectFormComponent implements OnInit {
 
   loadAll() {
     if (this.selectProject != this.projectId)
-      this.projectId = this.selectProject;
+      this.projectIdSet = this.projectId;
+    this.projectId = this.selectProject;
     this.loadProject();
     this.getProjectTypeLinks();
     this.getProjectCurrentSituation();
