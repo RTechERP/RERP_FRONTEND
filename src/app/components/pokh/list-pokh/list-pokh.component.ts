@@ -104,7 +104,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       this.loadCurrency();
       this.loadProducts();
     });
-    
+
   }
   ngAfterViewInit(): void {
     this.initTable();
@@ -594,6 +594,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       BillDate: null,
       BillNumber: "",
       Debt: 0,
+      KHID: 0,
       PayDate: null,
       GroupPO: "",
       ActualDeliveryDate: null,
@@ -640,6 +641,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       BillDate: null,
       BillNumber: "",
       Debt: 0,
+      KHID: 0,
       PayDate: null,
       GroupPO: "",
       ActualDeliveryDate: null,
@@ -666,21 +668,21 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     this.poFormData.userType = this.isResponsibleUsersEnabled ? 1 : 0;
     if (!this.isModalOpen) return;
     if (this.isResponsibleUsersEnabled) {
-        if (this.selectedId > 0 && (!this.isEditMode || this.detailUser.length === 0)) {
-            this.pokhService.loadUserDetail(this.selectedId, 0).subscribe(res => {
-                this.detailUser = res.status === 1 ? res.data : [];
-                this.initDetailTable();
-                this.DetailUser?.setData(this.detailUser);
-            });
-        } else {
-            this.initDetailTable();
-            this.DetailUser?.setData(this.detailUser);
-        }
+      if (this.selectedId > 0 && (!this.isEditMode || this.detailUser.length === 0)) {
+        this.pokhService.loadUserDetail(this.selectedId, 0).subscribe(res => {
+          this.detailUser = res.status === 1 ? res.data : [];
+          this.initDetailTable();
+          this.DetailUser?.setData(this.detailUser);
+        });
+      } else {
+        this.initDetailTable();
+        this.DetailUser?.setData(this.detailUser);
+      }
     } else {
-        if (this.DetailUser) {
-            this.DetailUser.destroy();
-        }
-        this.detailUser = [];
+      if (this.DetailUser) {
+        this.DetailUser.destroy();
+      }
+      this.detailUser = [];
     }
   }
   /////////////////////////////////////////////////////////END: Event Handlers và Business Logic////////////////////////////////////////////////////////////////
@@ -842,7 +844,11 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     if (!this.validateForm()) return;
     const pokhData = this.getPOKHData();
     const details = this.ProductDetailTreeList.getData();
-    const detailUsers = this.DetailUser.getData();
+    const detailUsers = this.DetailUser.getData().map(user => ({
+      ...user,
+      RowHandle: (!user.RowHandle || Object.keys(user.RowHandle).length === 0) ? 0 : user.RowHandle
+    }));
+
 
     console.log('POKH Data:', pokhData);
     console.log('Details:', details);
@@ -906,7 +912,29 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     let dataTree: any[] = [];
 
     data.forEach((row) => {
-      dataTree.push(row);
+      const processedRow = {
+        ...row,
+        KHID: (!row.KHID || Object.keys(row.KHID).length === 0) ? 0 : row.KHID, 
+        IndexPO: (!row.IndexPO || Object.keys(row.IndexPO).length === 0) ? null : row.IndexPO, 
+        RecivedMoneyDate: (!row.RecivedMoneyDate || Object.keys(row.RecivedMoneyDate).length === 0) ? null : row.RecivedMoneyDate,
+        BillDate: (!row.BillDate || Object.keys(row.BillDate).length === 0) ? null : row.BillDate,
+        ActualDeliveryDate: (!row.ActualDeliveryDate || Object.keys(row.ActualDeliveryDate).length === 0) ? null : row.ActualDeliveryDate,
+        DeliveryRequestedDate: (!row.DeliveryRequestedDate || Object.keys(row.DeliveryRequestedDate).length === 0) ? null : row.DeliveryRequestedDate,
+        PayDate: (!row.PayDate || Object.keys(row.PayDate).length === 0) ? null : row.PayDate,
+        CreatedDate: (!row.CreatedDate || Object.keys(row.CreatedDate).length === 0) ? null : row.CreatedDate,
+        UpdatedDate: (!row.UpdatedDate || Object.keys(row.UpdatedDate).length === 0) ? null : row.UpdatedDate,
+        QuotationDetailID: 0,
+        QtyTT: (!row.QtyTT || Object.keys(row.QtyTT).length === 0) ? 0 : row.QtyTT,
+        QtyCL: (!row.QtyCL || Object.keys(row.QtyCL).length === 0) ? 0 : row.QtyCL,
+        IsExport: (!row.IsExport || Object.keys(row.IsExport).length === 0) ? false : row.IsExport,
+        QtyRequest: (!row.QtyRequest || Object.keys(row.QtyRequest).length === 0) ? 0 : row.QtyRequest,
+        Note: (!row.Note || Object.keys(row.Note).length === 0) ? '' : row.Note,
+        CurrencyID: (!row.CurrencyID || Object.keys(row.CurrencyID).length === 0) ? null : row.CurrencyID,
+        TT: (!row.TT || Object.keys(row.TT).length === 0) ? '' : row.TT,
+        ProjectPartListID: (!row.ProjectPartListID || Object.keys(row.ProjectPartListID).length === 0) ? 0 : row.ProjectPartListID,
+        Spec: (!row.Spec || Object.keys(row.Spec).length === 0) ? '' : row.Spec,
+      };
+      dataTree.push(processedRow);
 
       if (row._children && Array.isArray(row._children)) {
         dataTree = dataTree.concat(
@@ -1016,7 +1044,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       this.loadPOKHFiles(this.selectedId);
     });
   }
-  
+
   initProductTable(): void {
     if (!this.productTableElement || !this.productTableElement.nativeElement) return;
 
@@ -1358,7 +1386,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     };
   }
   ////////////////////////////////////////////END: Table/////////////////////////////////////////////////////////////
- 
+
   ///////////////////////////////////////////////Utility Methods////////////////////////////////////////////////////
   dateFormatter = (cell: any) => {
     const value = cell.getValue();
@@ -1414,7 +1442,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
 
     return treeData;
   }
-////////////////////////////////////////////////END: Utility Methods/////////////////////////////////////////////////
+  ////////////////////////////////////////////////END: Utility Methods/////////////////////////////////////////////////
 
   // loadDetailUser(id: number = 0, idDetail: number = 0): void {
   //   this.pokhService.loadUserDetail(id, idDetail).subscribe(
