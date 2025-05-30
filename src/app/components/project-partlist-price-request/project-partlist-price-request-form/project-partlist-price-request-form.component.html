@@ -1,0 +1,84 @@
+<!-- Modal -->
+<div
+class="modal fade"
+  tabindex="-1"
+  #detailModal
+>
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header bg-success">
+        <h4 class="modal-title text-white" id="priceRequestModalLabel">
+          Chi tiết yêu cầu báo giá
+        </h4>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <form class="row g-3">
+          <div class="col-md-6">
+            <label for="requesterSelect" class="form-label">
+              Người yêu cầu
+            </label>
+            <ng-select
+              id="requesterSelect"
+              [(ngModel)]="requester"
+              name="requester"
+              [items]="users"
+              bindLabel="FullName"
+              bindValue="ID"
+              placeholder="Chọn người yêu cầu"
+            ></ng-select>
+          </div>
+          <div class="col-md-6">
+            <label for="requestDate" class="form-label">
+              Ngày yêu cầu
+            </label>
+            <input
+              id="requestDate"
+              type="date"
+              class="form-control"
+              [(ngModel)]="requestDate"
+              name="requestDate"
+            />
+          </div>
+        </form>
+
+        <button
+          class="btn btn-sm btn-primary mt-3"
+          (click)="addRow()"
+        >
+          + Thêm dòng
+        </button>
+
+        <div #table class="mt-2"></div>
+      </div>
+      
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-danger"
+          data-bs-dismiss="modal"
+          (click)="close()"
+        >
+          Hủy
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="saveAndClose()"
+        >
+          Lưu dữ liệu
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
