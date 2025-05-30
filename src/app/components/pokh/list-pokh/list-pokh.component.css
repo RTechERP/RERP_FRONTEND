@@ -1,149 +1,82 @@
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f4;
-}
-
-.toolbar {
-  background-color: #e6e6e6;
-  padding: 10px;
-  margin-bottom: 20px;
-}
-
-.toolbar .btn {
-  margin-right: 5px;
-}
-
-.form-section {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.grid-section {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-.table th,
-.table td {
-  vertical-align: middle;
-}
-.custom-modal .modal-dialog {
-    max-width: 90%;
-    margin: 1.75rem auto;
-}
-
-.custom-modal .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.project-select-group {
-    display: flex;
-    align-items: center;
-    gap: 0;
-}
-
-.project-select-group ng-select {
-    flex: 1;
-}
-
-.project-select-group .btn {
-    margin-left: 0;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
-.file-upload-section {
-  margin-top: 20px;
-}
-
-/* Modal specific styles */
-.modal-fullscreen {
-  width: 100%;
-  max-width: none;
+/* Đảm bảo phần thân đúng layout */
+.layout-wrapper {
   height: 100%;
-  margin: 0;
+  display: flex;
+  overflow: hidden;
+  position: relative;
 }
 
-.modal-fullscreen .modal-content {
-  height: auto;
+/* Thẻ offcanvas */
+.custom-offcanvas {
+  width: 300px;
+  position: absolute;
   height: 100%;
-  border-radius: 0;
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  z-index: 1;
+}
+
+/* Khi show, trượt vào */
+.offcanvas-left.show {
+  transform: translateX(0);
+}
+
+.card {
+  height: 100%;
+}
+
+.row {
+  height: 100%;
+}
+
+.offcanvas-left.show + .project-container {
+  margin-left: 300px;
+  width: calc(100% - 300px);
+}
+
+::ng-deep ng-select .ng-value-container {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  white-space: nowrap !important;
+}
+
+.tabulator {
+  font-size: 0.75rem;
+}
+
+.tabulator-cell {
+  padding: 0px;
+}
+
+.fs-12 {
+  font-size: 0.75rem;
+}
+
+.btn {
+  font-weight: bold;
+  height: 2.5vh ;
+  font-size: 0.75rem ;
   border: none;
 }
 
-.modal-header {
-  border-bottom: 1px solid #dee2e6;
-  background-color: #f8f9fa;
-}
-
-.modal-footer {
-  border-top: 1px solid #dee2e6;
-  background-color: #f8f9fa;
-}
-::ng-deep ng-select {
-  width: 100%;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-::ng-deep ng-select .ng-select-container {
-  height: 42px;
+::ng-deep ng-select.form-control .ng-clear-wrapper {
+  display: flex;
   align-items: center;
-  font-size: 14px;
-  padding: 0 10px;
-  background-color: #fff;
-  border: 1px solid #dcdcdc;
-  border-radius: 6px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.3s ease;
+  margin-left: 20px;
 }
 
-::ng-deep ng-select.ng-select-focused .ng-select-container {
-  border-color: #66afe9;
-  box-shadow: 0 0 0 3px rgba(102, 175, 233, 0.2);
+::ng-deep ng-select.form-control .ng-clear-wrapper:hover {
+  color: #d9363e;
 }
 
-/* Dropdown panel */
-::ng-deep ng-select .ng-dropdown-panel {
-  background-color: #ffffff;
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  font-size: 14px;
-  z-index: 1050;
+::ng-deep .ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+    margin-top: 3px;
+    margin-right: 1px;
+    font-size: .75rem;
+    background-color: #fafafa;
+    border: none;
+    border-radius: 2px;
+    height: 24px;
+    line-height: 22px;
 }
-
-/* Dropdown items */
-::ng-deep ng-select .ng-dropdown-panel .ng-option {
-  padding: 10px 14px;
-  min-height: 42px;
-  transition: background-color 0.2s ease;
-}
-
-/* Hover */
-::ng-deep ng-select .ng-dropdown-panel .ng-option:hover {
-  background-color: #f0f4f8;
-  cursor: pointer;
-}
-
-/* Selected item */
-::ng-deep ng-select .ng-dropdown-panel .ng-option-selected {
-  font-weight: 600;
-  background-color: #e6f3ff;
-}
-
-/* Disabled item */
-::ng-deep ng-select .ng-dropdown-panel .ng-option-disabled {
-  color: #aaa;
-  background-color: #f9f9f9;
-}
-

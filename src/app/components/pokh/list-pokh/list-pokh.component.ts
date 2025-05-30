@@ -13,6 +13,7 @@ import { map, catchError } from 'rxjs/operators'
 
 @Component({
   selector: 'app-list-pokh',
+  standalone: true,
   imports: [CommonModule, FormsModule, NgSelectModule, NgbModule],
   templateUrl: './list-pokh.component.html',
   styleUrls: ['./list-pokh.component.css']
@@ -426,7 +427,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     return this.poFormData.totalPO;
   }
 
-  onEdit(id: number) {
+  onEdit(id: number): void {
     this.selectedId = id;
     this.isEditMode = true;
     this.openModal();
@@ -972,7 +973,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         resizable: true
       },
       columns: [
-        { title: 'Hành động', field: 'actions', formatter: this.actionFormatter, width: 120 },
+      
         { title: 'Duyệt', field: 'IsApproved', sorter: 'boolean', width: 50, formatter: (cell) => `<input type="checkbox" ${cell.getValue() ? 'checked' : ''} disabled />` },
         { title: 'Trạng thái', field: 'StatusText', sorter: 'string', width: 150 },
         { title: 'Loại', field: 'MainIndex', sorter: 'string', width: 50 },
@@ -1001,14 +1002,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       const id = row.getData()['ID'];
       this.onEdit(id);
     });
-
-    (window as any).editPOKH = (id: number) => {
-      this.onEdit(id);
-    };
-
-    (window as any).deletePOKH = (id: number) => {
-      this.onDelete(id);
-    };
     this.table.on("rowClick", (e, row) => {
       const rowData = row.getData();
       this.selectedId = rowData['ID'];
@@ -1031,7 +1024,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       dataTreeStartExpanded: true,
       pagination: true,
       paginationSize: 3,
-      height: '18vh',
+      height: '23vh',
       movableColumns: true,
       resizableRows: true,
       columns: [
@@ -1077,7 +1070,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       layout: 'fitDataFill',
       pagination: true,
       paginationSize: 5,
-      height: '18vh',
+      height: '23vh',
       movableColumns: true,
       resizableRows: true,
       columns: [
@@ -1367,15 +1360,15 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     return isNaN(date.getTime()) ? '' : date.toLocaleDateString('vi-VN');
   };
 
-  actionFormatter(cell: any): any {
-    const id = cell.getRow().getData().ID;
-    return `
-    <button style="background-color: #007bff; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer;" 
-            onclick="window.editPOKH(${id})">Sửa</button>
-    <button style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;" 
-            onclick="window.deletePOKH(${id})">Xóa</button>
-  `;
-  }
+  // actionFormatter(cell: any): any {
+  //   const id = cell.getRow().getData().ID;
+  //   return `
+  //   <button style="background-color: #007bff; color: white; border: none; padding: 5px 10px; margin-right: 5px; cursor: pointer;" 
+  //           onclick="window.editPOKH(${id})">Sửa</button>
+  //   <button style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; cursor: pointer;" 
+  //           onclick="window.deletePOKH(${id})">Xóa</button>
+  // `;
+  // }
   getFileType(fileName: string): string {
     return fileName.split('.').pop()?.toUpperCase() || '';
   }
