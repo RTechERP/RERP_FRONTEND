@@ -43,10 +43,15 @@ export class ProjectListWorkReportComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    debugger;
     this.route.paramMap.subscribe((params) => {
-      this.projectId = params.get('id');
+      const idParam = params.get('id');
+
+      if (idParam !== null) {
+        this.projectId = parseInt(idParam, 10);
+      }
       this.onLoadTableProjectWorkerPriority();
-      this.getProjectModal();
+      this.getProjectModal()
     });
   }
 

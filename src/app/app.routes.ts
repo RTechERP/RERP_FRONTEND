@@ -6,5 +6,5 @@ import { ProjectListWorkReportComponent } from './components/projects/project-li
 export const routes: Routes = [
   { path: 'project', component: ProjectsComponent },
   { path: 'projectWorkerSynthetic', component: ProjectWorkerSyntheticComponent },
-  { path: 'projectListWorkReport', component: ProjectListWorkReportComponent },
+  { path: 'projectListWorkReport/:id', component: ProjectListWorkReportComponent },
 ];
