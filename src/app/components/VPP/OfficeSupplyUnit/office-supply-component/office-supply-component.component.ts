@@ -41,6 +41,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
+        selectableRows:15,
 
         columns: [
           {
