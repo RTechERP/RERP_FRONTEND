@@ -43,10 +43,13 @@
 
 .tabulator {
   font-size: 0.75rem;
+    border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .tabulator-cell {
   padding: 0px;
+   border: 1px solid #ddd;
 }
 
 .fs-12 {
@@ -78,4 +81,16 @@
     border-radius: 2px;
     height: 24px;
     line-height: 22px;
+}
+.card-body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.tabulator-container {
+  min-height: 70vh;
+  max-height: 100%;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
 }

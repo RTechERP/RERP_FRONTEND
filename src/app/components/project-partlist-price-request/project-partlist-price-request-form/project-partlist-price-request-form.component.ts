@@ -91,8 +91,55 @@ export class ProjectPartlistPriceRequestFormComponent
     this.tableData = this.dataInput;
     this.priceRequestService.getProductSale().subscribe({
       next: (response) => {
-        const prd = response.data;
-        this.table = new Tabulator(this.tableDiv.nativeElement, {
+       this.dtProductSale = response.data;
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy danh sách product sale:', err);
+      },
+    });
+
+  }
+  getAllUser() {
+    this.priceRequestService.getUser().subscribe({
+      next: (response) => {
+        this.users = response.data.dtEmployee;
+
+        console.log(this.users);
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy danh sách người dùng:', err);
+      },
+    });
+  }
+  getProductSale() {
+    this.priceRequestService.getProductSale().subscribe({
+      next: (response) => {
+        this.dtProductSale = response.data;
+        console.log('dtproductsale: ', this.dtProductSale);
+      },
+      error: (err) => {
+        console.error('Lỗi khi lấy danh sách product sale:', err);
+      },
+    });
+  }
+  ngAfterViewInit(): void {
+    // Khởi tạo và hiển thị modal
+    this.modalInstance = new bootstrap.Modal(
+      this.modalElementRef.nativeElement
+    );
+    this.modalInstance.show();
+
+    // Xử lý sự kiện khi modal đóng
+    this.modalElementRef.nativeElement.addEventListener(
+      'hidden.bs.modal',
+      () => {
+        this.closeModal.emit();
+      }
+    );
+        this.drawTable();
+  }
+   private drawTable(): void {
+    this.table = new Tabulator(this.tableDiv.nativeElement, {
           data: this.tableData,
           layout: 'fitDataStretch',
           columns: [
@@ -151,7 +198,7 @@ export class ProjectPartlistPriceRequestFormComponent
               formatter: (cell: any) => {
                 const value = cell.getValue();
                 const match = this.dtProductSale.find((c) => c.ID === value);
-                return match ? match.ProductCode : '';
+                return match ? match.ProductNewCode : '';
               },
               editorParams: {
                 values: this.dtProductSale.map((s) => ({
@@ -163,7 +210,7 @@ export class ProjectPartlistPriceRequestFormComponent
               },
               cellEdited: (cell) => {
                 const selectedId = cell.getValue(); // Lấy ID từ giá trị đã chọn
-                const product = prd.find(
+                const product = this.dtProductSale.find(
                   (p: { ID: any }) => p.ID === selectedId
                 ); // Tìm sản phẩm theo ID
 
@@ -253,51 +300,7 @@ export class ProjectPartlistPriceRequestFormComponent
             resizable: false,
             frozen: true,
           },
-        });
-      },
-      error: (err) => {
-        console.error('Lỗi khi lấy danh sách product sale:', err);
-      },
-    });
-    // this.drawTable();
-  }
-  getAllUser() {
-    this.priceRequestService.getUser().subscribe({
-      next: (response) => {
-        this.users = response.data.dtEmployee;
-
-        console.log(this.users);
-      },
-      error: (err) => {
-        console.error('Lỗi khi lấy danh sách người dùng:', err);
-      },
-    });
-  }
-  getProductSale() {
-    this.priceRequestService.getProductSale().subscribe({
-      next: (response) => {
-        this.dtProductSale = response.data;
-        console.log('dtproductsale: ', this.dtProductSale);
-      },
-      error: (err) => {
-        console.error('Lỗi khi lấy danh sách product sale:', err);
-      },
-    });
-  }
-  ngAfterViewInit(): void {
-    // Khởi tạo và hiển thị modal
-    this.modalInstance = new bootstrap.Modal(
-      this.modalElementRef.nativeElement
-    );
-    this.modalInstance.show();
-
-    // Xử lý sự kiện khi modal đóng
-    this.modalElementRef.nativeElement.addEventListener(
-      'hidden.bs.modal',
-      () => {
-        this.closeModal.emit();
-      }
-    );
+        })
   }
 
   addRow() {

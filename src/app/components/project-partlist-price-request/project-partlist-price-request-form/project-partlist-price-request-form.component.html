@@ -7,10 +7,10 @@ class="modal fade"
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
       <!-- Header -->
-      <div class="modal-header bg-success">
-        <h4 class="modal-title text-white" id="priceRequestModalLabel">
-          Chi tiết yêu cầu báo giá
-        </h4>
+      <div class="modal-header bg-primary p-2">
+        <h6 class="modal-title text-white" id="priceRequestModalLabel">
+          CHI TIẾT BÁO GIÁ
+        </h6>
         <button
           type="button"
           class="btn-close"
@@ -43,7 +43,7 @@ class="modal fade"
             <input
               id="requestDate"
               type="date"
-              class="form-control"
+              class="form-control fs-12"
               [(ngModel)]="requestDate"
               name="requestDate"
             />
@@ -65,15 +65,15 @@ class="modal fade"
       <div class="modal-footer">
         <button
           type="button"
-          class="btn btn-danger"
+          class="btn btn-outline-danger"
           data-bs-dismiss="modal"
           (click)="close()"
         >
-          Hủy
+          Đóng
         </button>
         <button
           type="button"
-          class="btn btn-success"
+          class="btn btn-primary"
           (click)="saveAndClose()"
         >
           Lưu dữ liệu

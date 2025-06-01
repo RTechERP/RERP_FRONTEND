@@ -17,7 +17,6 @@ import 'tabulator-tables/dist/css/tabulator_simple.min.css';
 import moment from 'moment';
 import { NgSelectModule } from '@ng-select/ng-select';
 import Swal from 'sweetalert2';
-import * as XLSX from 'xlsx';
 
 
 @Component({

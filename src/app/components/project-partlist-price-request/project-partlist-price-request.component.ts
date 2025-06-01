@@ -220,29 +220,9 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     this.PriceRequetsService.getPOKH().subscribe((response) => {
       this.dtPOKH = response.data;
       console.log('POKH:', this.dtPOKH);
-      });
+    });
   }
   private LoadPriceRequests(): void {
-    // const dateStartFormatted = this.formatDateForApi(this.filters.dateStart);
-    // const dateEndFormatted = this.formatDateForApi(this.filters.dateEnd);
-    // if (this.filters.projectTypeID === -1) {
-    //   this.filters.isCommercialProd = 1;
-    // }
-    // this.PriceRequetsService.getAllPartlist(
-    //   dateStartFormatted,
-    //   dateEndFormatted,
-    //   this.filters.statusRequest - 1,
-    //   this.filters.projectId,
-    //   this.filters.keyword,
-    //   this.filters.isDeleted,
-    //   this.filters.projectTypeID,
-    //   this.filters.poKHID,
-    //   this.filters.isCommercialProd
-    // ).subscribe((response) => {
-    //   this.dtprojectPartlistPriceRequest = response.data.dtData;
-    //   console.log('PriceRequests:', this.dtprojectPartlistPriceRequest);
-    //   this.updateActiveTable();
-    // });
     const table = this.tables.get(this.activeTabId);
     if (table) {
       // Đặt lại trang về 1
@@ -849,6 +829,376 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(link.href);
   }
+  async ExportToExcelTab() {
+    const table = this.tables.get(this.activeTabId);
+    if (!table) return;
+
+    const url = this.PriceRequetsService.getAPIPricerequest();
+    const filters = this.filters;
+
+    // Chuẩn bị tham số giống ajaxParams nhưng size lớn để lấy toàn bộ
+    let statusRequest = filters.statusRequest;
+    if (statusRequest < 0) statusRequest = 0;
+
+    let isCommercialProduct =
+      filters.projectTypeID === -1 ? 1 : filters.isCommercialProd;
+    let poKHID = filters.projectTypeID >= 0 ? 0 : filters.poKHID;
+
+    const params = {
+      dateStart: moment(filters.dateStart).format('YYYY-MM-DD'),
+      dateEnd: moment(filters.dateEnd).format('YYYY-MM-DD'),
+      statusRequest: statusRequest,
+      projectId: filters.projectId,
+      keyword: filters.keyword,
+      isDeleted: filters.isDeleted,
+      projectTypeID: filters.projectTypeID,
+      poKHID: poKHID,
+      isCommercialProduct: isCommercialProduct,
+      page: 1,
+      size: 1000000,
+    };
+
+    try {
+      const response = await fetch(
+        `${url}?${new URLSearchParams(params as any)}`
+      );
+      const result = await response.json();
+
+      const rawData = result.data?.dtData || [];
+
+      if (rawData.length === 0) {
+        Swal.fire('Thông báo', 'Không có dữ liệu để xuất!', 'warning');
+        return;
+      }
+
+      const columns = table
+        .getColumnDefinitions()
+        .filter((col: any) => col.visible !== false);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Danh sách báo giá');
+
+      // Thêm header
+      const headerRow = worksheet.addRow(columns.map((col: any) => col.title));
+      headerRow.font = { bold: true };
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE0E0E0' },
+      };
+
+      // Nhóm dữ liệu theo ProjectFullName
+      const grouped = rawData.reduce((acc: any, item: any) => {
+        const groupKey = item.ProjectFullName || 'Không rõ dự án';
+        if (!acc[groupKey]) acc[groupKey] = [];
+        acc[groupKey].push(item);
+        return acc;
+      }, {});
+
+      // Lặp qua từng group
+      for (const groupName of Object.keys(grouped)) {
+        const groupRows = grouped[groupName];
+
+        // Thêm dòng Group Header
+        const groupHeaderRow = worksheet.addRow([
+          `${groupName} (${groupRows.length})`,
+        ]);
+        groupHeaderRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFd9edf7' },
+        };
+
+        groupHeaderRow.font = { bold: true };
+        groupHeaderRow.alignment = { horizontal: 'left' };
+        worksheet.mergeCells(
+          `A${groupHeaderRow.number}:${
+            worksheet.columns.length > 0
+              ? worksheet.getColumn(worksheet.columns.length).letter +
+                groupHeaderRow.number
+              : 'A' + groupHeaderRow.number
+          }`
+        );
+
+        // Thêm các dòng dữ liệu trong nhóm
+        groupRows.forEach((row: any) => {
+          const rowData = columns.map((col: any) => {
+            const value = row[col.field];
+
+            if (value === null || value === undefined) return '';
+            if (typeof value === 'object' && Object.keys(value).length === 0)
+              return '';
+
+            if (col.field === 'IsCheckPrice') return value ? 'Có' : 'Không';
+
+            if (
+              ['DatePriceQuote', 'DateRequest', 'Deadline'].includes(col.field)
+            )
+              return value ? moment(value).format('DD/MM/YYYY') : '';
+
+            if (col.field === 'CurrencyID') {
+              const currency = this.dtcurrency?.find(
+                (c: any) => c.ID === value
+              );
+              return currency ? currency.Code : '';
+            }
+
+            if (col.field === 'SupplierSaleID') {
+              const supplier = this.dtSupplierSale?.find(
+                (s: any) => s.ID === value
+              );
+              return supplier ? supplier.NameNCC : '';
+            }
+
+            return value;
+          });
+
+          worksheet.addRow(rowData);
+        });
+      }
+
+      // Auto-fit width
+      worksheet.columns.forEach((column, index) => {
+        const col = columns[index];
+        if (col?.width) {
+          if (typeof col.width === 'string' && col.width.includes('vh')) {
+            column.width = parseFloat(col.width.replace('vh', '')) * 2;
+          } else if (typeof col.width === 'number') {
+            column.width = col.width;
+          } else {
+            column.width = parseFloat(col.width) || 15;
+          }
+        } else {
+          column.width = 15;
+        }
+      });
+
+      // Viền ô
+      worksheet.eachRow((row, rowNumber) => {
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' },
+          };
+
+          if (rowNumber === 1) {
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          }
+        });
+      });
+
+      // Tạo & tải file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `price-request-full-${
+        new Date().toISOString().split('T')[0]
+      }.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error(error);
+      Swal.fire('Lỗi', 'Không thể xuất Excel!', 'error');
+    }
+  }
+  async ExportAllTabsToExcel() {
+    const workbook = new ExcelJS.Workbook();
+    const url = this.PriceRequetsService.getAPIPricerequest();
+
+    for (const type of this.projectTypes) {
+      const filters = { ...this.filters };
+      const projectTypeID = type.ProjectTypeID;
+
+      let statusRequest = filters.statusRequest < 0 ? 0 : filters.statusRequest;
+      let isCommercialProduct =
+        projectTypeID === -1 ? 1 : filters.isCommercialProd;
+      let poKHID = projectTypeID >= 0 ? 0 : filters.poKHID;
+
+      const params = {
+        dateStart: moment(filters.dateStart).format('YYYY-MM-DD'),
+        dateEnd: moment(filters.dateEnd).format('YYYY-MM-DD'),
+        statusRequest,
+        projectId: filters.projectId,
+        keyword: filters.keyword,
+        isDeleted: filters.isDeleted,
+        projectTypeID,
+        poKHID,
+        isCommercialProduct,
+        page: 1,
+        size: 1000000,
+      };
+
+      try {
+        const response = await fetch(
+          `${url}?${new URLSearchParams(params as any)}`
+        );
+        const result = await response.json();
+        const rawData = result.data?.dtData || [];
+        if (rawData.length === 0) continue;
+
+        const table = this.tables.get(projectTypeID);
+        if (!table) continue;
+
+        const columns = table
+          .getColumnDefinitions()
+          .filter((col: any) => col.visible !== false);
+        const sheetName = (
+          type.ProjectTypeName || `Sheet-${projectTypeID}`
+        ).replace(/[\\/?*[\]]/g, '');
+        const sheet = workbook.addWorksheet(sheetName);
+
+        // Add header row
+        const headerRow = sheet.addRow(columns.map((col: any) => col.title));
+        headerRow.font = { bold: true };
+        headerRow.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE0E0E0' },
+        };
+        headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+
+        // Group dữ liệu theo ProjectFullName
+        const grouped = rawData.reduce((acc: any, item: any) => {
+          const groupKey = item.ProjectFullName || 'Không rõ dự án';
+          if (!acc[groupKey]) acc[groupKey] = [];
+          acc[groupKey].push(item);
+          return acc;
+        }, {});
+
+        for (const groupName of Object.keys(grouped)) {
+          const groupRows = grouped[groupName];
+
+          // Group header
+          const groupHeader = sheet.addRow([
+            `${groupName} (${groupRows.length})`,
+          ]);
+          groupHeader.font = { bold: true };
+          groupHeader.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFd9edf7' },
+          };
+          sheet.mergeCells(
+            `A${groupHeader.number}:${String.fromCharCode(
+              65 + columns.length - 1
+            )}${groupHeader.number}`
+          );
+
+          // Dữ liệu trong group
+          groupRows.forEach((row:any) => {
+            const rowData = columns.map((col: any) => {
+              const value = row[col.field];
+
+              if (
+                value == null ||
+                (typeof value === 'object' && Object.keys(value).length === 0)
+              )
+                return '';
+              if (col.field === 'IsCheckPrice') return value ? 'Có' : 'Không';
+              if (
+                ['DatePriceQuote', 'DateRequest', 'Deadline'].includes(
+                  col.field
+                )
+              )
+                return moment(value).isValid()
+                  ? moment(value).format('DD/MM/YYYY')
+                  : '';
+              if (col.field === 'CurrencyID') {
+                const cur = this.dtcurrency?.find((c) => c.ID === value);
+                return cur ? cur.Code : '';
+              }
+              if (col.field === 'SupplierSaleID') {
+                const sup = this.dtSupplierSale?.find((s) => s.ID === value);
+                return sup ? sup.NameNCC : '';
+              }
+              return value;
+            });
+
+            sheet.addRow(rowData);
+          });
+
+          // Footer bottomCalc
+          const footerRowData = columns.map((col: any) => {
+            if (!col.bottomCalc) return '';
+            const values = groupRows.map((r: any) => Number(r[col.field]) || 0);
+            switch (col.bottomCalc) {
+              case 'sum':
+                return values.reduce((a: number, b: number) => a + b, 0);
+
+              case 'avg':
+                return values.length > 0
+                  ? (
+                      values.reduce((a: number, b: number) => a + b, 0) /
+                      values.length
+                    ).toFixed(0)
+                  : 0;
+
+              default:
+                return '';
+            }
+          });
+
+          const footerRow = sheet.addRow(footerRowData);
+          footerRow.font = { bold: true };
+          footerRow.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFF9F9F9' },
+          };
+          sheet.addRow([]); // dòng trống giữa nhóm
+        }
+
+        // Auto-fit và border
+        sheet.columns.forEach((column, index) => {
+          const col = columns[index];
+          if (col?.width) {
+            if (typeof col.width === 'string' && col.width.includes('vh'))
+              column.width = parseFloat(col.width.replace('vh', '')) * 2;
+            else if (typeof col.width === 'number') column.width = col.width;
+            else column.width = parseFloat(col.width) || 15;
+          } else {
+            column.width = 15;
+          }
+        });
+
+        sheet.eachRow((row, rowNumber) => {
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: 'thin' },
+              left: { style: 'thin' },
+              bottom: { style: 'thin' },
+              right: { style: 'thin' },
+            };
+          });
+        });
+      } catch (error) {
+        console.error(`Lỗi khi export sheet ${type.ProjectTypeName}:`, error);
+      }
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `price-request-all-tabs-${
+      new Date().toISOString().split('T')[0]
+    }.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(link.href);
+  }
+
   // DownloadFile() {
   //   const table = this.tables.get(this.activeTabId);
   //   if (!table) return;
@@ -897,80 +1247,81 @@ export class ProjectPartlistPriceRequestComponent implements OnInit {
   //     );
   //   });
   // }
-DownloadFile() {
-  const table = this.tables.get(this.activeTabId);
-  if (!table) return;
+  DownloadFile() {
+    const table = this.tables.get(this.activeTabId);
+    if (!table) return;
 
-  const selectedRows = table.getSelectedData();
-  if (selectedRows.length <= 0) {
-    Swal.fire({
-      title: 'Thông báo',
-      text: `Vui lòng chọn 1 sản phẩm muốn tải!`,
-      icon: 'warning',
-      confirmButtonText: 'OK',
-    });
-    return;
-  }
+    const selectedRows = table.getSelectedData();
+    if (selectedRows.length <= 0) {
+      Swal.fire({
+        title: 'Thông báo',
+        text: `Vui lòng chọn 1 sản phẩm muốn tải!`,
+        icon: 'warning',
+        confirmButtonText: 'OK',
+      });
+      return;
+    }
 
-  selectedRows.forEach((row) => {
-    const projectId = row['ProjectID'];
-    const partListId = row['ProjectPartListID'];
-    const productCode = row['ProductCode'];
-    if (!productCode) return;
+    selectedRows.forEach((row) => {
+      const projectId = row['ProjectID'];
+      const partListId = row['ProjectPartListID'];
+      const productCode = row['ProductCode'];
+      if (!productCode) return;
 
-    const requestPayload = {
-      projectId,
-      partListId,
-      productCode,
-    };
+      const requestPayload = {
+        projectId,
+        partListId,
+        productCode,
+      };
 
-    this.PriceRequetsService.downloadFile(requestPayload).subscribe({
-      next: (blob: Blob) => {
-        // Kiểm tra nếu blob thực ra chứa lỗi dạng JSON thay vì PDF
-        const reader = new FileReader();
-        reader.onload = () => {
-          try {
-            const json = JSON.parse(reader.result as string);
-            if (json?.status === 0) {
-              Swal.fire({
-                title: 'Thông báo',
-                text: json.message || 'Lỗi không xác định!',
-                icon: 'error',
-                confirmButtonText: 'OK',
-              });
-              return;
+      this.PriceRequetsService.downloadFile(requestPayload).subscribe({
+        next: (blob: Blob) => {
+          // Kiểm tra nếu blob thực ra chứa lỗi dạng JSON thay vì PDF
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const json = JSON.parse(reader.result as string);
+              if (json?.status === 0) {
+                Swal.fire({
+                  title: 'Thông báo',
+                  text: json.message || 'Lỗi không xác định!',
+                  icon: 'error',
+                  confirmButtonText: 'OK',
+                });
+                return;
+              }
+            } catch {
+              // Không phải JSON → hợp lệ là file PDF
+              const fileName = `${productCode}.pdf`;
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = fileName;
+              a.click();
+              window.URL.revokeObjectURL(url);
             }
-          } catch {
-            // Không phải JSON → hợp lệ là file PDF
-            const fileName = `${productCode}.pdf`;
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            window.URL.revokeObjectURL(url);
-          }
-        };
-        reader.readAsText(blob);
-      },
-      error: (error) => {
-        const errMsg = error?.error?.message || error?.message || 'Đã xảy ra lỗi!';
-        Swal.fire({
-          title: 'Thông báo',
-          text: errMsg,
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-      }
+          };
+          reader.readAsText(blob);
+        },
+        error: (error) => {
+          const errMsg =
+            error?.error?.message || error?.message || 'Đã xảy ra lỗi!';
+          Swal.fire({
+            title: 'Thông báo',
+            text: errMsg,
+            icon: 'error',
+            confirmButtonText: 'OK',
+          });
+        },
+      });
     });
-  });
-}
+  }
 
   private GetTableConfig(): any {
     return {
       // data: this.dtprojectPartlistPriceRequest,
       layout: 'fitDataFill',
-      height: '68vh',
+      height: '70vh',
       virtualDom: true,
       rowHeader: {
         headerSort: false,
@@ -1007,7 +1358,7 @@ DownloadFile() {
           projectTypeID: filters.projectTypeID,
           poKHID: poKHID,
           isCommercialProduct: isCommercialProduct,
-          page: 1, 
+          page: 1,
           size: 25,
         };
       },
