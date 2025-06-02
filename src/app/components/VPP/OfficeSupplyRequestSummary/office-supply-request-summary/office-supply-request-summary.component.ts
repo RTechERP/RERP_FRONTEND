@@ -113,25 +113,32 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
           paginationSize: 50,
           movableColumns: true,
           resizableRows: true,
+          
           columnDefaults:{
-            headerWordWrap: true,
+            // headerWordWrap: true,
             headerVertical: false,
             headerHozAlign: "center",           
             minWidth: 60,
-            resizable: true
+            headerFilter:true,
+            resizable: true,
+           
           },
           columns: [
             { 
               title: "",
+              frozen:true,
               columns:[
-                { title: "STT", field: "STT", width: 45, hozAlign: "center", resizable: true },
+                { title: "STT", field: "STT", width: 45, hozAlign: "center", resizable: true
+                  //  frozen: true 
+                  },
                 { 
                   title: "Tên sản phẩm", 
                   field: "OfficeSupplyName", 
-                  width: 150,
+                  width: 400,
                   resizable: true,
                   variableHeight: true,
-                  bottomCalc: "count"
+                  bottomCalc: "count",
+                  // frozen: true
                 },
               ]
             },
@@ -187,9 +194,15 @@ export class OfficeSupplyRequestSummaryComponent implements OnInit {
                   resizable: true,
                   hozAlign: "right",
                   formatter: "money",
-                  formatterParams: moneyFormatterParams,
-                  bottomCalc:"sum",
-                  bottomCalcFormatterParams: moneyFormatterParams
+                  bottomCalc: "sum",
+                  bottomCalcFormatter: "money",
+                  bottomCalcFormatterParams: {
+                    precision: 0,
+                    decimal: ".",
+                    thousand: ",",
+                    symbol: "",
+                    symbolAfter: true
+                  }
                 },
                 { 
                   title: "Ghi chú", 

@@ -42,8 +42,8 @@
   <div class="modal fade" id="addUnitModal" tabindex="-1" aria-labelledby="addUnitModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addUnitModalLabel">Thêm đơn vị tính mới</h5>
+        <div class="modal-header bg-primary text-white text-uppercase">
+          <h6 class="modal-title" id="addUnitModalLabel">Thêm đơn vị tính mới</h6>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -52,7 +52,7 @@
             </div>
             <div class="mb-3">
               <label for="unitName" class="form-label">Tên đơn vị <sup style="color: red;">(*)</sup></label>
-              <input type="text" class="form-control" id="unitName" [(ngModel)]="selectedItem.Name" name="unitName" required placeholder="Nhập tên đơn vị">
+              <input type="text" class="form-control fs-12" id="unitName" [(ngModel)]="selectedItem.Name" name="unitName" required placeholder="Nhập tên đơn vị">
               <div class="invalid-feedback">
                 Vui lòng nhập tên đơn vị!
               </div>
@@ -60,8 +60,8 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
-          <button type="button" class="btn btn-outline-primary" (click)="saveSelectedItem()">Lưu</button>
+          <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-success p-0 ps-2 pe-2" (click)="saveSelectedItem()">Lưu thay đổi</button>
         </div>
       </div>
     </div>

@@ -48,6 +48,8 @@ export class OfficeSuppliesComponent implements OnInit {
   dataTable: any[] = [];
   dataTable2: any[]=[];
   dataTableExcel: any[]=[];
+  lastAddedId: number | null = null; // Thêm biến để theo dõi ID của đơn vị tính mới thêm
+  lastAddedIdProduct: number | null = null; // Thêm biến để theo dõi ID của sản phẩm mới thêm 
   newUnit: any = {ID:0,Name:''};
   newProduct: Product = {
     CodeRTC: '',
@@ -68,68 +70,26 @@ export class OfficeSuppliesComponent implements OnInit {
   filePath: string = '';
   excelSheets: string[] = [];
   selectedSheet: string = '';
-  uploadProgress: number = 0; // Thêm biến theo dõi tiến trình
+  
+  // Biến hiển thị chính trên thanh tiến trình
+  displayProgress: number = 0; // % hiển thị trên thanh
+  displayText: string = '0/0'; // Text hiển thị trên thanh
+  
+  totalRowsAfterFileRead: number = 0; // Tổng số dòng dữ liệu hợp lệ sau khi đọc file
+  processedRowsForSave: number = 0; // Số dòng đã được xử lý khi lưu vào DB
 
   typeOptions = [
     { id: 2, name: 'Dùng chung' },
     { id: 1, name: 'Cá nhân' }
   ];
 
-
-
   constructor(private lstVPP: OfficeSuppliesService) { }
 
   ngOnInit(): void {
-    this.drawTable();
+    this.drawTable(); // Khởi tạo tất cả các bảng ở đây
     this.getAll();
     this.getUnits();
-
-    // Thêm event listener cho việc import
-    // if (this.table) {
-    //   this.table.on("dataLoaded", (data: any[]) => {
-    //     // Xử lý dữ liệu sau khi import
-    //     const processedData = data.map(row => ({
-    //       CodeRTC: row.CodeRTC || '',
-    //       CodeNCC: row.CodeNCC || '',
-    //       NameRTC: row.NameRTC || '',
-    //       NameNCC: row.NameNCC || '',
-    //       SupplyUnitID: this.getUnitIdByName(row.Unit),
-    //       Price: Number(row.Price) || 0,
-    //       RequestLimit: Number(row.RequestLimit) || 0,
-    //       Type: row.Loại === 'Cá nhân' ? 1 : 2
-    //     }));
-
-        // Lưu dữ liệu vào database
-    //     this.lstVPP.adddata(processedData).subscribe({
-    //       next: () => {
-    //         Swal.fire({
-    //           icon: 'success',
-    //           title: 'Thông báo',
-    //           text: 'Nhập dữ liệu thành công!',
-    //           showConfirmButton: true,
-    //           timer: 1500
-    //         });
-    //         this.getAll(); // Refresh the table
-    //       },
-    //       error: (err) => {
-    //         Swal.fire({
-    //           icon: 'error',
-    //           title: 'Thông báo',
-    //           text: 'Có lỗi xảy ra khi nhập dữ liệu!',
-    //           showConfirmButton: true,
-    //           timer: 1500
-    //         });
-    //       }
-    //     });
-    //   });
-    // }
   }
-
-  // Hàm helper để lấy ID của đơn vị tính từ tên
-  // private getUnitIdByName(unitName: string): number {
-  //   const unit = this.listUnit.find(u => u.Name === unitName);
-  //   return unit ? unit.ID : 0;
-  // }
 
 //lấy ra danh sách đơn vị tính
   getUnits(): void {
@@ -138,10 +98,25 @@ export class OfficeSuppliesComponent implements OnInit {
         console.log('Danh sách đơn vị tính:', res);
         this.listUnit = Array.isArray(res?.data) ? res.data : [];
         this.dataTable2 = res.data;
+        if(this.lastAddedId){
+          const newItem = this.listUnit.find(item => item.ID === this.lastAddedId);
+          if(newItem){
+            //Tách đơn vị mới ra khỏi danh sách
+            this.listUnit = this.listUnit.filter(item => item.ID !== this.lastAddedId);
+            //Sắp xếp các đơn vị còn lại theo ID tăng dần
+            this.listUnit.sort((a, b) => a.ID - b.ID);
+            //Thêm đơn vị mới vào đầu danh sách
+            this.listUnit.unshift(newItem);
+          }
+        }else{
+          //Nếu không có đơn vị mới, sắp xếp tất cả theo ID tăng dần
+          this.listUnit.sort((a, b) => a.ID - b.ID);
+        }
         if (this.table2) {
           this.table2.replaceData(this.dataTable2);
         } else {
-          this.drawTable();
+          // Nếu table2 chưa được khởi tạo (ví dụ: trong trường hợp lỗi ngOnInit), gọi drawTable
+          this.drawTable(); 
         }
       },
       error: (err) => {
@@ -149,12 +124,10 @@ export class OfficeSuppliesComponent implements OnInit {
       }
     });
   }
- 
+  
   private drawTable(): void {
-    // Khởi tạo bảng đầu tiên
-    if (this.table) {
-      this.table.replaceData(this.dataTable);
-    } else {
+    // Khởi tạo bảng chính (this.table)
+    if (!this.table) { // Chỉ khởi tạo nếu chưa có
       this.table = new Tabulator('#datatable', {
         data: this.dataTable,
         layout: 'fitDataFill',
@@ -165,6 +138,7 @@ export class OfficeSuppliesComponent implements OnInit {
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
+       
         columns: [
           { 
             title: "",
@@ -175,8 +149,9 @@ export class OfficeSuppliesComponent implements OnInit {
             headerSort: false,
             width: 40,
             frozen: true,
+            
           },
-          { title: 'Mã RTC', field: 'CodeRTC', hozAlign: 'left', headerHozAlign: 'center', width: 80 },
+          { title: 'Mã RTC', field: 'CodeRTC', hozAlign: 'left', headerHozAlign: 'center', width: 80,   bottomCalc: "count",},
           { title: 'Mã NCC', field: 'CodeNCC', hozAlign: 'left', headerHozAlign: 'center', width: 100 },
           { title: 'Tên (RTC)', field: 'NameRTC', hozAlign: 'left', headerHozAlign: 'center', width: 200 },
           { title: 'Tên (NCC)', field: 'NameNCC', hozAlign: 'left', headerHozAlign: 'center', width: 350 },
@@ -193,6 +168,15 @@ export class OfficeSuppliesComponent implements OnInit {
               thousand: ",",
               symbol: "",
               symbolAfter: true
+            },
+            bottomCalc: "sum",
+            bottomCalcFormatter: "money",
+            bottomCalcFormatterParams: {
+              precision: 0,
+              decimal: ".",
+              thousand: ",",
+              symbol: "",
+              symbolAfter: true
             }
           },
           { title: 'Định mức', field: 'RequestLimit', hozAlign: 'right', headerHozAlign: 'center', width: 80 },
@@ -201,10 +185,8 @@ export class OfficeSuppliesComponent implements OnInit {
       });
     }
 
-    // Khởi tạo bảng thứ hai
-    if (this.table2) {
-      this.table2.replaceData(this.dataTable2);
-    } else {
+    // Khởi tạo bảng thứ hai (this.table2)
+    if (!this.table2) { // Chỉ khởi tạo nếu chưa có
       this.table2 = new Tabulator('#datatable2', {
         data: this.dataTable2,
         layout: 'fitDataFill',
@@ -244,15 +226,13 @@ export class OfficeSuppliesComponent implements OnInit {
       });
     }
     
-    //khoi tao bang du lieu Excel
-    if(this.tableExcel){
-      this.tableExcel.replaceData(this.dataTableExcel);
-      
-    }else{
+    // Khởi tạo bảng dữ liệu Excel (this.tableExcel)
+    // Đặt chiều cao hợp lý cho bảng trong modal
+    if (!this.tableExcel) { // Chỉ khởi tạo nếu chưa có
       this.tableExcel = new Tabulator('#datatableExcel', {
-         data: this.dataTable,
+        data: this.dataTableExcel, // Dữ liệu ban đầu rỗng
         layout: 'fitDataFill',
-        height: '50vh',
+        height: '300px', // Chiều cao cố định cho bảng trong modal
         selectableRows: 10,
         pagination: true,
         paginationSize: 50,
@@ -260,15 +240,16 @@ export class OfficeSuppliesComponent implements OnInit {
         resizableRows: true,
         reactiveData: true,
         columns: [
-          { title: '', field: 'CodeRTC', hozAlign: 'left', headerHozAlign: 'center', width: 80 },
-          { title: '', field: 'CodeNCC', hozAlign: 'left', headerHozAlign: 'center', width: 100 },
-          { title: '', field: 'NameRTC', hozAlign: 'left', headerHozAlign: 'center', width: 200 },
-          { title: '', field: 'NameNCC', hozAlign: 'left', headerHozAlign: 'center', width: 350 },
+          // Các cột này sẽ được cập nhật sau khi đọc Excel, có thể đặt tiêu đề rỗng ban đầu
+          { title: 'Mã RTC', field: 'CodeRTC', hozAlign: 'left', headerHozAlign: 'center', width: 80 },
+          { title: 'Mã NCC', field: 'CodeNCC', hozAlign: 'left', headerHozAlign: 'center', width: 100 },
+          { title: 'Tên (RTC)', field: 'NameRTC', hozAlign: 'left', headerHozAlign: 'center', width: 200 },
+          { title: 'Tên (NCC)', field: 'NameNCC', hozAlign: 'left', headerHozAlign: 'center', width: 350 },
           {
-            title: '', field: 'Unit', hozAlign: 'left', headerHozAlign: 'center', width: 80
+            title: 'Đơn vị tính', field: 'Unit', hozAlign: 'left', headerHozAlign: 'center', width: 80
           },
           {
-            title: '', field: 'Price', hozAlign: 'right', headerHozAlign: 'center', 
+            title: 'Giá (VND)', field: 'Price', hozAlign: 'right', headerHozAlign: 'center', 
             width: 120,
             formatter: "money",
             formatterParams: {
@@ -279,10 +260,10 @@ export class OfficeSuppliesComponent implements OnInit {
               symbolAfter: true
             }
           },
-          { title: '', field: 'RequestLimit', hozAlign: 'right', headerHozAlign: 'center', width: 80 },
-          { title: '', field: 'TypeName', hozAlign: 'left', headerHozAlign: 'center', width: 80 }
+          { title: 'Định mức', field: 'RequestLimit', hozAlign: 'right', headerHozAlign: 'center', width: 80 },
+          { title: 'Loại', field: 'Type', hozAlign: 'left', headerHozAlign: 'center', width: 80 } // Cột Type nên hiển thị giá trị gốc từ Excel
         ],
-      });  
+      });   
     }
   }
   getdataUnitbyid(id: number) {
@@ -327,6 +308,10 @@ export class OfficeSuppliesComponent implements OnInit {
     if (!this.selectedItem?.ID || this.selectedItem.ID === 0) {
       this.lstVPP.addUnit({ ID: 0, Name: this.selectedItem.Name }).subscribe({
         next: (response) => {
+          if(response && response.data){
+            const newItem = Array.isArray(response.data) ? response.data[0] : response.data;
+            this.lastAddedId = newItem.ID;
+          }
           Swal.fire({
             icon: 'success',
             title: 'Thành công',
@@ -374,6 +359,23 @@ export class OfficeSuppliesComponent implements OnInit {
       next: (res) => {
         console.log('Dữ liệu nhận được:', res);
         this.lstVP = res.data.officeSupply;
+        
+        // Sắp xếp dữ liệu: sản phẩm mới nhất lên đầu, các sản phẩm khác theo thứ tự tăng dần
+        if (this.lastAddedIdProduct) {
+          const newItem = this.lstVP.find(item => item.ID === this.lastAddedIdProduct);
+          if (newItem) {
+            // Tách sản phẩm mới ra khỏi danh sách
+            this.lstVP = this.lstVP.filter(item => item.ID !== this.lastAddedIdProduct);
+            // Sắp xếp các sản phẩm còn lại theo ID tăng dần
+            this.lstVP.sort((a, b) => a.ID - b.ID);
+            // Thêm sản phẩm mới vào đầu danh sách
+            this.lstVP.unshift(newItem);
+          }
+        } else {
+          // Nếu không có sản phẩm mới, sắp xếp tất cả theo ID tăng dần
+          this.lstVP.sort((a, b) => a.ID - b.ID);
+        }
+
         // Cập nhật lại dataTable và reload bảng
         this.dataTable = this.lstVP;
         if (this.table) {
@@ -396,10 +398,10 @@ export class OfficeSuppliesComponent implements OnInit {
 
   add(): void {
     if (!this.newProduct.CodeNCC || !this.newProduct.NameNCC || !this.newProduct.Price || !this.newProduct.SupplyUnitID) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Thông báo',
-            text: 'Vui lòng điền đầy đủ thông tin!',
+      Swal.fire({
+        icon: 'error',
+        title: 'Thông báo',
+        text: 'Vui lòng điền đầy đủ thông tin!',
         showConfirmButton: true,
         timer: 1500
       });
@@ -407,6 +409,10 @@ export class OfficeSuppliesComponent implements OnInit {
     }
     this.lstVPP.adddata(this.newProduct).subscribe({
       next: (res) => {
+        if(res && res.data){
+          const newItem = Array.isArray(res.data) ? res.data[0] : res.data;
+          this.lastAddedIdProduct = newItem.ID;
+        }
         Swal.fire({
           icon: 'success',
           title: 'Thông báo',
@@ -457,8 +463,11 @@ export class OfficeSuppliesComponent implements OnInit {
         icon: 'warning',
         title: 'Thông báo',
         text: 'Bạn có chắc chắn muốn xóa không?',
-        showConfirmButton: true,
         showCancelButton: true,
+        showConfirmButton: true,
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy',
+        reverseButtons: true,
       }).then((result) => {
         if (result.isConfirmed) {
           this.lstVPP.deletedata(ids).subscribe({
@@ -691,7 +700,7 @@ export class OfficeSuppliesComponent implements OnInit {
         this.newUnit={ID:0,Name:''};
         this.closeUnitModal();
         this.getUnits(); 
-       
+        
       },
       error: (error: any) => {
         Swal.fire({
@@ -774,12 +783,13 @@ export class OfficeSuppliesComponent implements OnInit {
     this.getdatabyid(this.selectedList[0].ID);
     this.openModal();
   }
-  OpenModalExcel(): void{
+  OpenModalExcel(): void {
     const modalEl = document.getElementById('ExcelModal');
     if (modalEl) {
       const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-
       modal.show();
+      // Reset trạng thái tiến trình khi mở modal
+      this.resetExcelImportState(); // Sử dụng hàm reset
     }
   }
 
@@ -803,84 +813,132 @@ export class OfficeSuppliesComponent implements OnInit {
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const fileExtension = file.name.split('.').pop()?.toLowerCase();
-      
-      if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
-        Swal.fire({
-          icon: 'error',
-          title: 'Lỗi',
-          text: 'Vui lòng chọn file Excel (.xlsx hoặc .xls)!',
-          showConfirmButton: true,
-          timer: 1500
-        });
-        input.value = ''; // Reset input
-        this.filePath = ''; // Reset file path
-        this.excelSheets = []; // Reset sheets
-        return;
-      }
+        const file = input.files[0];
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
-      // Lưu file và đường dẫn
-      this.filePath = file.name;
-      console.log('File selected:', file);
-      
-      // Đọc nội dung file Excel
-      const reader = new FileReader();
+        console.log('File đã chọn:', file.name); // Log để kiểm tra
+        console.log('Phần mở rộng:', fileExtension); // Log để kiểm tra
 
-      // Cập nhật tiến trình đọc file
-      reader.onprogress = (event) => {
-        if (event.lengthComputable) {
-          this.uploadProgress = Math.round((event.loaded / event.total) * 50); // Tính tiến trình đọc (lên đến 50%)
-        }
-      };
-
-      reader.onload = async (e: any) => {
-        this.uploadProgress = 50; // Hoàn thành đọc file (50%)
-        const data = e.target.result;
-        try {
-          const workbook = new ExcelJS.Workbook();
-          await workbook.xlsx.load(data);
-          
-          // Lấy danh sách các sheet
-          this.excelSheets = workbook.worksheets.map(sheet => sheet.name);
-          console.log('Available sheets:', this.excelSheets);
-          
-          // Nếu có sheet, chọn sheet đầu tiên và đọc dữ liệu
-          if (this.excelSheets.length > 0) {
-            this.selectedSheet = this.excelSheets[0];
-            await this.readExcelData(workbook, this.selectedSheet);
-          }
-        } catch (error) {
-          console.error('Error reading Excel file:', error);
-          Swal.fire({
-            icon: 'error',
-            title: 'Lỗi',
-            text: 'Không thể đọc file Excel!',
-            showConfirmButton: true,
-            timer: 1500
-          });
+        if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Lỗi',
+              text: 'Vui lòng chọn tệp Excel (.xlsx hoặc .xls)!',
+              showConfirmButton: true,
+              timer: 1500
+            });
+            input.value = ''; // Xóa input để có thể chọn lại file
+            this.resetExcelImportState(); // Reset trạng thái khi có lỗi định dạng
+            return;
         }
 
-        // Reset giá trị của input file để cho phép chọn lại cùng file
-        input.value = '';
+        this.filePath = file.name;
+        this.excelSheets = [];
+        this.selectedSheet = '';
+        this.dataTableExcel = [];
+        this.totalRowsAfterFileRead = 0;
+        this.processedRowsForSave = 0; // Reset cho giai đoạn lưu
 
-      };
-      reader.readAsArrayBuffer(file);
+        // Đặt trạng thái ban đầu cho thanh tiến trình: Đang đọc file
+        this.displayProgress = 0;
+        this.displayText = 'Đang đọc file...'; 
+        console.log('Progress bar state set to: Đang đọc file...'); // Log trạng thái ban đầu
+
+        const reader = new FileReader();
+
+        reader.onprogress = (event) => {
+            if (event.lengthComputable) {
+                this.displayProgress = Math.round((event.loaded / event.total) * 100);
+                this.displayText = `Đang tải file: ${this.displayProgress}%`;
+                // console.log(`Tiến trình đọc file: ${this.displayProgress}%`); // Bỏ comment nếu muốn log chi tiết tiến trình tải
+            }
+        };
+
+        let startTime = Date.now(); // Ghi lại thời gian bắt đầu đọc file
+
+        reader.onload = async (e: any) => {
+            const data = e.target.result;
+            console.log('FileReader.onload đã hoàn thành. Bắt đầu xử lý ExcelJS.'); // Log
+            try {
+                const workbook = new ExcelJS.Workbook();
+                await workbook.xlsx.load(data);
+                console.log('Workbook đã được tải bởi ExcelJS.'); // Log
+
+                this.excelSheets = workbook.worksheets.map(sheet => sheet.name);
+                console.log('Danh sách sheets tìm thấy:', this.excelSheets); // Log
+
+                if (this.excelSheets.length > 0) {
+                    this.selectedSheet = this.excelSheets[0];
+                    console.log('Sheet mặc định được chọn:', this.selectedSheet); // Log
+                    await this.readExcelData(workbook, this.selectedSheet);
+                    
+                    const elapsedTime = Date.now() - startTime;
+                    const minDisplayTime = 500; // Thời gian hiển thị tối thiểu cho trạng thái tải (500ms)
+
+                    if (elapsedTime < minDisplayTime) {
+                        // Nếu quá trình xử lý nhanh hơn thời gian tối thiểu, đợi thêm
+                        setTimeout(() => {
+                            this.displayProgress = 0; // Luôn hiển thị 0% cho trạng thái "0/tổng số dòng"
+                            if (this.totalRowsAfterFileRead === 0) {
+                                this.displayText = 'Không có dữ liệu hợp lệ trong sheet.';
+                            } else {
+                                this.displayText = `0/${this.totalRowsAfterFileRead} dòng`;
+                            }
+                            console.log('Dữ liệu đã được đọc và bảng Excel preview đã được cập nhật (sau delay).');
+                        }, minDisplayTime - elapsedTime);
+                    } else {
+                        // Nếu quá trình xử lý đã đủ lâu, cập nhật ngay lập tức
+                        this.displayProgress = 0;
+                        if (this.totalRowsAfterFileRead === 0) {
+                            this.displayText = 'Không có dữ liệu hợp lệ trong sheet.';
+                        } else {
+                            this.displayText = `0/${this.totalRowsAfterFileRead} dòng`;
+                        }
+                        console.log('Dữ liệu đã được đọc và bảng Excel preview đã được cập nhật.');
+                    }
+
+                } else {
+                    console.warn('File Excel không chứa bất kỳ sheet nào.'); // Log
+                    Swal.fire({
+                      icon: 'warning',
+                      title: 'Thông báo',
+                      text: 'File Excel không có sheet nào!',
+                      showConfirmButton: true,
+                      timer: 1500
+                    });
+                    this.resetExcelImportState();
+                }
+            } catch (error) {
+                console.error('Lỗi khi đọc tệp Excel trong FileReader.onload:', error); // Log chi tiết lỗi
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Lỗi',
+                  text: 'Không thể đọc tệp Excel. Vui lòng đảm bảo tệp không bị hỏng và đúng định dạng.',
+                  showConfirmButton: true,
+                  timer: 2500
+                });
+                this.resetExcelImportState(); // Reset trạng thái khi có lỗi
+            }
+            input.value = ''; // Xóa input để có thể chọn lại cùng file
+        };
+        reader.readAsArrayBuffer(file); // Bắt đầu đọc file ngay lập tức
     }
   }
 
   async readExcelData(workbook: ExcelJS.Workbook, sheetName: string) {
+    console.log(`Bắt đầu đọc dữ liệu từ sheet: "${sheetName}"`); // Log
     try {
       const worksheet = workbook.getWorksheet(sheetName);
       if (!worksheet) {
-        throw new Error('Sheet không tồn tại');
+        throw new Error(`Sheet "${sheetName}" không tồn tại trong workbook.`); // Log lỗi cụ thể
       }
 
-      // Đọc dữ liệu từ sheet
       const data: any[] = [];
+      let validRecords = 0;
+
+      // Đọc dữ liệu từ hàng thứ 3 trở đi (bỏ qua 2 hàng header)
       worksheet.eachRow((row, rowNumber) => {
-        // Bỏ qua 2 hàng đầu tiên (hàng tiêu đề)
-        if (rowNumber > 2) {
+        if (rowNumber > 2) { 
           const rowData: any = {
             CodeRTC: row.getCell(2).value?.toString() || '',
             CodeNCC: row.getCell(3).value?.toString() || '',
@@ -892,66 +950,93 @@ export class OfficeSuppliesComponent implements OnInit {
             Type: row.getCell(9).value?.toString() || ''
           };
           
-          // Kiểm tra kỹ hơn để loại bỏ các dòng tiêu đề
-          const isHeaderRow = 
-            rowData.CodeRTC === 'Mã RTC' || 
-            rowData.CodeRTC === 'CodeRTC' ||
-            rowData.CodeNCC === 'Mã' ||
-            rowData.CodeNCC === 'CodeNCC' ||
-            rowData.NameNCC === 'Tên' ||
-            !rowData.CodeRTC && !rowData.CodeNCC;
+          // Kiểm tra nếu hàng không rỗng hoàn toàn để tránh các hàng trống cuối file
+          // Một hàng được coi là rỗng nếu tất cả các giá trị của nó đều là null, rỗng, hoặc 0
+          const isEmptyRow = !Object.values(rowData).some(val => 
+            val !== null && val !== '' && val !== 0
+          );
 
-          // Chỉ thêm vào data nếu không phải là dòng tiêu đề và có dữ liệu
-          if (!isHeaderRow && (rowData.CodeRTC || rowData.CodeNCC || rowData.NameRTC || rowData.NameNCC)) {
+          if (!isEmptyRow) {
+            validRecords++;
             data.push(rowData);
           }
         }
       });
 
-      // Cập nhật dữ liệu vào bảng
       this.dataTableExcel = data;
+      this.totalRowsAfterFileRead = validRecords; // Cập nhật tổng số dòng hợp lệ
+      console.log(`Đã đọc ${validRecords} dòng dữ liệu hợp lệ từ sheet.`); // Log
+      console.log('Dữ liệu đọc được để preview:', this.dataTableExcel); // Log
+
+      // Cập nhật hiển thị sau khi đọc dữ liệu xong (0/tổng số dòng)
+      this.displayProgress = 0; 
+      if (this.totalRowsAfterFileRead === 0) {
+        this.displayText = 'Không có dữ liệu hợp lệ trong sheet.'; // Thông báo rõ ràng hơn
+      } else {
+        this.displayText = `0/${this.totalRowsAfterFileRead} dòng`;
+      }
+      
+      // Cập nhật Tabulator
       if (this.tableExcel) {
         this.tableExcel.replaceData(this.dataTableExcel);
+        console.log('Tabulator Excel đã được cập nhật dữ liệu.'); // Log
       } else {
-        this.drawTable(); // Khởi tạo bảng nếu chưa có
+        // Trường hợp này ít xảy ra nếu drawTable được gọi trong ngOnInit
+        this.drawTable(); 
+        console.log('Tabulator Excel được khởi tạo lại thông qua drawTable.'); // Log
       }
 
     } catch (error) {
-      console.error('Error reading Excel data:', error);
+      console.error('Lỗi khi đọc dữ liệu từ sheet trong readExcelData:', error); // Log chi tiết lỗi
       Swal.fire({
         icon: 'error',
         title: 'Lỗi',
-        text: 'Không thể đọc dữ liệu từ sheet!',
+        text: 'Không thể đọc dữ liệu từ sheet! Vui lòng kiểm tra định dạng dữ liệu.',
         showConfirmButton: true,
         timer: 1500
       });
+      this.resetExcelImportState(); // Reset trạng thái khi có lỗi
     }
   }
 
-  // Thêm phương thức để xử lý khi sheet thay đổi
   onSheetChange() {
+    console.log('Sheet đã thay đổi thành:', this.selectedSheet); // Log
     if (this.filePath) {
-      const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-      if (fileInput.files && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const reader = new FileReader();
-        reader.onload = async (e: any) => {
-          const data = e.target.result;
-          try {
-            const workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(data);
-            await this.readExcelData(workbook, this.selectedSheet);
-          } catch (error) {
-            console.error('Error reading Excel file:', error);
-          }
-        };
-        reader.readAsArrayBuffer(file);
-      }
+        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+        if (fileInput.files && fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e: any) => {
+                const data = e.target.result;
+                try {
+                    const workbook = new ExcelJS.Workbook();
+                    await workbook.xlsx.load(data);
+                    await this.readExcelData(workbook, this.selectedSheet);
+                    // Sau khi thay đổi sheet và đọc dữ liệu, đặt lại thanh tiến trình
+                    this.displayProgress = 0;
+                    // displayText được cập nhật trong readExcelData
+                    console.log('Dữ liệu đã được đọc lại sau khi thay đổi sheet.'); // Log
+                } catch (error) {
+                    console.error('Lỗi khi đọc tệp Excel khi thay đổi sheet:', error);
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Lỗi',
+                      text: 'Không thể đọc dữ liệu từ sheet đã chọn!',
+                      showConfirmButton: true,
+                      timer: 1500
+                    });
+                    this.resetExcelImportState(); // Reset trạng thái khi có lỗi
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
     }
   }
 
   saveExcelData() {
     console.log('--- Bắt đầu saveExcelData ---');
+    console.log('Tổng số bản ghi cần lưu:', this.dataTableExcel.length);
+    console.log('Dữ liệu Excel hiện tại:', this.dataTableExcel);
 
     if (!this.dataTableExcel || this.dataTableExcel.length === 0) {
       Swal.fire({
@@ -965,7 +1050,11 @@ export class OfficeSuppliesComponent implements OnInit {
       return;
     }
 
-    console.log('dataTableExcel (dữ liệu từ Excel):', this.dataTableExcel);
+    // Reset tiến trình cho giai đoạn lưu dữ liệu
+    this.processedRowsForSave = 0;
+    const totalProductsToSave = this.dataTableExcel.length;
+    this.displayText = `Đang lưu: 0/${totalProductsToSave} bản ghi`; // Văn bản ban đầu cho giai đoạn lưu
+    this.displayProgress = 0; // Bắt đầu thanh tiến trình từ 0%
 
     // Lấy danh sách mã sản phẩm cần kiểm tra
     const codesToCheck = this.dataTableExcel.map(item => ({
@@ -979,27 +1068,18 @@ export class OfficeSuppliesComponent implements OnInit {
     this.lstVPP.checkProductCodes(codesToCheck).subscribe({
       next: (response: any) => {
         console.log('Response từ checkProductCodes API:', response);
-        // Đảm bảo existingProducts là một mảng từ cấu trúc response của backend
         const existingProducts = (response.data && Array.isArray(response.data.existingProducts)) ? response.data.existingProducts : [];
         console.log('existingProducts (sau khi xử lý response):', existingProducts);
         
-        // Chuyển đổi dữ liệu từ Excel sang định dạng phù hợp
         const processedData = this.dataTableExcel.map((row, index) => {
-          // Tìm sản phẩm đã tồn tại trong database
           const existingProduct = existingProducts.find((p: any) => 
-            p.CodeRTC === row.CodeRTC && p.CodeNCC === row.CodeNCC // Tìm kiếm chính xác theo cả hai mã
+            p.CodeRTC === row.CodeRTC && p.CodeNCC === row.CodeNCC
           );
 
           const assignedId = existingProduct ? existingProduct.ID : 0;
 
-          console.log(`Xử lý hàng ${index}:`, { 
-            rowFromExcel: row, 
-            foundExisting: existingProduct, 
-            assignedId: assignedId 
-          });
-
           return {
-            id: assignedId, // Sử dụng ID từ database nếu có
+            id: assignedId,
             codeRTC: row.CodeRTC || '',
             codeNCC: row.CodeNCC || '',
             nameRTC: row.NameRTC || '',
@@ -1014,16 +1094,11 @@ export class OfficeSuppliesComponent implements OnInit {
 
         console.log('processedData (dữ liệu cuối cùng gửi đi lưu):', processedData);
 
-        // Gửi dữ liệu đã xử lý lên API (từng sản phẩm một)
         let successCount = 0;
         let errorCount = 0;
-        const totalProducts = processedData.length;
         let completedRequests = 0;
 
-        // Reset tiến trình cho phần gửi API
-        this.uploadProgress = 50;
-
-        if (totalProducts === 0) {
+        if (totalProductsToSave === 0) {
           Swal.fire({
             icon: 'info',
             title: 'Thông báo',
@@ -1036,39 +1111,43 @@ export class OfficeSuppliesComponent implements OnInit {
         }
 
         processedData.forEach((product, index) => {
-          console.log(`Gửi lưu sản phẩm ${index}:`, product);
+          console.log(`Gửi lưu sản phẩm ${index + 1}/${totalProductsToSave}:`, product);
           this.lstVPP.adddata(product).subscribe({
             next: (response) => {
-              console.log(`Response từ adddata cho sản phẩm ${index}:`, response);
+              console.log(`Response từ adddata cho sản phẩm ${index + 1}:`, response);
               if (response.status === 1) {
                 successCount++;
               } else {
                 errorCount++;
-                console.error(`Lỗi khi lưu sản phẩm ${index}:`, response.message);
+                console.error(`Lỗi khi lưu sản phẩm ${index + 1}:`, response.message);
               }
 
               completedRequests++;
-              // Cập nhật tiến trình dựa trên số lượng request hoàn thành
-              this.uploadProgress = 50 + Math.round((completedRequests / totalProducts) * 50); // Tính tiến trình gửi API (từ 50% đến 100%)
+              this.processedRowsForSave = completedRequests;
+              // Cập nhật thanh tiến trình và văn bản
+              this.displayProgress = Math.round((completedRequests / totalProductsToSave) * 100);
+              this.displayText = `Đang lưu: ${completedRequests}/${totalProductsToSave} bản ghi`;
 
               // Kiểm tra xem tất cả các request đã hoàn thành chưa
-              if (completedRequests === totalProducts) {
+              if (completedRequests === totalProductsToSave) {
                 console.log('--- Tất cả các request adddata đã hoàn thành ---');
-                this.showSaveSummary(successCount, errorCount, totalProducts);
+                this.showSaveSummary(successCount, errorCount, totalProductsToSave);
               }
             },
             error: (err) => {
               errorCount++;
-              console.error(`Lỗi khi lưu sản phẩm ${index}:`, err);
+              console.error(`Lỗi khi lưu sản phẩm ${index + 1}:`, err);
 
               completedRequests++;
-               // Cập nhật tiến trình dựa trên số lượng request hoàn thành
-              this.uploadProgress = 50 + Math.round((completedRequests / totalProducts) * 50); // Tính tiến trình gửi API (từ 50% đến 100%)
+              this.processedRowsForSave = completedRequests;
+              // Cập nhật thanh tiến trình và văn bản
+              this.displayProgress = Math.round((completedRequests / totalProductsToSave) * 100);
+              this.displayText = `Đang lưu: ${completedRequests}/${totalProductsToSave} bản ghi`;
 
               // Kiểm tra xem tất cả các request đã hoàn thành chưa
-              if (completedRequests === totalProducts) {
+              if (completedRequests === totalProductsToSave) {
                 console.log('--- Tất cả các request adddata đã hoàn thành ---');
-                this.showSaveSummary(successCount, errorCount, totalProducts);
+                this.showSaveSummary(successCount, errorCount, totalProductsToSave);
               }
             }
           });
@@ -1083,6 +1162,8 @@ export class OfficeSuppliesComponent implements OnInit {
           showConfirmButton: true,
           timer: 1500
         });
+        this.displayText = 'Lỗi kiểm tra sản phẩm!';
+        this.displayProgress = 0;
       }
     });
   }
@@ -1100,7 +1181,7 @@ export class OfficeSuppliesComponent implements OnInit {
         confirmButtonText: 'OK'
       });
     } else if (successCount === 0) {
-       Swal.fire({
+        Swal.fire({
         title: 'Lỗi!',
         text: `Lưu thất bại ${errorCount}/${totalProducts} sản phẩm`, 
         icon: 'error',
@@ -1117,7 +1198,6 @@ export class OfficeSuppliesComponent implements OnInit {
     this.closeExcelModal();
     this.getAll(); // Refresh the table
     console.log('--- Kết thúc hiển thị tóm tắt ---');
-    this.uploadProgress = 0; // Reset tiến trình về 0 sau khi hoàn thành
   }
 
   // Hàm helper để lấy ID của đơn vị tính từ tên
@@ -1126,21 +1206,29 @@ export class OfficeSuppliesComponent implements OnInit {
     return unit ? unit.ID : 0;
   }
 
+  // Hàm mới để reset trạng thái nhập Excel
+  private resetExcelImportState(): void {
+    this.filePath = '';
+    this.excelSheets = [];
+    this.selectedSheet = '';
+    this.dataTableExcel = [];
+    this.displayText = '0/0'; 
+    this.displayProgress = 0;
+    this.totalRowsAfterFileRead = 0;
+    this.processedRowsForSave = 0;
+    
+    if (this.tableExcel) {
+      this.tableExcel.replaceData([]); // Xóa dữ liệu trong Tabulator preview
+    }
+    console.log('Trạng thái nhập Excel đã được reset.'); // Log
+  }
+
   closeExcelModal() {
     const modalEl = document.getElementById('ExcelModal');
     if (modalEl) {
       const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
       modal.hide();
     }
-    // Reset các biến
-    this.filePath = '';
-    this.excelSheets = [];
-    this.selectedSheet = '';
-    this.dataTableExcel = [];
-    
-    // Cập nhật lại bảng Tabulator để hiển thị dữ liệu rỗng
-    if (this.tableExcel) {
-      this.tableExcel.replaceData(this.dataTableExcel);
-    }
+    this.resetExcelImportState(); // Gọi hàm reset khi đóng modal
   }
 }

@@ -1,7 +1,7 @@
 <div class="layout-wrapper d-flex" style="height: 100%">
   <div class="offcanvas offcanvas-left custom-offcanvas" tabindex="-1" id="searchOffcanvas" data-bs-backdrop="false">
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title">Tìm kiếm</h5>
+      <h6 class="offcanvas-title">Tìm kiếm</h6>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
@@ -18,17 +18,17 @@
 
       <!-- Employee -->
       <div class="form-group">
-        <label for="cboEmployee">Nhân viên</label>
-        <ng-select id="cboEmployee" class="department-select" [items]="dataEmployees" bindLabel="FullName"
+        <label for="cboEmployee" class="fs-12">Nhân viên</label>
+        <ng-select id="cboEmployee" class="department-select fs-12" [items]="dataEmployees" bindLabel="FullName"
           [bindValue]="'UserID'" [(ngModel)]="searchParams.userID" placeholder="Chọn nhân viên">
           <ng-template ng-header-tmp>
-            <div class="row font-weight-bold text-center">
+            <div class="row font-weight-bold text-center fs-12">
               <div class="col-4" style="font-weight: bold;">Mã nhân viên</div>
               <div class="col-4" style="font-weight: bold;">Tên nhân viên</div>
             </div>
           </ng-template>
           <ng-template ng-option-tmp let-item="item">
-            <div class="row text-center">
+            <div class="row text-center fs-12">
               <div class="col-4">{{ item.Code}}</div>
               <div class="col-4">{{ item.FullName }}</div>
             </div>
@@ -38,21 +38,20 @@
 
       <!-- Keyword -->
       <div class="form-group">
-        <label for="txtKeyword">Từ khóa</label>
-        <input type="text" id="txtKeyword" [(ngModel)]="searchParams.keyword" class="form-control form-control-sm"
+        <label for="txtKeyword" class="fs-12">Từ khóa</label>
+        <input type="text" id="txtKeyword" [(ngModel)]="searchParams.keyword" class="form-control form-control-sm fs-12"
           placeholder="Từ khóa">
       </div>
 
-      <!-- Buttons -->
-      <div class="form-group mt-3">
-        <button class="btn btn-outline-primary btn-outline-sm me-2"
-        style="height: auto;" data-bs-dismiss="offcanvas" (click)="search()">
-          <i class="fas fa-search"></i> Tìm kiếm
-        </button>
-        <button  style="height: auto;" class="btn btn-outline-secondary btn-outline-sm">
-          <i class="fas fa-undo"></i> Đặt lại
-        </button>
+      <div class="offcanvas-bottom pt-0 pb-1">
+        <div class="col-12 ps-3 pe-3">
+          <button class="btn btn-primary col-12 fs-10 d-flex align-items-center justify-content-center"  data-bs-dismiss="offcanvas" (click)="search()">
+            Tìm kiếm
+          </button>
+        </div>
       </div>
+      <!-- Buttons -->
+      
     </div>
   </div>
   <div class="container-fluid project-container" id="projectParent">
@@ -61,9 +60,9 @@
         <div class="card">
           <div class="card-header p-0">
             <div class="d-flex justify-content-start">
-              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Tìm kiếm"
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Tìm kiếm" 
                 data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas">
-                <i class="fas fa-search"></i> Tìm kiếm
+                <i class="fas fa-search  p-0 ps-2 pe-2"></i>
               </button>
 
               <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xuất Excel"

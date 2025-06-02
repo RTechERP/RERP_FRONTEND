@@ -112,15 +112,15 @@ export class DailyreportComponent implements OnInit {
       this.table1 = new Tabulator("#table_dailyreportHCNSIT", {
         data: this.dataTable1,
         layout: "fitDataFill",
-        height: '65vh',
+        height: '66vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
         columns: [
-          {title: "Họ tên", field: "FullName", hozAlign: "left"},
-          {title: "Chức vụ", field: "PositionName",hozAlign: "left"},
+          {title: "Họ tên", field: "FullName", hozAlign: "left",  frozen:true},
+          {title: "Chức vụ", field: "PositionName",hozAlign: "left",  frozen:true},
           {title: "Ngày", field: "DateReport",hozAlign: "center",
             formatter: (cell) => {
               const value = cell.getValue();
@@ -132,7 +132,17 @@ export class DailyreportComponent implements OnInit {
               return `${day}-${month}-${year}`;
             }
           },
-          {title: "Nội dung", field: "Content",hozAlign: "left"},
+          {
+            title: "Nội dung", 
+            field: "Content",
+            hozAlign: "left",
+            width: 500,
+            formatter: "textarea",
+            formatterParams: {
+              maxHeight: 100
+            },
+            cssClass: "content-cell"
+          },
           {title: "Kết quả", field: "Results",hozAlign: "left"},
           {title: "Kế hoạch ngày tiếp theo", field: "PlanNextDay",hozAlign: "left"},
           {title: "Tồn đọng", field: "Backlog",hozAlign: "left"},
@@ -186,11 +196,12 @@ export class DailyreportComponent implements OnInit {
       this.table2 = new Tabulator("#table_dailyreportCP", {
         data: this.dataTable2,
         layout: "fitDataFill",
-        height: '65vh',
+        height: '66vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,
         resizableRows: true,
+        
         reactiveData: true,
         columns: [
           {title: "Họ tên", field: "FullName", hozAlign: "left"},
@@ -205,8 +216,8 @@ export class DailyreportComponent implements OnInit {
             return `${day}-${month}-${year}`;
           }},
           {title: "Đầu mục", field: "FilmName",hozAlign: "left"},
-          {title: "Nội dung công việc", field: "WorkContent",hozAlign: "right"},
-          {title: "ĐVT", field: "UnitName",hozAlign: "right"},
+          {title: "Nội dung công việc", field: "WorkContent",hozAlign: "left"},
+          {title: "ĐVT", field: "UnitName",hozAlign: "left"},
           {title: "Năng suất trung bình(phút/đơn vị sản phẩm)", field: "PerformanceAVG",hozAlign: "right"},
           {title: "Kế quả thực hiện", field: "Quantity",hozAlign: "right"},
           {title: "Thời gian thực hiện (Phút)", field: "TimeActual",hozAlign: "right"},
@@ -261,7 +272,7 @@ export class DailyreportComponent implements OnInit {
       this.table3 = new Tabulator("#table_dailyreportLX", {
         data: this.dataTable3,
         layout: "fitDataFill",
-        height: '65vh',
+        height: '66vh',
         pagination:true,
         paginationSize: 30,
         movableColumns: true,

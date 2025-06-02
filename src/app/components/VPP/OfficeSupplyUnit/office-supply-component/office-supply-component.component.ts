@@ -23,6 +23,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
   selectedItem: any = {};
   isCheckmode: boolean = false;
   selectedList: any[] = [];
+  lastAddedId: number | null = null; // Thêm biến để theo dõi ID của đơn vị mới thêm
   constructor(private OSU: OfficeSupplyUnitServiceService) { }
   ngOnInit(): void {
     this.drawTable();
@@ -42,7 +43,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
         resizableRows: true,
         reactiveData: true,
         selectableRows:15,
-
+      
         columns: [
           {
             title: "",
@@ -60,7 +61,7 @@ export class OfficeSupplyComponentComponent implements OnInit {
             field: 'ID',
             hozAlign: 'center',
             headerHozAlign: 'center',
-            width: 150
+            width: 80
           },
           {
             title: 'Tên đơn vị',
@@ -123,14 +124,20 @@ export class OfficeSupplyComponentComponent implements OnInit {
     }
     this.OSU.updatedata(this.selectedItem).subscribe({
       next: (response) => {
+        // Lưu ID từ response của API
+        if (response && response.data) {
+          const newItem = Array.isArray(response.data) ? response.data[0] : response.data;
+          this.lastAddedId = newItem.ID;
+        }
+        
         Swal.fire({
           icon: 'success',
           title: 'Thành công',
           text: 'Lưu thành công!',
         })
-        this.selectedItem = {}; // responseet form
-        this.get(); // Tải lại bảng
+        this.selectedItem = {}; // reset form
         this.closeUnitModal();
+        this.get(); // Tải lại bảng
       },
       error: (err) => {
         console.error('Lỗi khi lưu dữ liệu:', err);
@@ -162,7 +169,10 @@ export class OfficeSupplyComponentComponent implements OnInit {
         title: 'Thông báo',
         text: 'Bạn có chắc chắn muốn xóa không?',
         showConfirmButton: true,
+        confirmButtonText: 'Đồng ý',
         showCancelButton: true,
+        cancelButtonText: 'Hủy',
+        reverseButtons: true,
       }).then((result) => {
         if (result.isConfirmed) {
           this.OSU.deletedata(ids).subscribe({
@@ -251,6 +261,22 @@ export class OfficeSupplyComponentComponent implements OnInit {
       next: (response) => {
         console.log('Dữ liệu nhận được:', response);
         this.lstOUS = Array.isArray(response?.data) ? response.data : Array.isArray(response) ? response : [];
+
+        // Sắp xếp dữ liệu: đơn vị mới nhất lên đầu, các đơn vị khác theo thứ tự tăng dần
+        if (this.lastAddedId) {
+          const newItem = this.lstOUS.find(item => item.ID === this.lastAddedId);
+          if (newItem) {
+            // Tách đơn vị mới ra khỏi danh sách
+            this.lstOUS = this.lstOUS.filter(item => item.ID !== this.lastAddedId);
+            // Sắp xếp các đơn vị còn lại theo ID tăng dần
+            this.lstOUS.sort((a, b) => a.ID - b.ID);
+            // Thêm đơn vị mới vào đầu danh sách
+            this.lstOUS.unshift(newItem);
+          }
+        } else {
+          // Nếu không có đơn vị mới, sắp xếp tất cả theo ID tăng dần
+          this.lstOUS.sort((a, b) => a.ID - b.ID);
+        }
 
         // Cập nhật lại dataTable và reload bảng
         this.dataTable = this.lstOUS;

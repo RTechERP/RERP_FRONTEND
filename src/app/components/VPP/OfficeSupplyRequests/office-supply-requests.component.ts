@@ -260,22 +260,28 @@ export class OfficeSupplyRequestsComponent implements OnInit {
       this.table2 = new Tabulator('#datatable2', {
         data: this.dataTable2,
         layout: 'fitDataFill',
-        height: '25vh',
-        pagination:true,
+        height: "34vh",
+        pagination: true,
         movableColumns: true,
         resizableRows: true,
         reactiveData: true,
         selectableRows: 1,
+        groupBy: "FullName",
+        groupHeader: function(value, count, data, group) {
+          // Lấy mã nhân viên từ dữ liệu đầu tiên của nhóm
+          const code = data[0]?.Code || '';
+          return "Nhân viên: " + code + " - " + value + " <span>(" + count + " items)</span>";
+        },
         rowHeader: {
           headerSort: false,
           resizable: false,
           frozen: true,
-          formatter: "rowSelection", // Đây là cấu hình để Tabulator tự tạo checkbox
+          formatter: "rowSelection",
           headerHozAlign: "center",
           hozAlign: "center",
-          titleFormatter: "rowSelection", // Đây cũng là để thêm checkbox cho header
+          titleFormatter: "rowSelection",
           cellClick: (e, cell) => {
-            e.stopPropagation(); // Ngăn sự kiện click hàng khi bấm vào checkbox
+            e.stopPropagation();
             const checkbox = e.target as HTMLInputElement;
           },
         },
@@ -290,7 +296,6 @@ export class OfficeSupplyRequestsComponent implements OnInit {
               const value = cell.getValue();
               if (value === null || value === undefined) return '';
               if (typeof value === 'object') {
-                // Nếu là object, trả về thuộc tính Name hoặc thuộc tính phù hợp
                 return value.Name || value.name || '';
               }
               return value;
@@ -378,8 +383,9 @@ export class OfficeSupplyRequestsComponent implements OnInit {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Xác nhận',
-        cancelButtonText: 'Hủy bỏ'
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy',
+        reverseButtons: true,
       }).then((result) => {
         if (result.isConfirmed) {
           this.lstDKVPP.IsAdminApproved(ids).subscribe({
@@ -416,8 +422,9 @@ export class OfficeSupplyRequestsComponent implements OnInit {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Xác nhận',
-        cancelButtonText: 'Hủy bỏ'
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy',
+        reverseButtons: true,
       }).then((result) => {
         if (result.isConfirmed) {
           const ids = this.selectedList.map(item => item.ID);
@@ -468,8 +475,9 @@ export class OfficeSupplyRequestsComponent implements OnInit {
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Xác nhận',
-      cancelButtonText: 'Hủy bỏ'
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
         this.lstDKVPP.IsApproved(ids).subscribe({
@@ -517,8 +525,9 @@ export class OfficeSupplyRequestsComponent implements OnInit {
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Xác nhận',
-        cancelButtonText: 'Hủy bỏ'
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy',
+        reverseButtons: true,
       }).then((result) => {
         if (result.isConfirmed) {
           const ids = this.selectedList.map(item => item.ID);
