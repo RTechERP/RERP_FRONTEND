@@ -112,4 +112,7 @@ export class PokhServiceService {
       }
     });
   }
+  deleteFiles(fileIds: number[]): Observable<any> {
+    return this.http.post<any>(this._url + 'DeleteFile', fileIds);
+  }
 }
