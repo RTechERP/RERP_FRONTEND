@@ -1,0 +1,70 @@
+<div class="layout-wrapper d-flex" style="height: 100%">
+  <div class="container-fluid project-container" id="projectParent">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="card">
+          <div class="card-header p-0">
+            <div class="d-flex justify-content-between">
+              <div class="d-flex gap-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary p-0 ps-2 pe-2"
+                  title="Thêm mới" (click)="openUnitModalForNewUnit()"
+                >
+                  <i class="fas fa-plus"></i> Thêm
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary p-0 ps-2 pe-2"
+                  title="Sửa" (click)="openUnitModalForUpdateUnit()"
+                >
+                  <i class="fas fa-pen"></i> Sửa
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary p-0 ps-2 pe-2"
+                  title="Xóa" (click)="deleteUnit()"
+                >
+                  <i class="fas fa-trash"></i> Xóa
+                </button>             
+              </div>
+          </div>
+          <div class="card-body p-0">
+              <div id="datatable"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+  <!-- Modal thêm đơn vị tính -->
+  <div class="modal fade" id="addUnitModal" tabindex="-1" aria-labelledby="addUnitModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white text-uppercase">
+          <h6 class="modal-title" id="addUnitModalLabel">Thêm đơn vị tính mới</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form class="needs-validation" novalidate>
+            <div class="mb-3">
+            </div>
+            <div class="mb-3">
+              <label for="unitName" class="form-label">Tên đơn vị <sup style="color: red;">(*)</sup></label>
+              <input type="text" class="form-control fs-12" id="unitName" [(ngModel)]="selectedItem.Name" name="unitName" required placeholder="Nhập tên đơn vị">
+              <div class="invalid-feedback">
+                Vui lòng nhập tên đơn vị!
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-success p-0 ps-2 pe-2" (click)="saveSelectedItem()">Lưu thay đổi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+

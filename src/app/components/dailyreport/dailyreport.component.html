@@ -1,0 +1,121 @@
+<div class="layout-wrapper d-flex" style="height: 100%">
+  <div class="offcanvas offcanvas-left custom-offcanvas" tabindex="-1" id="searchOffcanvas" data-bs-backdrop="false">
+    <div class="offcanvas-header">
+      <h6 class="offcanvas-title">Tìm kiếm</h6>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+      <!-- Date range -->
+      <div class="form-group">
+        <label for="dateStart">Từ ngày</label>
+        <input type="date" id="dateStart" [(ngModel)]="searchParams.dateStart" class="form-control form-control-sm">
+      </div>
+
+      <div class="form-group">
+        <label for="dateEnd">Đến ngày</label>
+        <input type="date" id="dateEnd" [(ngModel)]="searchParams.dateEnd" class="form-control form-control-sm">
+      </div>
+
+      <!-- Employee -->
+      <div class="form-group">
+        <label for="cboEmployee" class="fs-12">Nhân viên</label>
+        <ng-select id="cboEmployee" class="department-select fs-12" [items]="dataEmployees" bindLabel="FullName"
+          [bindValue]="'UserID'" [(ngModel)]="searchParams.userID" placeholder="Chọn nhân viên">
+          <ng-template ng-header-tmp>
+            <div class="row font-weight-bold text-center fs-12">
+              <div class="col-4" style="font-weight: bold;">Mã nhân viên</div>
+              <div class="col-4" style="font-weight: bold;">Tên nhân viên</div>
+            </div>
+          </ng-template>
+          <ng-template ng-option-tmp let-item="item">
+            <div class="row text-center fs-12">
+              <div class="col-4">{{ item.Code}}</div>
+              <div class="col-4">{{ item.FullName }}</div>
+            </div>
+          </ng-template>
+        </ng-select>
+      </div>
+
+      <!-- Keyword -->
+      <div class="form-group">
+        <label for="txtKeyword" class="fs-12">Từ khóa</label>
+        <input type="text" id="txtKeyword" [(ngModel)]="searchParams.keyword" class="form-control form-control-sm fs-12"
+          placeholder="Từ khóa">
+      </div>
+
+      <div class="offcanvas-bottom pt-0 pb-1">
+        <div class="col-12 ps-3 pe-3">
+          <button class="btn btn-primary col-12 fs-10 d-flex align-items-center justify-content-center"  data-bs-dismiss="offcanvas" (click)="search()">
+            Tìm kiếm
+          </button>
+        </div>
+      </div>
+      <!-- Buttons -->
+      
+    </div>
+  </div>
+  <div class="container-fluid project-container" id="projectParent">
+    <div class="row">
+      <div class="col-12 p-0">
+        <div class="card">
+          <div class="card-header p-0">
+            <div class="d-flex justify-content-start">
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Tìm kiếm" 
+                data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas">
+                <i class="fas fa-search  p-0 ps-2 pe-2"></i>
+              </button>
+
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xuất Excel"
+                (click)="exportToExcel()">
+                <i class="fas fa-file-excel"></i> Xuất excel
+              </button>
+            </div>
+            <div class="card-body p-0">
+              <div class="custom-tabs-container" >
+                <ul class="nav nav-tabs fs-12" id="customTab3" role="tablist" >
+                  <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="tab-oneAA" data-bs-toggle="tab" href="#oneAA" role="tab"
+                      aria-controls="oneAA" aria-selected="true" (click)="setCheckModeExcel(0)">Hành chính nhân sự
+                      IT</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="tab-twoAA" data-bs-toggle="tab" href="#twoAA" role="tab"
+                      aria-controls="twoAA" aria-selected="false" (click)="setCheckModeExcel(1)">Cắt phim</a>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="tab-threeAA" data-bs-toggle="tab" href="#threeAA" role="tab"
+                      aria-controls="threeAA" aria-selected="false" (click)="setCheckModeExcel(2)">Lái xe</a>
+                  </li>
+                </ul>
+                <div class="tab-content" id="customTabContent3">
+                  <div class="tab-pane fade show active" id="oneAA" role="tabpanel">
+                    <div class="card mb-3">
+                      <div class="table-container mb-3 ">
+                        <div id="table_dailyreportHCNSIT" class="custom-tabulator"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="tab-pane fade" id="twoAA" role="tabpanel">
+                    <div class="card mb-3">
+                      <div class="table-container mb-3">
+                        <div id="table_dailyreportCP" class="custom-tabulator"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="tab-pane fade" id="threeAA" role="tabpanel">
+                    <div class="card mb-3">
+                      <div class="table-container mb-3">
+                        <div id="table_dailyreportLX" class="custom-tabulator"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
