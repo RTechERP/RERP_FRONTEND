@@ -137,7 +137,7 @@ export class TeamFormComponent implements OnInit {
     this.teamService.getUserTeam(teamId, departmentId).subscribe((data: any) => {
       const flatData = data.data;
       const treeData = this.buildTreeEmployee(flatData);
-      this.employeeList = treeData;
+      this.employeeList = data.data;
       this.employeeTabulator.setData(this.employeeList);
     });
   }
@@ -155,7 +155,7 @@ export class TeamFormComponent implements OnInit {
           this.employeeTeamList = data.data;
           console.log(this.employeeTeamList);
           const treeData = this.buildTreeEmployeeTeam(this.employeeTeamList);
-          this.employeeTeamList = treeData;
+          this.employeeTeamList = data.data;
           this.employeeTeamTabulator.setData(this.employeeTeamList);
         },
         error: (error) => {
@@ -260,7 +260,7 @@ export class TeamFormComponent implements OnInit {
           headerHozAlign: 'center',
           formatter: "tree" as any
         },
-        { title: 'Trưởng nhóm', field: 'Leader', hozAlign: 'center', headerHozAlign: 'center',
+        { title: 'Trưởng nhóm', field: 'Leader', hozAlign: 'left', headerHozAlign: 'center',
           formatter: function(cell) {
             const value = cell.getValue();
             if (!value || (typeof value === 'object' && Object.keys(value).length === 0)) {
@@ -272,7 +272,7 @@ export class TeamFormComponent implements OnInit {
         { 
           title: 'Loại', 
           field: 'TypeName', 
-          hozAlign: 'center', 
+          hozAlign: 'left', 
           headerHozAlign: 'center',
           formatter: function(cell) {
             const value = cell.getValue();
@@ -300,31 +300,32 @@ export class TeamFormComponent implements OnInit {
       layout: 'fitColumns',
       selectableRows: true,
       responsiveLayout: true,
-      dataTree: true,
       rowHeader:{formatter:"rowSelection", titleFormatter:"rowSelection", headerSort:false, width:70, frozen:true, headerHozAlign:"center", hozAlign:"center"},
-      dataTreeStartExpanded: true,
-      dataTreeChildField: "children",
+      // dataTree: true,
+      // dataTreeStartExpanded: true,
+      // dataTreeChildField: "children",
+      groupBy: "Team",
       height: '75vh',
       columns: [
         { 
           title: 'Mã nhân viên', 
           field: 'Code', 
-          hozAlign: 'center', 
+          hozAlign: 'left', 
           headerHozAlign: 'center',
-          formatter: function(cell) {
-            const data = cell.getRow().getData();
-            // If it's a team row, show team name with tree formatter
-            if (data['children'] && data['children'].length > 0) {
-              return `<span class="tabulator-tree-control"></span>${data['Team']}`;
-            }
-            // If it's an employee row, show employee code
-            return data['Code'];
-          }
+          // formatter: function(cell) {
+          //   const data = cell.getRow().getData();
+          //   // If it's a team row, show team name with tree formatter
+          //   if (data['children'] && data['children'].length > 0) {
+          //     return `<span class="tabulator-tree-control"></span>${data['Team']}`;
+          //   }
+          //   // If it's an employee row, show employee code
+          //   return data['Code'];
+          // }
         },
         { 
           title: 'Tên nhân viên', 
           field: 'FullName', 
-          hozAlign: 'center', 
+          hozAlign: 'left', 
           headerHozAlign: 'center',
         }
       ],
@@ -338,9 +339,10 @@ export class TeamFormComponent implements OnInit {
       selectableRows: true,
       rowHeader:{formatter:"rowSelection", titleFormatter:"rowSelection", headerSort:false, width:70, frozen:true, headerHozAlign:"center", hozAlign:"center"},
       responsiveLayout: true,
-      dataTree: true,
-      dataTreeStartExpanded: true,
-      dataTreeChildField: "children",
+      groupBy: "DepartmentName",
+      // dataTree: true,
+      // dataTreeStartExpanded: true,
+      // dataTreeChildField: "children",
       height: '75vh',
       columns: [
         { 
@@ -348,15 +350,15 @@ export class TeamFormComponent implements OnInit {
           field: 'Code', 
           hozAlign: 'center', 
           headerHozAlign: 'center',
-          formatter: function(cell) {
-            const data = cell.getRow().getData();
-            // If it's a team row, show department name with tree formatter
-            if (data['children'] && data['children'].length > 0) {
-              return `<span class="tabulator-tree-control text-left"></span>${data['DepartmentName']}`;
-            }
-            // If it's an employee row, show employee code
-            return data['Code'];
-          }
+          // formatter: function(cell) {
+          //   const data = cell.getRow().getData();
+          //   // If it's a team row, show department name with tree formatter
+          //   if (data['children'] && data['children'].length > 0) {
+          //     return `<span class="tabulator-tree-control text-left"></span>${data['DepartmentName']}`;
+          //   }
+          //   // If it's an employee row, show employee code
+          //   return data['Code'];
+          // }
         },
         { 
           title: 'Tên nhân viên', 
@@ -412,7 +414,6 @@ export class TeamFormComponent implements OnInit {
 
   openAddModal() {
     const selectedRows = this.teamTabulator.getSelectedRows();
-    console.log(selectedRows);
 
     if(selectedRows.length === 0) {
       this.team = {
@@ -426,21 +427,21 @@ export class TeamFormComponent implements OnInit {
         LeaderID: 0,
         ProjectTypeID: 0,
       }
+    } else {
+      this.selectedTeam = selectedRows[0].getData();
+      this.team = {
+        ID: 0,
+        DepartmentID: this.selectedTeam.DepartmentID,
+        ParentID: this.selectedTeam.ID,
+        Code: '',
+        Name: '',
+        Leader: '',
+        TypeName: '',
+        LeaderID: 0,
+        ProjectTypeID: 0,
+      }
     }
     this.isEditMode = false;
-    this.selectedTeam = selectedRows[0].getData();
-    
-    this.team = {
-      ID: 0,
-      DepartmentID: this.selectedTeam.DepartmentID,
-      ParentID: this.selectedTeam.ID,
-      Code: '',
-      Name: '',
-      Leader: '',
-      TypeName: '',
-      LeaderID: 0,
-      ProjectTypeID: 0,
-    }
 
     const modal = new (window as any).bootstrap.Modal(document.getElementById('addTeamModal'));
     modal.show();
@@ -487,7 +488,14 @@ export class TeamFormComponent implements OnInit {
   }
 
   onSubmit(form: any) {
-    if(form.valid) {
+    if(form.invalid) {
+      Swal.fire({
+        title: 'Thông báo',
+        text: 'Vui lòng điền đầy đủ thông tin',
+        icon: 'warning'
+      });
+      return;
+    }
       if(this.isEditMode) {
         this.teamService.saveTeam(this.team).subscribe({
           next: (response) => {
@@ -529,7 +537,6 @@ export class TeamFormComponent implements OnInit {
         }
       });
     }
-    }
   }
 
   closeModal() {
@@ -554,7 +561,9 @@ export class TeamFormComponent implements OnInit {
       title: 'Xác nhận xóa',
       text: 'Bạn có chắc chắn muốn xóa nhóm này không?',
       icon: 'warning',
-      showCancelButton: true,
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true,
     }).then((result) => {
       if(result.isConfirmed) {
         this.deleteTeam();
@@ -674,7 +683,9 @@ export class TeamFormComponent implements OnInit {
       title: 'Xác nhận xóa',
       text: 'Bạn có chắc chắn muốn xóa nhân viên khỏi team này không?',
       icon: 'warning',
-      showCancelButton: true,
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true,
     }).then((result) => {
       if(result.isConfirmed) {
         employeeIds.forEach(id => {

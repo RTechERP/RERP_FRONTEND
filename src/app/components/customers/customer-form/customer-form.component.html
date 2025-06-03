@@ -1,3 +1,321 @@
-<p>
-  customer-form works!
-</p>
+<!-- Offcanvas Bootstrap cho tìm kiếm -->
+<div class="offcanvas offcanvas-left custom-offcanvas fs-12" tabindex="-1" id="searchOffcanvas"
+  aria-labelledby="searchOffcanvasLabel" data-bs-backdrop="false">
+  <div class="offcanvas-header">
+    <h6 class="offcanvas-title" id="searchOffcanvasLabel">Tìm kiếm khách hàng</h6>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <form (ngSubmit)="onSearch(); closeSearchOffcanvas()">
+      <div class="mb-3 fs-12">
+        <label for="searchTeam" class="form-label">Team</label>
+        <select class="form-select fs-12" id="searchTeam" [(ngModel)]="searchTeam" name="searchTeam">
+          <option *ngFor="let team of teamList" [value]="team.ID">{{ team.GroupSalesName }}</option>
+        </select>
+      </div>
+      <div class="mb-3 fs-12">
+        <label for="searchEmployee" class="form-label">Nhân viên sale</label>
+        <ng-select id="searchEmployee" [(ngModel)]="searchEmployee" name="searchEmployee" [items]="employeeList"
+          [clearable]="false" bindLabel="FullName" bindValue="ID" placeholder="Chọn nhân viên sale" [searchable]="true"
+          [virtualScroll]="true">
+          <ng-template ng-option-tmp let-item="item">
+            <div class="row text-dark w-100 fs-12">
+              <div class="col-3 ms-1">
+                {{item.Code}} - {{item.FullName}}
+              </div>
+            </div>
+          </ng-template>
+        </ng-select>
+      </div>
+      <div class="mb-3 fs-12">
+        <label for="searchKeyword" class="form-label">Từ khóa</label>
+        <input type="text" class="form-control fs-12" id="searchKeyword" placeholder="Nhập từ khóa"
+          [(ngModel)]="searchKeyword" name="searchKeyword">
+      </div>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary flex-grow-1" style="height: 3vh;">Tìm kiếm</button>
+      </div>
+      <div class="d-flex gap-2 w-100 mt-2">
+        <button type="button" class="btn btn-secondary flex-grow-1" (click)="resetSearch()" style="height: 3vh;">Đặt
+          lại</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div class="col-xl-12 project-container">
+  <div class="mb-0 d-flex align-items-center justify-content-start">
+    <button type="button" class="btn btn-outline-secondary rounded d-flex align-items-center gap-2" title="Tìm kiếm"
+      data-bs-toggle="offcanvas" data-bs-target="#searchOffcanvas" aria-controls="searchOffcanvas">
+      <i class="fas fa-search"></i>
+      <span>Tìm kiếm</span>
+    </button>
+    <button type="button" class="btn btn-outline-secondary rounded d-flex align-items-center gap-2" title="Thêm mới"
+      (click)="openAddModal()">
+      <i class="fas fa-plus"></i>
+      <span>Thêm</span>
+    </button>
+    <button type="button" class="btn btn-outline-secondary rounded d-flex align-items-center gap-2" title="Sửa"
+      (click)="openEditModal()">
+      <i class="fas fa-pen"></i>
+      <span>Sửa</span>
+    </button>
+    <button type="button" class="btn btn-outline-secondary rounded d-flex align-items-center gap-2" title="Xóa"
+      (click)="openDeleteModal()">
+      <i class="fas fa-trash"></i>
+      <span>Xóa</span>
+    </button>
+    <button type="button" class="btn btn-outline-secondary rounded d-flex align-items-center gap-2" title="Ngành nghề"
+      (click)="openCustomerSpecializationForm()">
+      <i class="fas fa-industry"></i>
+      <span>Ngành nghề</span>
+    </button>
+    <button type="button" class="btn btn-outline-secondary rounded d-flex align-items-center gap-2" title="Xuất excel"
+      (click)="exportToExcel()">
+      <i class="fas fa-file-excel"></i>
+      <span>Xuất excel</span>
+    </button>
+  </div>
+  <div class="row">
+    <!-- Cột bên trái: Bảng khách hàng -->
+    <div class="col-lg-9 d-flex flex-column gap-3 ">
+      <div id="customer-table"></div>
+      <div class="row">
+        <div class="col-md-8">
+          <div id="customerContact-table"></div>
+        </div>
+        <div class="col-md-4">
+          <div id="address-table"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Cột bên phải: Nhân viên sale -->
+    <div class="col-lg-3">
+      <div id="employeeSale-table"></div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- Modal Tạo/Sửa khách hàng -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl fs-12 modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h6 class="modal-title text-uppercase" id="addCustomerModalLabel">{{isEditMode ? 'Sửa khách hàng' : 'Tạo khách hàng mới'}}</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body fs-12">
+        <form #customerForm="ngForm" (ngSubmit)="onSubmit(customerForm)">
+          <div class="row mb-2">
+            <div class="col-md-2">
+              <label class="form-label">Tỉnh <span class="text-danger">(*)</span></label>
+              <ng-select [items]="provinces" [clearable]="false" bindLabel="Name" bindValue="Name"
+                placeholder="Chọn tỉnh" [(ngModel)]="selectedProvince" name="Province" required #province="ngModel"
+                (change)="onProvinceChange($event)" class="fs-12">
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row text-dark w-100 fs-12">
+                    <div class="col-3 ms-1">
+                      <span class="fs-12">{{ item.Name }}</span>
+                    </div>
+                  </div>
+                </ng-template>
+              </ng-select>
+
+            </div>
+            <div class="col-md-1">
+              <label class="form-label">Mã tỉnh <span class="text-danger">(*)</span></label>
+              <input type="text" class="form-control fs-12" placeholder="Mã tỉnh" name="CodeProvinces"
+                [(ngModel)]="customer.CodeProvinces" required #codeProvinces="ngModel" readonly>
+
+            </div>
+            <div class="col-md-1">
+              <label class="form-label">Mã khách<span class="text-danger">(*)</span></label>
+              <input type="text" class="form-control fs-12" placeholder="Mã khách" name="CustomerCode"
+                [(ngModel)]="customer.CustomerCode" required #customerCode="ngModel">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Ký hiệu <span class="text-danger">(*)</span></label>
+              <input type="text" class="form-control fs-12" placeholder="Ký hiệu" name="CustomerShortName"
+                [(ngModel)]="customer.CustomerShortName" required #shortName="ngModel">
+
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Mã số thuế</label>
+              <input type="text" class="form-control fs-12" placeholder="Mã số thuế" name="TaxCode"
+                [(ngModel)]="customer.TaxCode">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Loại hình <span class="text-danger">(*)</span></label>
+              <select class="form-select fs-12" name="CustomerType" [(ngModel)]="customer.CustomerType">
+                <option value="">--Chọn loại hình--</option>
+                <option value="1">SL</option>
+                <option value="2">Thương mại</option>
+                <option value="3">Sản xuất</option>
+                <option value="4">Chế tạo máy</option>
+                <option value="5">Cá nhân</option>
+              </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="bigAccount" name="BigAccount"
+                  [(ngModel)]="customer.BigAccount">
+                <label class="form-check-label" for="bigAccount">Big account</label>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <label class="form-label">Tên khách hàng <span class="text-danger">(*)</span></label>
+              <input type="text" class="form-control fs-12" placeholder="Tên khách hàng" name="CustomerName"
+                [(ngModel)]="customer.CustomerName" required #customerName="ngModel">
+
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Địa chỉ <span class="text-danger">(*)</span></label>
+              <input type="text" class="form-control fs-12" placeholder="Địa chỉ" name="Address"
+                [(ngModel)]="customer.Address" required #address="ngModel">
+
+            </div>
+            <div class="col-md-4">
+              <label for="selectedBusinessField" class="form-label">Sản phẩm đã bán <span
+                  class="text-danger">(*)</span></label>
+              <select class="form-select fs-12" id="selectedBusinessField" name="BusinessFieldID"
+                [(ngModel)]="customer.BusinessFieldID" #selectedBusinessField="ngModel">
+                <option value="">-- Chọn sản phẩm --</option>
+                <option *ngFor="let businessField of businessField" [ngValue]="businessField.ID">{{ businessField.Name
+                  }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <label for="selectedMajor" class="form-label">Ngành nghề <span class="text-danger">(*)</span></label>
+              <select class="form-select fs-12" id="selectedMajor" name="CustomerSpecializationID"
+                [(ngModel)]="customer.CustomerSpecializationID" required #selectedMajor="ngModel">
+                <option [ngValue]="null">-- Chọn ngành nghề --</option>
+                <option *ngFor="let major of major" [ngValue]="major.ID">{{ major.Name }}</option>
+              </select>
+
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">SP chi tiết</label>
+              <input type="text" class="form-control fs-12" placeholder="SP chi tiết" name="ProductDetails"
+                [(ngModel)]="customer.ProductDetails">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Công nợ</label>
+              <input type="text" class="form-control fs-12" placeholder="Công nợ" name="Debt"
+                [(ngModel)]="customer.Debt">
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <label class="form-label">Lưu ý giao</label>
+              <input type="text" class="form-control fs-12" placeholder="Lưu ý giao" name="NoteDelivery"
+                [(ngModel)]="customer.NoteDelivery">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Lưu ý chứng từ</label>
+              <input type="text" class="form-control fs-12" placeholder="Lưu ý chứng từ" name="NoteVoucher"
+                [(ngModel)]="customer.NoteVoucher">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Ngày chốt công nợ</label>
+              <input type="date" class="form-control fs-12" name="ClosingDateDebt"
+                [(ngModel)]="customer.ClosingDateDebt">
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-4">
+              <label class="form-label">Đầu mối gửi chứng từ bản cứng</label>
+              <input type="text" class="form-control fs-12" placeholder="Đầu mối gửi chứng từ bản cứng"
+                name="HardCopyVoucher" [(ngModel)]="customer.HardCopyVoucher">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Đầu mối gửi check chứng từ</label>
+              <input type="text" class="form-control fs-12" placeholder="Đầu mối gửi check chứng từ" name="CheckVoucher"
+                [(ngModel)]="customer.CheckVoucher">
+            </div>
+          </div>
+          <!-- 3 bảng Tabulator trên cùng 1 dòng -->
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <h6>Thông tin liên hệ</h6>
+              <div id="customerContact-table-create" style="width:100%; min-height:150px;"></div>
+            </div>
+            <div class="col-md-3">
+              <h6>Địa chỉ giao hàng</h6>
+              <div id="address-table-create" style="width:100%; min-height:100px;"></div>
+            </div>
+            <div class="col-md-3">
+              <h6>Nhân viên sale</h6>
+              <div id="employeeSale-table-create" style="width:100%; min-height:100px;"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer fs-12">
+        <button type="button" class="btn btn-outline-danger text-center" data-bs-dismiss="modal"
+          style="height: 3vh; border: 1px solid;">Hủy</button>
+        <button type="submit" class="btn btn-success text-center" (click)="onSubmit(customerForm)"
+          style="height: 3vh;">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Xác nhận xóa -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="deleteConfirmModalLabel">Xác nhận xóa</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body fs-12">
+        Bạn có chắc chắn muốn xóa khách hàng này không?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="height: 3vh;">Hủy</button>
+        <button type="button" class="btn btn-danger" (click)="deleteCustomer()" style="height: 3vh;">Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal Loading -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true"
+  data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center p-4">
+        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <h5 class="mb-0">Đang xử lý...</h5>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ngành nghề -->
+<div class="modal fade" id="customerSpecializationModal" tabindex="-1"
+  aria-labelledby="customerSpecializationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title" id="customerSpecializationModalLabel">Quản lý ngành nghề</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body fs-12">
+        <app-customer-specialization-form></app-customer-specialization-form>
+      </div>
+    </div>
+  </div>
+</div>

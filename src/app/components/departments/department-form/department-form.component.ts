@@ -73,13 +73,13 @@ export class DepartmentFormComponent implements OnInit {
       selectableRows: 1,
       height: '100%',
       columns: [
-        { title: 'STT', field: 'STT', hozAlign: 'center', headerHozAlign: 'center', width: 100},
-        { title: 'Mã phòng ban', field: 'Code', hozAlign: 'center', headerHozAlign: 'center', width: 400},
-        { title: 'Tên phòng ban', field: 'Name', hozAlign: 'center', headerHozAlign: 'center' },
+        { title: 'STT', field: 'STT', hozAlign: 'center', headerHozAlign: 'center', width: 60},
+        { title: 'Mã phòng ban', field: 'Code', hozAlign: 'left', headerHozAlign: 'center', width: 400},
+        { title: 'Tên phòng ban', field: 'Name', hozAlign: 'left', headerHozAlign: 'center' },
         { 
           title: 'Trạng thái', 
           field: 'Status', 
-          hozAlign: 'center', 
+          hozAlign: 'left', 
           headerHozAlign: 'center',
           formatter: (cell) => {
             const value = cell.getValue();
@@ -116,7 +116,12 @@ export class DepartmentFormComponent implements OnInit {
   openEditModal() {
     const selectedRows = this.tabulator.getSelectedRows();
     if (selectedRows.length === 0) {
-      this.showNotification('Vui lòng chọn phòng ban cần sửa', false);
+      Swal.fire({
+        title: 'Thông báo',
+        text: 'Vui lòng chọn phòng ban cần chỉnh sửa',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
       return;
     }
     this.isEditMode = true;
@@ -137,7 +142,12 @@ export class DepartmentFormComponent implements OnInit {
   openDeleteModal() {
     const selectedRows = this.tabulator.getSelectedRows();
     if (selectedRows.length === 0) {
-      this.showNotification('Vui lòng chọn phòng ban cần xóa', false);
+      Swal.fire({
+        title: 'Thông báo',
+        text: 'Vui lòng chọn phòng ban cần xóa',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
       return;
     }
     this.selectedDepartmentId = selectedRows[0].getData()['ID'];
@@ -146,10 +156,9 @@ export class DepartmentFormComponent implements OnInit {
       text: 'Bạn có chắc chắn muốn xóa phòng ban này không?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy'
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy',
+      reverseButtons: true
     }).then((result) => {
       if (result.isConfirmed) {
         this.deleteDepartment();
@@ -178,9 +187,17 @@ export class DepartmentFormComponent implements OnInit {
   }
 
   onSubmit(form: any) {
-    if (form.valid) {
+    if (form.invalid) {
+        Swal.fire({
+          title: 'Thông báo',
+          text: 'Vui lòng điền đầy đủ thông tin trước khi lưu',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
+      return;
+    }
       if (this.isEditMode) {
-        this.departmentService.updateDepartment(this.department).subscribe({
+        this.departmentService.createDepartment(this.department).subscribe({
           next: (response) => {
             this.closeModal();
             this.loadDepartments();
@@ -219,9 +236,7 @@ export class DepartmentFormComponent implements OnInit {
         });
       }
     }
-  }
 
-  
   closeModal() {
     const modal = document.getElementById('addDepartmentModal');
     if (modal) {
@@ -229,12 +244,12 @@ export class DepartmentFormComponent implements OnInit {
     }
   }
 
-  showNotification(message: string, isSuccess: boolean) {
-    this.toastMessage = message;
-    this.isSuccess = isSuccess;
-    const modal = new (window as any).bootstrap.Modal(document.getElementById('notificationModal'));
-    modal.show();
-  }
+  // showNotification(message: string, isSuccess: boolean) {
+  //   this.toastMessage = message;
+  //   this.isSuccess = isSuccess;
+  //   const modal = new (window as any).bootstrap.Modal(document.getElementById('notificationModal'));
+  //   modal.show();
+  // }
   
   
 

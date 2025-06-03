@@ -19,12 +19,9 @@ export class DepartmentServiceService {
   }
 
   createDepartment(department:any):Observable<any>{
-    return this.http.post<any>(this._url + 'Department/createDepartment', department);
+    return this.http.post<any>(this._url + 'Department/saveDepartment', department);
   }
 
-  updateDepartment(department:any):Observable<any>{
-    return this.http.put<any>(this._url + 'Department/updateDepartment', department);
-  }
 
   deleteDepartment(id:number):Observable<any>{
     return this.http.delete<any>(this._url + 'Department/deleteDepartment?departmentID=' + id);
