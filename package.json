@@ -23,6 +23,7 @@
     "@types/select2": "^4.0.63",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.13.1",
+    "exceljs": "^4.4.0",
     "font-awesome": "^4.7.0",
     "jquery": "^3.7.1",
     "luxon": "^3.6.1",

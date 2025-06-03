@@ -5,18 +5,54 @@
         <div class="card">
           <div class="card-header p-0">
             <div class="d-flex justify-content-start">
-              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Thêm mới"
-                (click)="openModal()">
-                <i class="fas fa-plus"></i> Thêm
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Thêm mới" (click)="openModal()">
+                <i class="bi bi-plus-circle"></i> Thêm
               </button>
-              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Sửa"
-              (click)="onEdit()">
-              <i class="fas fa-plus"></i> Sửa
-            </button>
-            <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xóa" 
-            (click)="onDelete()">
-            <i class="fas fa-plus"></i> Xóa
-          </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Sửa" (click)="onEdit()">
+                <i class="bi bi-pencil-square"></i> Sửa
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xóa" (click)="onDelete()">
+                <i class="bi bi-trash"></i> Xóa
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Nhập Excel">
+                <i class="bi bi-file-earmark-excel"></i> Nhập Excel
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Duyệt" (click)="handlePOKHApproval(true)">
+                <i class="bi bi-check-circle"></i> Duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Hủy Duyệt" (click)="handlePOKHApproval(false)">
+                <i class="bi bi-x-circle"></i> Hủy Duyệt
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Chuyển đặt hàng">
+                <i class="bi bi-arrow-left-right"></i> Chuyển đặt hàng
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xuất PO" (click)="exportToExcel()">
+                <i class="bi bi-file-earmark-text"></i> Xuất PO
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Xuất Phiếu" (click)="exportMainTableToExcel()">
+                <i class="bi bi-file-earmark"></i> Xuất Phiếu
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Chi tiết POKH">
+                <i class="bi bi-info-circle"></i> Chi tiết POKH
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Tiền về">
+                <i class="bi bi-currency-dollar"></i> Tiền về
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Yêu cầu mua hàng">
+                <i class="bi bi-cart"></i> Yêu cầu mua hàng
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Yêu cầu xuất kho">
+                <i class="bi bi-box-seam"></i> Yêu cầu xuất kho
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Lịch sử bán hàng">
+                <i class="bi bi-clock-history"></i> Lịch sử bán hàng
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Copy">
+                <i class="bi bi-files"></i> Copy
+              </button>
+              <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" title="Yêu cầu báo giá">
+                <i class="bi bi-receipt"></i> Yêu cầu báo giá
+              </button>
             </div>
           </div>
           <div class="card-body p-0">
@@ -53,18 +89,25 @@
     <div class="container-fluid">
       <!-- Toolbar -->
       <div class="toolbar">
-        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="savePOKH()"><i class="bi bi-save"></i> Thêm mới</button>
-        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Add Customer')"><i class="bi bi-person-plus"></i> Thêm khách
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="savePOKH()"><i class="bi bi-save"></i> Thêm
+          mới</button>
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Add Customer')"><i
+            class="bi bi-person-plus"></i> Thêm khách
           hàng</button>
-        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Add New Product')"><i class="bi bi-box"></i>
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Add New Product')"><i
+            class="bi bi-box"></i>
           Thêm sản phẩm mới</button>
-        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Select Quotation')"><i class="bi bi-file-earmark"></i> Chọn
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Select Quotation')"><i
+            class="bi bi-file-earmark"></i> Chọn
           báo giá</button>
-        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Search Inventory')"><i class="bi bi-search"></i> Tìm kiếm
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Search Inventory')"><i
+            class="bi bi-search"></i> Tìm kiếm
           kho</button>
-        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Select Partlist')"><i class="bi bi-list"></i>
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Select Partlist')"><i
+            class="bi bi-list"></i>
           Chọn partlist</button>
-        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Import Excel')"><i class="bi bi-file-excel"></i> Nhập
+        <button class="btn btn-outline-secondary p-0 ps-2 pe-2" onclick="alert('Import Excel')"><i
+            class="bi bi-file-excel"></i> Nhập
           Excel</button>
       </div>
 
@@ -86,19 +129,19 @@
         <div class="tab-pane fade show active" id="po-details" role="tabpanel" aria-labelledby="po-details-tab">
           <div class="form-section">
             <div class="row">
-              <div class="col-md-3" >                
+              <div class="col-md-3">
                 <label for="cboStatus" class="fs-12">Trạng thái</label>
                 <ng-select [items]="statusOptions" bindLabel="label" bindValue="value" [(ngModel)]="poFormData.status"
-                  [disabled]="true"
-                  class="form-control form-control-sm p-0 border border-0 fs-12"
-                  >
+                  [disabled]="true" class="form-control form-control-sm p-0 border border-0 fs-12">
                 </ng-select>
               </div>
               <div class="col-md-3">
                 <label for="txtPOCode" class="fs-12">Mã PO</label>
                 <div class="input-group">
-                  <input type="text" class="form-control form-control-sm fs-12" id="txtPOCode" [(ngModel)]="poFormData.poCode">
-                  <button class="btn btn-secondary p-0 ps-2 pe-2" style="height: 4vh !important;" type="button" (click)="openModalPOCode()">
+                  <input type="text" class="form-control form-control-sm fs-12" id="txtPOCode"
+                    [(ngModel)]="poFormData.poCode">
+                  <button class="btn btn-secondary p-0 ps-2 pe-2" style="height: 4vh !important;" type="button"
+                    (click)="openModalPOCode()">
                     <i class="bi bi-plus"></i>
                   </button>
                 </div>
@@ -107,33 +150,29 @@
               <div class="col-md-3">
                 <label for="cboCustomer" class="fs-12">Khách hàng</label>
                 <ng-select [items]="customers" bindLabel="CustomerName" [(ngModel)]="selectedCustomer"
-                  (change)="onCustomerChange($event)"
-                  class="form-control form-control-sm p-0 border border-0 fs-12">
-                 
+                  (change)="onCustomerChange($event)" class="form-control form-control-sm p-0 border border-0 fs-12">
+
                 </ng-select>
               </div>
               <div class="col-md-3">
                 <label for="txtEndUser" class="fs-12">End User</label>
-                <input type="text" id="txtEndUser" [(ngModel)]="poFormData.endUser" 
-                class="form-control form-control-sm fs-12">
+                <input type="text" id="txtEndUser" [(ngModel)]="poFormData.endUser"
+                  class="form-control form-control-sm fs-12">
               </div>
             </div>
             <div class="row mt-3">
               <div class="col-md-3">
                 <label for="cboUser" class="fs-12">Sales phụ trách</label>
                 <ng-select [items]="users" bindLabel="FullName" bindValue="ID" [(ngModel)]="poFormData.userId"
-                  placeholder="Chọn người phụ trách" 
-                  class="form-control form-control-sm p-0 border border-0 fs-12"
-                  >
-                 
+                  placeholder="Chọn người phụ trách" class="form-control form-control-sm p-0 border border-0 fs-12">
+
                 </ng-select>
               </div>
 
               <div class="col-md-3">
                 <label for="dtpPOdate" class="fs-12">Ngày PO</label>
-                <input type="date" class="form-control" id="dtpPOdate" 
-                class="form-control form-control-sm fs-12"
-                [(ngModel)]="poFormData.poDate">
+                <input type="date" class="form-control" id="dtpPOdate" class="form-control form-control-sm fs-12"
+                  [(ngModel)]="poFormData.poDate">
               </div>
               <div class="col-md-3">
                 <label for="txtTotalPO" class="fs-12">Tổng tiền PO</label>
@@ -142,7 +181,8 @@
               </div>
               <div class="col-md-3">
                 <label for="txtPONumber" class="fs-12">Số POKH</label>
-                <input type="text"    class="form-control form-control-sm fs-12" id="txtPONumber" [(ngModel)]="poFormData.poNumber">
+                <input type="text" class="form-control form-control-sm fs-12" id="txtPONumber"
+                  [(ngModel)]="poFormData.poNumber">
               </div>
             </div>
             <div class="row mt-3">
@@ -151,10 +191,10 @@
                 <div class="input-group">
                   <ng-select [items]="projects" bindLabel="ProjectName" bindValue="ID"
                     [(ngModel)]="poFormData.projectId" placeholder="Chọn dự án"
-                    class="form-control form-control-sm p-0 border border-0 fs-12"
-                    >
+                    class="form-control form-control-sm p-0 border border-0 fs-12">
                   </ng-select>
-                  <button class="btn btn-secondary p-0 ps-2 pe-2" style="height: 3.8vh !important;" type="button" onclick="alert('New Project')">
+                  <button class="btn btn-secondary p-0 ps-2 pe-2" style="height: 3.8vh !important;" type="button"
+                    onclick="alert('New Project')">
                     <i class="bi bi-plus"></i>
                   </button>
                 </div>
@@ -162,37 +202,31 @@
               <div class="col-md-3 ">
                 <label for="cbType" class="fs-12">Loại PO</label>
                 <ng-select [items]="poTypes" bindLabel="MainIndex" bindValue="ID" [(ngModel)]="poFormData.poType"
-                  placeholder="Chọn loại PO"
-                  class="form-control form-control-sm p-0 border border-0 fs-12"
-                  >
+                  placeholder="Chọn loại PO" class="form-control form-control-sm p-0 border border-0 fs-12">
                 </ng-select>
               </div>
               <div class="col-md-3">
                 <label for="cbPart" class="fs-12">Bộ phận</label>
                 <ng-select [items]="parts" bindLabel="PartName" bindValue="ID" [(ngModel)]="poFormData.departmentId"
-                  placeholder="Chọn bộ phận"
-                  class="form-control form-control-sm p-0 border border-0 fs-12"
-                  >
+                  placeholder="Chọn bộ phận" class="form-control form-control-sm p-0 border border-0 fs-12">
                 </ng-select>
               </div>
             </div>
             <div class="row mt-3">
               <div class="col-md-6">
                 <label for="txtNote" class="fs-12">Chú thích</label>
-                <textarea    class="form-control form-control-sm fs-12" id="txtNote" rows="1" [(ngModel)]="poFormData.note"></textarea>
+                <textarea class="form-control form-control-sm fs-12" id="txtNote" rows="1"
+                  [(ngModel)]="poFormData.note"></textarea>
               </div>
               <div class="col-md-3">
                 <label for="cboCurrency" class="fs-12">Loại tiền</label>
                 <ng-select [items]="currencies" bindLabel="Code" bindValue="ID" [(ngModel)]="poFormData.currencyId"
-                  placeholder="Chọn loại tiền"
-                  class="form-control form-control-sm p-0 border border-0 fs-12"
-                  >
+                  placeholder="Chọn loại tiền" class="form-control form-control-sm p-0 border border-0 fs-12">
                 </ng-select>
               </div>
               <div class="col-md-3">
                 <div class="form-check mt-4">
-                  <input class="form-check-input "
-                type="checkbox" id="ckbBigAccount"
+                  <input class="form-check-input " type="checkbox" id="ckbBigAccount"
                     [(ngModel)]="poFormData.isBigAccount">
                   <label class="form-check-label" for="ckbBigAccount">New Account</label>
                 </div>
@@ -203,7 +237,8 @@
           <div class="grid-section file-upload-section">
             <p>File đính kèm</p>
             <div class="mb-3 d-flex align-items-center">
-              <input type="file" multiple class="form-control w-auto me-2 fs-12" #fileInput style="max-width: 300px;" (change)="onFileSelected($event)">
+              <input type="file" multiple class="form-control w-auto me-2 fs-12" #fileInput style="max-width: 300px;"
+                (change)="onFileSelected($event)">
             </div>
             <div #fileUploaded></div>
           </div>
@@ -213,8 +248,10 @@
         <div class="tab-pane fade" id="product-details" role="tabpanel" aria-labelledby="product-details-tab">
           <div class="grid-section">
             <div class="mb-3">
-              <button class="btn btn-outline-secondary p-0 ps-2 pe-2"  (click)="addNewRow()"><i class="bi bi-plus"></i>Thêm</button>
-              <button class="btn btn-outline-secondary p-0 ps-2 pe-2"  (click)="addChildRow()"><i class="bi bi-plus-circle"></i>
+              <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="addNewRow()"><i
+                  class="bi bi-plus"></i>Thêm</button>
+              <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="addChildRow()"><i
+                  class="bi bi-plus-circle"></i>
                 Thêm Con</button>
             </div>
             <div class="table-responsive">
@@ -226,14 +263,15 @@
             <div class="d-flex justify-content-between align-items-center">
               <p class="mb-0 ps-0">Người phụ trách</p>
               <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" 
-                       [(ngModel)]="isResponsibleUsersEnabled" (click)="toggleResponsibleUsers()">
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked"
+                  [(ngModel)]="isResponsibleUsersEnabled" (click)="toggleResponsibleUsers()">
               </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center mb-2">          
-              <button class="btn btn-outline-secondary p-0 ps-2 pe-2"  (click)="addRowDetailUser()" [style.display]="isResponsibleUsersEnabled ? 'block' : 'none'">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <button class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="addRowDetailUser()"
+                [style.display]="isResponsibleUsersEnabled ? 'block' : 'none'">
                 <i class="bi bi-plus-circle"></i> Thêm người phụ trách
-              </button>            
+              </button>
             </div>
             <div #DetailUser [style.display]="isResponsibleUsersEnabled ? 'block' : 'none'"></div>
           </div>
@@ -242,7 +280,7 @@
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2"  (click)="closeModal()">Đóng</button>
+    <button type="button" class="btn btn-outline-secondary p-0 ps-2 pe-2" (click)="closeModal()">Đóng</button>
   </div>
 </ng-template>
 

@@ -1,0 +1,10 @@
+<div>
+    <button id="file-load-trigger">Choose File</button>
+</div>
+
+<div #tableContainer></div>
+<script>
+    document.getElementById("file-load-trigger").addEventListener("click", function(){
+    table.import("xlsx", [".xlsx", ".csv", ".ods"], "buffer");
+});
+</script>

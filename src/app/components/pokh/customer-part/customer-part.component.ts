@@ -5,7 +5,7 @@ import { TabulatorFull as Tabulator } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { CustomerPartService } from '../../vision-base/customer-part/customer-part/customer-part.service';
+import { CustomerPartService } from '../customer-part/customer-part/customer-part.service';
 
 @Component({
   selector: 'app-customer-part',

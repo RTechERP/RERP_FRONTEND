@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { VisionBaseService } from './vision-base.service';
+import { ImportExcelService } from './import-excel.service';
 
-describe('VisionBaseService', () => {
-  let service: VisionBaseService;
+describe('ImportExcelService', () => {
+  let service: ImportExcelService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(VisionBaseService);
+    service = TestBed.inject(ImportExcelService);
   });
 
   it('should be created', () => {

@@ -1,16 +1,17 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef, TemplateRef } from '@angular/core';
-import { PokhServiceService } from '../pokh-service/pokh.service';
+import { PokhServiceService } from './pokh-service/pokh.service';
 import { CommonModule } from '@angular/common';
 import { TabulatorFull as Tabulator, RowComponent } from 'tabulator-tables';
 import 'tabulator-tables/dist/css/tabulator.min.css';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { CustomerPartComponent } from '../../vision-base/customer-part/customer-part.component';
+import { CustomerPartComponent } from '../customer-part/customer-part.component';
 import { NgbModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { CustomerPartService } from '../../vision-base/customer-part/customer-part/customer-part.service';
+import { CustomerPartService } from '../customer-part/customer-part/customer-part.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators'
 import { end } from '@popperjs/core';
+import * as ExcelJS from 'exceljs';
 
 @Component({
   selector: 'app-list-pokh',
@@ -417,6 +418,59 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     console.log('Customer Short Name:', customerShortName);
   }
 
+  handlePOKHApproval(isApprove: boolean) {
+    if (!this.selectedId) {
+      alert('Vui lòng chọn POKH cần xử lý');
+      return;
+    }
+
+    // Kiểm tra trạng thái duyệt hiện tại
+    const selectedPOKH = this.pokhs.find(p => p.ID === this.selectedId);
+    if (!selectedPOKH) {
+      alert('Không tìm thấy thông tin POKH');
+      return;
+    }
+
+    if (isApprove && selectedPOKH.IsApproved) {
+      alert('POKH này đã được duyệt rồi!');
+      return;
+    }
+
+    if (!isApprove && !selectedPOKH.IsApproved) {
+      alert('POKH này chưa được duyệt!');
+      return;
+    }
+
+    const confirmMessage = isApprove ? `Bạn có chắc chắn muốn DUYỆT -- POKH ID: ${this.selectedId} ?` : `Bạn có chắc chắn muốn HỦY DUYỆT -- POKH ID: ${this.selectedId} ?`;
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    const requestBody = {
+      POKH: {
+        ID: this.selectedId,
+        IsApproved: isApprove
+      },
+      pOKHDetails: [],
+      pOKHDetailsMoney: []
+    };
+
+    this.pokhService.handlePOKH(requestBody).subscribe({
+      next: (response) => {
+        if (response.status === 1) {
+          alert(isApprove ? 'Duyệt POKH thành công' : 'Hủy duyệt POKH thành công');
+          this.loadData();
+        } else {
+          alert('Có lỗi xảy ra khi xử lý POKH');
+        }
+      },
+      error: (error) => {
+        alert('Có lỗi xảy ra khi xử lý POKH');
+        console.error('Error handling POKH:', error);
+      }
+    });
+  }
+
   deleteFile(index: number): void {
     if (confirm('Bạn có chắc chắn muốn xóa file này?')) {
       this.uploadedFiles.splice(index, 1);
@@ -462,13 +516,11 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   }
 
   onEdit(): void {
-    if(this.selectedId > 0)
-    {
+    if (this.selectedId > 0) {
       this.isEditMode = true;
       this.openModal();
     }
-    else
-    {
+    else {
       alert("Vui lòng chọn một bản ghi cần sửa!");
     }
   }
@@ -913,13 +965,14 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
     if (!this.validateForm()) return;
     const pokhData = this.getPOKHData();
     const details = this.ProductDetailTreeList.getData();
-    const detailUsers = this.isResponsibleUsersEnabled && this.DetailUser ? 
+    const detailUsers = this.isResponsibleUsersEnabled && this.DetailUser ?
       this.DetailUser.getData().map(user => ({
         ...user,
         RowHandle: (!user.RowHandle || Object.keys(user.RowHandle).length === 0) ? 0 : user.RowHandle,
         CreatedDate: (!user.CreatedDate || Object.keys(user.CreatedDate).length === 0) ? null : user.CreatedDate,
         STT: (!user.STT || Object.keys(user.STT).length === 0) ? 0 : user.STT,
         ReceiveMoney: (!user.ReceiveMoney || Object.keys(user.ReceiveMoney).length === 0) ? 0 : user.ReceiveMoney,
+        UserID: user.UserID ? Number(user.UserID) : null
       })) : [];
 
     // Add deleted IDs to the request
@@ -950,7 +1003,6 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       POKH: pokhData,
       pOKHDetails: [...this.getTreeRows(details), ...deletedPOKHDetails],
       pOKHDetailsMoney: [...detailUsers, ...deletedDetailUsers],
-
     };
 
     //api call
@@ -1119,7 +1171,25 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         { title: 'Ngày nhận PO', field: 'ReceivedDatePO', sorter: 'date', width: 150, },
         { title: 'Loại tiền', field: 'CurrencyCode', sorter: 'string', width: 50 },
         { title: 'Tổng tiền Xuất VAT', field: 'TotalMoneyKoVAT', sorter: 'number', width: 150, formatter: 'money' },
-        { title: 'Tổng tiền nhận PO', field: 'TotalMoneyPO', sorter: 'number', width: 150, formatter: 'money' },
+        {
+          title: 'Tổng tiền nhận PO', field: 'TotalMoneyPO', sorter: 'number', width: 150, formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          },
+          bottomCalc: "sum",
+          bottomCalcFormatter: "money",
+          bottomCalcFormatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          }
+        },
         { title: 'Tiền về', field: 'ReceiveMoney', sorter: 'number', width: 150, formatter: 'money' },
         { title: 'Tình trạng tiến độ giao hàng', field: 'DeliveryStatusText', sorter: 'string', width: 150 },
         { title: 'Tình trạng xuất kho', field: 'ExportStatusText', sorter: 'string', width: 150 },
@@ -1163,32 +1233,164 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       movableColumns: true,
       resizableRows: true,
       columns: [
-        { title: 'STT', field: 'STT', sorter: 'number', width: 70 },
-        { title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120 },
-        { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 120 },
-        { title: 'Tên sản phẩm', field: 'ProductName', sorter: 'string', width: 250 },
-        { title: 'Mã theo khách', field: 'GuestCode', sorter: 'string', width: 250 },
-        { title: 'Hãng', field: 'Maker', sorter: 'string', width: 250 },
-        { title: 'Số lượng', field: 'Qty', sorter: 'number', width: 250 },
-        { title: 'Kích thước phim cắt/Model', field: 'FilmSize', sorter: 'string', width: 250 },
-        { title: 'ĐVT', field: 'Unit', sorter: 'string', width: 250 },
-        { title: 'Đơn giá trước VAT', field: 'UnitPrice', sorter: 'number', width: 250 },
-        { title: 'Tổng tiền trước VAT', field: 'IntoMoney', sorter: 'number', width: 250 },
-        { title: 'VAT (%)', field: 'VAT', sorter: 'number', width: 250 },
-        { title: 'Tổng tiền sau VAT', field: 'TotalPriceIncludeVAT', sorter: 'number', width: 250 },
-        { title: 'Người nhận', field: 'UserReceiver', sorter: 'string', width: 250 },
-        { title: 'Ngày yêu cầu giao hàng', field: 'DeliveryRequestedDate', sorter: 'string', width: 250, formatter: this.dateFormatter },
-        { title: 'Thanh toán dự kiến', field: 'EstimatedPay', sorter: 'number', width: 250 },
-        { title: 'Ngày hóa đơn', field: 'BillDate', sorter: 'string', width: 250, formatter: this.dateFormatter },
-        { title: 'Số hóa đơn', field: 'BillNumber', sorter: 'string', width: 250 },
-        { title: 'Công nợ', field: 'Debt', sorter: 'number', width: 250 },
-        { title: 'Ngày yêu cầu thanh toán', field: 'PayDate', sorter: 'string', width: 250, formatter: this.dateFormatter },
-        { title: 'Nhóm', field: 'GroupPO', sorter: 'string', width: 250 },
-        { title: 'Ngày giao hàng thực tế', field: 'ActualDeliveryDate', sorter: 'string', width: 250, formatter: this.dateFormatter },
-        { title: 'Ngày tiền về', field: 'RecivedMoneyDate', sorter: 'string', width: 250, formatter: this.dateFormatter },
-        { title: 'SL đã về', field: 'QuantityReturn', sorter: 'number', width: 250 },
-        { title: 'SL đã xuất', field: 'QuantityExport', sorter: 'number', width: 250 },
-        { title: 'SL còn lại', field: 'QuantityRemain', sorter: 'number', width: 250 },
+        { title: 'STT', field: 'STT', sorter: 'number', width: 70, frozen: true },
+        { title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 100, frozen: true },
+        { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 100 },
+        { title: 'Tên sản phẩm', field: 'ProductName', sorter: 'string', width: 200 },
+        { title: 'Mã theo khách', field: 'GuestCode', sorter: 'string', width: 200 },
+        { title: 'Hãng', field: 'Maker', sorter: 'string', width: 100 },
+        {
+          title: 'Số lượng', field: 'Qty', sorter: 'number', width: 100, formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          },
+          bottomCalc: function(values, data, calcParams) {
+            let total = 0;
+            const processRow = (row: any) => {
+              if (row.Qty) {
+                total += Number(row.Qty);
+              }
+              if (row._children) {
+                row._children.forEach(processRow);
+              }
+            };
+            data.forEach(processRow);
+            return total;
+          },
+          bottomCalcFormatter: "money",
+          bottomCalcFormatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          }
+        },
+        {
+          title: 'SL đã về', field: 'QuantityReturn', sorter: 'number', width: 100, formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          },
+          bottomCalc: function(values, data, calcParams) {
+            let total = 0;
+            const processRow = (row: any) => {
+              if (row.QuantityReturn) {
+                total += Number(row.QuantityReturn);
+              }
+              if (row._children) {
+                row._children.forEach(processRow);
+              }
+            };
+            data.forEach(processRow);
+            return total;
+          },
+          bottomCalcFormatter: "money",
+          bottomCalcFormatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          }
+        },
+        { title: 'SL đã xuất', field: 'QuantityExport', sorter: 'number', width: 100 },
+        { title: 'SL còn lại', field: 'QuantityRemain', sorter: 'number', width: 100 },
+        { title: 'Kích thước phim cắt/Model', field: 'FilmSize', sorter: 'string', width: 150 },
+        { title: 'ĐVT', field: 'Unit', sorter: 'string', width: 100 },
+        {
+          title: 'Đơn giá trước VAT', field: 'UnitPrice', sorter: 'number', width: 200, formatter: "money", formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          },
+        },
+        {
+          title: 'Tổng tiền trước VAT', field: 'IntoMoney', sorter: 'number', width: 200, formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          },
+          bottomCalc: function(values, data, calcParams) {
+            let total = 0;
+            const processRow = (row: any) => {
+              if (row.IntoMoney) {
+                total += Number(row.IntoMoney);
+              }
+              if (row._children) {
+                row._children.forEach(processRow);
+              }
+            };
+            data.forEach(processRow);
+            return total;
+          },
+          bottomCalcFormatter: "money",
+          bottomCalcFormatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          }
+        },
+        {
+          title: 'VAT (%)', field: 'VAT', sorter: 'number', width: 150, formatter: function (cell) {
+            return cell.getValue() + '%';
+          }
+        },
+        {
+          title: 'Tổng tiền sau VAT', field: 'TotalPriceIncludeVAT', sorter: 'number', width: 200, formatter: "money",
+          formatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          },
+          bottomCalc: function(values, data, calcParams) {
+            let total = 0;
+            const processRow = (row: any) => {
+              if (row.TotalPriceIncludeVAT) {
+                total += Number(row.TotalPriceIncludeVAT);
+              }
+              if (row._children) {
+                row._children.forEach(processRow);
+              }
+            };
+            data.forEach(processRow);
+            return total;
+          },
+          bottomCalcFormatter: "money",
+          bottomCalcFormatterParams: {
+            precision: 0,
+            decimal: ".",
+            thousand: ",",
+            symbol: "",
+            symbolAfter: true
+          }
+        },
+        { title: 'Người nhận', field: 'UserReceiver', sorter: 'string', width: 200 },
+        { title: 'Ngày yêu cầu giao hàng', field: 'DeliveryRequestedDate', sorter: 'string', width: 200, formatter: this.dateFormatter },
+        { title: 'Thanh toán dự kiến', field: 'EstimatedPay', sorter: 'number', width: 200 },
+        { title: 'Ngày hóa đơn', field: 'BillDate', sorter: 'string', width: 200, formatter: this.dateFormatter },
+        { title: 'Số hóa đơn', field: 'BillNumber', sorter: 'string', width: 200 },
+        { title: 'Công nợ', field: 'Debt', sorter: 'number', width: 200 },
+        { title: 'Ngày yêu cầu thanh toán', field: 'PayDate', sorter: 'string', width: 200, formatter: this.dateFormatter },
+        { title: 'Nhóm', field: 'GroupPO', sorter: 'string', width: 100 },
+        { title: 'Ngày giao hàng thực tế', field: 'ActualDeliveryDate', sorter: 'string', width: 200, formatter: this.dateFormatter },
+        { title: 'Ngày tiền về', field: 'RecivedMoneyDate', sorter: 'string', width: 200, formatter: this.dateFormatter },
       ]
     });
   }
@@ -1239,7 +1441,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
       resizableRows: true,
       columns: [
         {
-          title: '', field: 'actions', formatter: (cell) => {
+          title: '', field: 'actions',frozen: true, formatter: (cell) => {
             return `<i class="bi bi-trash3 text-danger delete-btn" style="font-size:15px; cursor: pointer;"></i>`;
           },
           width: '5%',
@@ -1250,11 +1452,11 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
                 const row = cell.getRow();
                 const rowData = row.getData();
                 const parentRow = row.getTreeParent();
-                
+
                 // Get all IDs to be deleted (current row and all its children)
                 this.deletedPOKHDetailIds = this.getAllRowIds(row);
                 console.log("deletedPOKHDetailIds: ", this.deletedPOKHDetailIds);
-                
+
                 if (parentRow) {
                   // Nếu có node cha, xóa node con khỏi mảng _children của node cha
                   const parentData = parentRow.getData();
@@ -1266,7 +1468,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
                   // Nếu là node gốc, xóa khỏi mảng POKHProduct
                   this.POKHProduct = this.POKHProduct.filter(item => item['ID'] !== rowData['ID']);
                 }
-                
+
                 // Cập nhật lại bảng
                 this.ProductDetailTreeList.setData(this.POKHProduct);
                 this.getTotalPOValue();
@@ -1274,9 +1476,9 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             }
           }
         },
-        { title: 'STT', field: 'STT', sorter: 'number', width: 70 },
+        { title: 'STT', field: 'STT', sorter: 'number', width: 70, frozen: true },
         {
-          title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120, editor: "list", editorParams: {
+          title: 'Mã Nội Bộ', field: 'ProductNewCode', sorter: 'string', width: 120, editor: "list",frozen: true, editorParams: {
             values: this.Products.map(product => ({
               label: `${product.ProductNewCode}  - ${product.ProductCode} - ${product.ProductName}`,
               value: product.ProductNewCode,
@@ -1287,8 +1489,8 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             freetext: true,
           },
         },
-        { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 120, editor: "input" },
-        { title: 'Tên sản phẩm', field: 'ProductName', sorter: 'string', width: 250, editor: "input" },
+        { title: 'Mã Sản Phẩm (Cũ)', field: 'ProductCode', sorter: 'string', width: 120, editor: "input", frozen: true },
+        { title: 'Tên sản phẩm', field: 'ProductName', sorter: 'string', width: 150, editor: "input", frozen: true },
         { title: 'Mã theo khách', field: 'GuestCode', sorter: 'string', width: 150, editor: "input" },
         { title: 'Hãng', field: 'Maker', sorter: 'string', width: 100, editor: "input" },
         { title: 'Số lượng', field: 'Qty', sorter: 'number', width: 80, editor: "number" },
@@ -1419,12 +1621,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
               if (confirm('Bạn có chắc chắn muốn xóa người phụ trách này?')) {
                 const row = cell.getRow();
                 const rowData = row.getData();
-                
+
                 // thêm id của người phụ trách đã xóa vào mảng deletedDetailUserIds
                 if (rowData['ID']) {
                   this.deletedDetailUserIds.push(rowData['ID']);
                 }
-                
+
                 row.delete();
                 this.detailUser = this.DetailUser.getData();
               }
@@ -1453,7 +1655,7 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
             values: this.users.map(user => ({
               label: `${user.FullName}`,
               value: user.FullName,
-              id: user.ID 
+              id: user.ID
             })),
             listOnEmpty: true,
             autocomplete: true
@@ -1547,12 +1749,12 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
               if (confirm('Bạn có chắc chắn muốn xóa file này?')) {
                 const row = cell.getRow();
                 const rowData = row.getData();
-                
+
                 // thêm id của file đã xóa vào mảng deletedFileIds
                 if (rowData['ID']) {
                   this.deletedFileIds.push(rowData['ID']);
                 }
-                
+
                 row.delete();
                 this.uploadedFiles = this.fileUploadedTable.getData();
               }
@@ -1621,11 +1823,11 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
   private getAllRowIds(row: any): number[] {
     const ids: number[] = [];
     const rowData = row.getData();
-    
+
     if (rowData.ID) {
       ids.push(rowData.ID);
     }
-    
+
     if (rowData._children && rowData._children.length > 0) {
       rowData._children.forEach((child: any) => {
         const childRow = {
@@ -1634,8 +1836,230 @@ export class ListPokhComponent implements OnInit, AfterViewInit {
         ids.push(...this.getAllRowIds(childRow));
       });
     }
-    
+
     return ids;
+  }
+
+  async exportToExcel() {
+    if (!this.productTable) {
+      alert('Vui lòng chọn một PO để xuất Excel');
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('PO Details');
+
+    // Get column definitions from the table
+    const columns = this.productTable.getColumns();
+    
+    // Add headers
+    const headerRow = worksheet.addRow(columns.map(col => col.getDefinition().title));
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+
+    // Function to process rows recursively
+    const processRows = (rows: any[], level: number = 0) => {
+      rows.forEach(row => {
+        const rowData = columns.map(col => {
+          const field = col.getField();
+          return row.getData()[field];
+        });
+        
+        // Add indentation for child rows
+        if (level > 0) {
+          rowData[0] = '  '.repeat(level) + rowData[0]; // Indent the first column (STT)
+        }
+        
+        const excelRow = worksheet.addRow(rowData);
+        
+        // Add indentation style for child rows
+        if (level > 0) {
+          excelRow.font = { italic: true };
+        }
+
+        // Process child rows if they exist
+        const children = row.getTreeChildren();
+        if (children && children.length > 0) {
+          processRows(children, level + 1);
+        }
+      });
+    };
+
+    // Start processing from root rows
+    const rootRows = this.productTable.getRows().filter(row => !row.getTreeParent());
+    processRows(rootRows);
+
+    // Function to calculate total for a column including all children
+    const calculateTotal = (column: any) => {
+      let total = 0;
+      const processRow = (row: any) => {
+        const value = row.getData()[column.getField()];
+        if (typeof value === 'number') {
+          total += value;
+        }
+        const children = row.getTreeChildren();
+        if (children && children.length > 0) {
+          children.forEach(processRow);
+        }
+      };
+      rootRows.forEach(processRow);
+      return total;
+    };
+
+    // Add bottom calculations
+    const bottomCalcRow = worksheet.addRow(columns.map(col => {
+      const column = col.getDefinition();
+      if (column.bottomCalc) {
+        const total = calculateTotal(col);
+        
+        // Format the total based on the column's formatter
+        if (column.bottomCalcFormatter === "money") {
+          return new Intl.NumberFormat('vi-VN', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }).format(total);
+        }
+        return total;
+      }
+      return '';
+    }));
+
+    // Style the bottom calc row
+    bottomCalcRow.font = { bold: true };
+    bottomCalcRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+
+    // Add a label for the total row
+    const totalLabelCell = bottomCalcRow.getCell(1);
+    totalLabelCell.value = 'Tổng cộng';
+    totalLabelCell.font = { bold: true };
+
+    // Auto-fit columns
+    worksheet.columns.forEach((column: any) => {
+      column.width = 15;
+    });
+
+    // Generate Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `PO_${this.selectedId}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async exportMainTableToExcel() {
+    if (!this.table) {
+      alert('Không có dữ liệu để xuất Excel');
+      return;
+    }
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('POKH List');
+
+    // Get column definitions from the table
+    const columns = this.table.getColumns();
+    
+    // Add headers
+    const headerRow = worksheet.addRow(columns.map(col => col.getDefinition().title));
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+
+    // Get current page data
+    const currentPage = this.table.getPage();
+    const rows = this.table.getRows();
+
+    // Process rows
+    rows.forEach(row => {
+      const rowData = columns.map(col => {
+        const field = col.getField();
+        const value = row.getData()[field];
+        
+        // Format boolean values
+        if (typeof value === 'boolean') {
+          return value ? 'Có' : 'Không';
+        }
+        
+        // Format date values
+        if (field === 'ReceivedDatePO' && value) {
+          return new Date(value).toLocaleDateString('vi-VN');
+        }
+        
+        // Format money values
+        if (typeof value === 'number' && 
+            (field === 'TotalMoneyPO' || field === 'TotalMoneyKoVAT' || 
+             field === 'ReceiveMoney' || field === 'Debt')) {
+          return new Intl.NumberFormat('vi-VN', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }).format(value);
+        }
+        
+        return value;
+      });
+      
+      worksheet.addRow(rowData);
+    });
+
+    // Add bottom calculations for money columns
+    const bottomCalcRow = worksheet.addRow(columns.map(col => {
+      const column = col.getDefinition();
+      if (column.bottomCalc) {
+        const calcResults = this.table.getCalcResults();
+        const total = calcResults?.bottom?.[column.field as string] ?? 0;
+        
+        // Format the total based on the column's formatter
+        if (column.bottomCalcFormatter === "money") {
+          return new Intl.NumberFormat('vi-VN', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }).format(total);
+        }
+        return total;
+      }
+      return '';
+    }));
+
+    // Style the bottom calc row
+    bottomCalcRow.font = { bold: true };
+    bottomCalcRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
+
+    // Add a label for the total row
+    const totalLabelCell = bottomCalcRow.getCell(1);
+    totalLabelCell.value = 'Tổng cộng';
+    totalLabelCell.font = { bold: true };
+
+    // Auto-fit columns
+    worksheet.columns.forEach((column: any) => {
+      column.width = 15;
+    });
+
+    // Generate Excel file
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `POKH_List_${new Date().toISOString().split('T')[0]}.xlsx`;
+    link.click();
+    window.URL.revokeObjectURL(url);
   }
   ////////////////////////////////////////////////END: Utility Methods/////////////////////////////////////////////////
 }
